@@ -1,0 +1,6 @@
+Reviewer A,Reviewer B,"A Include, B Include","A Include, B Exclude","A Exclude, B Include","A Exclude, B Exclude",Proportionate Agreement,Yes Probability,No Probability,Random Agreement Probability,Cohen's Kappa
+ANA IVKOVIC,Stephanie Chien,3,0,0,6,1.0,0.11111,0.44444,0.55556,1.0
+Julian Raffoul,Stephanie Chien,54,20,11,112,0.84264,0.12394,0.41836,0.5423,0.6562
+Andrea DeSimone,Stephanie Chien,40,8,3,34,0.87059,0.28567,0.21509,0.50076,0.74078
+Andrea DeSimone,Julian Raffoul,2,0,3,4,0.66667,0.12346,0.34568,0.46914,0.37209
+Artie McCarty,Julian Raffoul,0,1,0,0,0.0,0.0,0.0,0.0,0.0

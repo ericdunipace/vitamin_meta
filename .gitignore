@@ -2,3 +2,12 @@
 .Rhistory
 .RData
 .Ruserdata
+data-raw/local
+job_output.txt
+outputs/saved_models
+outputs/reports
+outputs/depression
+outputs/overall
+outputs/anxiety
+R/tests
+outputs/documents/Results_edit.docx
