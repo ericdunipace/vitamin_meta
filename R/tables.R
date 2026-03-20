@@ -26,6 +26,7 @@ if(length(ls()) > 1 || length(ls()) ==0) {
 }
 
 outcomes <- c("depression","anxiety")
+mem.maxVSize(1024*1024)
 
 #### Load Data ####
 # full data
@@ -334,7 +335,7 @@ data <- vit$get_vitamin_data(outcome = NULL, simple_analysis = FALSE,
     if(!dir.exists(here::here(outdir, "gt")) ) {
       dir.create(here::here(outdir, "gt"), recursive = TRUE)
     }
-    saveRDS(x, here::here(outdir, "gt", paste0(file.name, ".rds")))
+    saveRDS(ggt, here::here(outdir, "gt", paste0(file.name, ".rds")))
     
     # gen flextable 
     ft <- x %>% flextable_fmt() 
@@ -2490,7 +2491,7 @@ for (outcome in outcomes) {
     
     # all bias deficiency and disease status
     cin_def <- vit$cinema(fit_def, 
-                          contribution.matrix = loo_def,
+                          # contribution.matrix = loo_def,
                           keep = c(".trt",outcome_label, "def","bias")) %>% 
       mutate(def = forcats::fct_recode(
         as.factor(def), "Unknown" = "NA",

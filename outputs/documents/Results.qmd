@@ -149,6 +149,9 @@ box::use(../../R/vit)
 data <- vit$get_vitamin_data(outcome = NA_character_, 
                              simple_analysis = TRUE,
                              include_full_bias = TRUE)
+full_data <- vit$get_vitamin_data(outcome = NA_character_, 
+                             simple_analysis = FALSE,
+                             include_full_bias = TRUE, additive_tx = TRUE)
 
 ```
 
@@ -368,10 +371,10 @@ study_demo <- readRDS(
         here::here("outputs","overall","tables","raw","study_demo_low_bias.rds"))
 
 most_common_multi <- study_demo %>% 
-  filter(grepl(",", intervention) &
-           !grepl("antidepressant|aerobic",intervention)) %>% 
-  arrange(desc(n.study)) %>% 
-  slice(1) %>% pull(intervention)
+  filter(grepl(",", Intervention) &
+           !grepl("antidepressant|aerobic",Intervention)) %>% 
+  arrange(desc(N)) %>% 
+  slice(1) %>% pull(Intervention)
 
 ```
 ```{r}
@@ -380,7 +383,7 @@ most_common_multi <- study_demo %>%
 #| warning: false
 
 qual <- readRDS(here::here("data","quality.rds")) %>% 
-    filter(study %in% data$study) %>% 
+    filter(study %in% full_data$study) %>% 
     mutate(study = forcats::fct_recode(study, "Vyas/2023/US" = "Vyas/2023/US/2"))
 
 most_common_bias <- qual %>%
@@ -469,14 +472,14 @@ fit_time_anx <- readRDS(
 
 
 fit_dose_dep <- readRDS(
-      here::here("outputs", "saved_models", "depression",
+      here::here("outputs", "saved_models", "depression", "sensitivity",
                  glue::glue("model_", 
                             "depression", 
                             "_low_bias_data_by_dose.rds"))
     )
 
 fit_dose_anx <- readRDS(
-      here::here("outputs", "saved_models", "anxiety",
+      here::here("outputs", "saved_models", "anxiety","sensitivity",
                  glue::glue("model_", 
                             "anxiety", 
                             "_low_bias_data_by_dose.rds"))
@@ -567,7 +570,7 @@ Minerals included zinc (`r n_tx_summary_low$N_zinc`; `r vitamin_range_to_text('z
 
 ## Risk of Bias Within Studies
 
-`r sum("low" == qual$bias.overall)` studies were rated low risk (`r glue::glue("{round(mean('low' == qual$bias.overall) * 100, digits = 2)}%")`), `r sum("some concerns" == qual$bias.overall)` had some concerns (`r glue::glue("{round(mean('some concerns' == qual$bias.overall) * 100, digits = 2)}%")`), and `r sum("high" == qual$bias.overall)` were high risk (`r glue::glue("{round(mean('high' == qual$bias.overall) * 100, digits = 2)}%")`). The most frequent sources of bias were `r most_common_bias %>% stringr::str_to_lower()`. Primary analyses were restricted to low risk-of-bias studies. Domain-level assessments are shown in @fig-rob.
+`r sum("low" == qual$bias.overall)` studies were rated low risk (`r glue::glue("{round(mean('low' == qual$bias.overall) * 100, digits = 2)}%")`), `r sum("some concerns" == qual$bias.overall)` had unclear risk (`r glue::glue("{round(mean('some concerns' == qual$bias.overall) * 100, digits = 2)}%")`), and `r sum("high" == qual$bias.overall)` were high risk (`r glue::glue("{round(mean('high' == qual$bias.overall) * 100, digits = 2)}%")`). The most frequent sources of bias were `r most_common_bias %>% stringr::str_to_lower()`. Primary analyses were restricted to low risk-of-bias studies. Domain-level assessments are shown in @fig-rob.
 
 ::: {#fig-rob}
 
@@ -963,7 +966,7 @@ We excluded several studies at after the extraction phase for the reasons listed
 ```{r}
 #| label: tbl-baseline-low
 #| tbl-cap: "Baseline demographics of low bias studies. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
-comb_tab_low <- readRDS(here::here("outputs","overall","tables","combined_demo_low_bias_table.rds"))
+comb_tab_low <- readRDS(here::here("outputs","overall","tables","gt","combined_demo_low_bias_table.rds"))
 
 comb_tab_low %>% gt::rm_caption() %>% gt::opt_table_font(
     size = gt::px(8)
@@ -990,7 +993,7 @@ comb_tab_low %>% gt::rm_caption() %>% gt::opt_table_font(
 ```{r}
 #| label: tbl-comp-low
 #| tbl-cap: "Baseline demographics of low bias studies by comparison. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
-comb_tab_low.comp <- readRDS(here::here("outputs","overall","tables","combined_demo_low_bias_table_comparison.rds"))
+comb_tab_low.comp <- readRDS(here::here("outputs","overall","tables","gt","combined_demo_low_bias_table_comparison.rds"))
 
 comb_tab_low.comp %>% gt::rm_caption() %>% gt::opt_table_font(
     size = gt::px(8)
@@ -1001,7 +1004,7 @@ comb_tab_low.comp %>% gt::rm_caption() %>% gt::opt_table_font(
 <!-- ```{r} -->
 <!-- #| label: tbl-comp-study-demographics-low -->
 <!-- #| tbl-cap: "Characteristics of low bias studies by comparison. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding." -->
-<!-- study_tab_low.comp <- readRDS(here::here("outputs","overall","tables","study_demo_low_bias_table_comparison.rds")) -->
+<!-- study_tab_low.comp <- readRDS(here::here("outputs","overall","tables","gt","study_demo_low_bias_table_comparison.rds")) -->
 
 <!-- study_tab_low.comp %>% gt::rm_caption() %>% gt::as_raw_html() -->
 <!-- ``` -->
@@ -1009,7 +1012,7 @@ comb_tab_low.comp %>% gt::rm_caption() %>% gt::opt_table_font(
 <!-- ```{r} -->
 <!-- #| label: tbl-comp-pop-demographics-low -->
 <!-- #| tbl-cap: "Baseline demographics of population in low bias studies by comparison. Values are n (%) or mean (SD) where appropriate." -->
-<!-- pop_tab_low.comp <- readRDS(here::here("outputs","overall","tables","pop_demo_low_bias_table_comparison.rds")) -->
+<!-- pop_tab_low.comp <- readRDS(here::here("outputs","overall","tables","gt","pop_demo_low_bias_table_comparison.rds")) -->
 
 <!-- pop_tab_low.comp %>% gt::rm_caption() %>% gt::as_raw_html() -->
 <!-- ``` -->
@@ -1018,7 +1021,7 @@ comb_tab_low.comp %>% gt::rm_caption() %>% gt::opt_table_font(
 ```{r}
 #| label: tbl-baseline-all
 #| tbl-cap: "Baseline demographics of all studies. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
-comb_tab <- readRDS(here::here("outputs","overall","tables","combined_demo_table.rds"))
+comb_tab <- readRDS(here::here("outputs","overall","tables","gt","combined_demo_table.rds"))
 
 comb_tab %>% gt::rm_caption() %>% gt::opt_table_font(
     size = gt::px(8)
@@ -1030,7 +1033,7 @@ comb_tab %>% gt::rm_caption() %>% gt::opt_table_font(
 <!-- ```{r} -->
 <!-- #| label: tbl-baseline-demographics-all -->
 <!-- #| tbl-cap: "Baseline demographics of included studies. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding." -->
-<!-- study_tab <- readRDS(here::here("outputs","overall","tables", -->
+<!-- study_tab <- readRDS(here::here("outputs","overall","tables","gt", -->
 <!--                  "study_demo_table.rds")) -->
 
 <!-- (study_tab)  %>% gt::rm_caption() %>% gt::as_raw_html() -->
@@ -1039,7 +1042,7 @@ comb_tab %>% gt::rm_caption() %>% gt::opt_table_font(
 <!-- ```{r} -->
 <!-- #| label: tbl-baseline-pop-demographics-all -->
 <!-- #| tbl-cap: "Baseline demographics of population in all bias studies. Values are n (%) or mean (SD) where appropriate. Total sample size (N) percentages reflect percent of total population across all studies." -->
-<!-- pop_tab <- readRDS(here::here("outputs","overall","tables","pop_demo_table.rds")) -->
+<!-- pop_tab <- readRDS(here::here("outputs","overall","tables","gt","pop_demo_table.rds")) -->
 
 <!-- pop_tab %>% gt::rm_caption() %>% gt::as_raw_html() -->
 <!-- ``` -->
@@ -1048,7 +1051,7 @@ comb_tab %>% gt::rm_caption() %>% gt::opt_table_font(
 ```{r}
 #| label: tbl-comp-all
 #| tbl-cap: "Baseline demographics of all studies by comparison. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
-comb_tab.comp <- readRDS(here::here("outputs","overall","tables","combined_demo_table_comparison.rds"))
+comb_tab.comp <- readRDS(here::here("outputs","overall","tables","gt","combined_demo_table_comparison.rds"))
 
 comb_tab.comp %>% gt::rm_caption() %>% gt::opt_table_font(
     size = gt::px(8)
@@ -1061,7 +1064,7 @@ comb_tab.comp %>% gt::rm_caption() %>% gt::opt_table_font(
 <!-- ```{r} -->
 <!-- #| label: tbl-comp-demographics-all -->
 <!-- #| tbl-cap: "Baseline demographics of included studies by comparison. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding." -->
-<!-- study_tab.comp <- readRDS(here::here("outputs","overall","tables", -->
+<!-- study_tab.comp <- readRDS(here::here("outputs","overall","tables","gt, -->
 <!--                  "study_demo_table_comparison.rds")) -->
 
 <!-- (study_tab.comp)  %>% gt::rm_caption() %>% gt::as_raw_html() -->
@@ -1070,7 +1073,7 @@ comb_tab.comp %>% gt::rm_caption() %>% gt::opt_table_font(
 <!-- ```{r} -->
 <!-- #| label: tbl-comp-pop-demographics-all -->
 <!-- #| tbl-cap: "Baseline demographics of population in all bias studies. Values are n (%) or mean (SD) where appropriate. Total sample size (N) percentages reflect percent of total population across all studies." -->
-<!-- pop_tab.comp <- readRDS(here::here("outputs","overall","tables","pop_demo_table_comparison.rds")) -->
+<!-- pop_tab.comp <- readRDS(here::here("outputs","overall","tables","gt","pop_demo_table_comparison.rds")) -->
 
 <!-- pop_tab.comp %>% gt::rm_caption() %>% gt::as_raw_html() -->
 <!-- ``` -->
@@ -1265,7 +1268,7 @@ Further, cross-over trials were permissible in our study but we only used the fi
 #| label: tbl-studies-main
 #| tbl-cap: "Included studies in the main meta-analysis."
 
-study_tab <- readRDS(here::here("outputs","overall","tables",
+study_tab <- readRDS(here::here("outputs","overall","tables","gt",
                  "study_level_demo_table_low.rds"))
 
 study_tab %>% gt::as_raw_html()
@@ -1278,7 +1281,7 @@ study_tab %>% gt::as_raw_html()
 #| label: tbl-studies
 #| tbl-cap: "Included studies in the meta-analysis. *Only studies with a low overall risk of bias are included in the main analysis. Studies with an unclear or high overall risk of bias are included in sensitivity analyses."
 
-study_tab <- readRDS(here::here("outputs","overall","tables",
+study_tab <- readRDS(here::here("outputs","overall","tables","gt",
                  "study_level_demo_table.rds"))
 
 study_tab %>% gt::as_raw_html()
@@ -1418,7 +1421,7 @@ Network geometry for low bias studies broken out by deficiency and anxiety statu
 
 ## Contribution Matrices  {.appendix}
 ```{r}
-contribution.mat.dep <- readRDS(here::here("outputs","depression","table","contribution_matrix_low_bias.rds"))
+contribution.mat.dep <- readRDS(here::here("outputs","depression","tables","contribution_matrix_low_bias.rds"))
 
 contribution.mat.dep %>% gt::tab_caption(
     "Contribution matrix for depression scales in low bias studies. The contribution of each study to the overall network meta-analysis estimates is shown as a percentage. The rows correspond to the comparisons in the network meta-analysis and the columns correspond to the individual studies. The values in the table represent the percentage contribution of each study to each comparison."
@@ -1427,11 +1430,11 @@ contribution.mat.dep %>% gt::tab_caption(
 ```
 
 ```{r}
-# contribution.mat.all <- readRDS(here::here("outputs","depression","table","contribution_matrix_all_data.rds"))
+# contribution.mat.all <- readRDS(here::here("outputs","depression","tables","contribution_matrix_all_data.rds"))
 # 
 # contribution.mat.all %>%  gt::as_raw_html()
 
-contribution.mat.anx<- readRDS(here::here("outputs","anxiety","table","contribution_matrix_low_bias.rds"))
+contribution.mat.anx<- readRDS(here::here("outputs","anxiety","tables","contribution_matrix_low_bias.rds"))
 
 contribution.mat.anx %>% gt::tab_caption(
     "Contribution matrix for anxiety scales in low bias studies. The contribution of each study to the overall network meta-analysis estimates is shown as a percentage. The rows correspond to the comparisons in the network meta-analysis and the columns correspond to the individual studies. The values in the table represent the percentage contribution of each study to each comparison."
@@ -1809,7 +1812,7 @@ This was done using node-splitting models, which separate the evidence for a par
 ```{r}
 #| label: tbl-loo-ume-dep
 #| tbl-cap: "Comparison of design-by-treatment interaction (Unrestricted Model of Effects) and connected model (simple model) via leave-one-out assessment of model fit. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through fourth columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses. In all cases, the network model fits better. The deficiency by depression status model was not estimated with just Unclear/Low bias data."
-loo_ume_dep <- readRDS(here::here("outputs","depression","table","loo_compare_model_tab.rds"))
+loo_ume_dep <- readRDS(here::here("outputs","depression","tables","gt","loo_compare_model_tab.rds"))
 
 loo_ume_dep %>% gt::rm_caption() %>% gt::rm_header() %>%  gt::as_raw_html()
 # "Comparison of Model Fit by Bias. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through third columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses."
@@ -1818,7 +1821,7 @@ loo_ume_dep %>% gt::rm_caption() %>% gt::rm_header() %>%  gt::as_raw_html()
 ```{r}
 #| label: tbl-loo-ume-anx
 #| tbl-cap: "Comparison of design-by-treatment interaction (Unrestricted Model of Effects) and connected model (simple model) via leave-one-out assessment of model fit. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through fourth columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses. The deficiency by anxiety status model was not estimated with just Unclear/Low bias data."
-loo_ume_anx <- readRDS(here::here("outputs","depression","table","loo_compare_model_tab.rds"))
+loo_ume_anx <- readRDS(here::here("outputs","depression","tables","gt","loo_compare_model_tab.rds"))
 
 loo_ume_anx %>% gt::rm_caption() %>%  gt::rm_header() %>% gt::as_raw_html()
 # "Comparison of Model Fit by Bias. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through third columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses."
@@ -1931,7 +1934,7 @@ Forest plot for the effect of micronutrients broken down by baseline disease, de
 #| label: tab-dep-mod-low-bias
 #| tbl-cap: "Table of depression treatments compared to placebo for low bias data by disease and deficiency status. The table lists the estimated treatment effects (standardized mean differences, SMD). for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
 
-readRDS(glue::glue("../depression/table/nma_depression_deficiency_table_low_bias.rds")) %>% 
+readRDS(glue::glue("../depression/tables/gt/nma_depression_deficiency_table_low_bias.rds")) %>% 
   gt::as_raw_html()
 
 
@@ -1986,7 +1989,7 @@ outcome_label <- "depressed"
 #       gt::as_raw_html()
       
 
-readRDS(glue::glue("../depression/table/nma_depression_def_all_data_table.rds")) %>% 
+readRDS(glue::glue("../depression/tables/gt/nma_depression_deficiency_table_all_data.rds")) %>% 
   gt::as_raw_html()
 ```
 
@@ -2149,7 +2152,7 @@ outcome_label <- "anxiety"
 #       gt::as_raw_html()
       
 
-readRDS(glue::glue("../anxiety/table/nma_anxiety_def_all_data_table.rds")) %>% 
+readRDS(glue::glue("../anxiety/tables/gt/nma_anxiety_deficiency_table_all_data.rds")) %>% 
   gt::as_raw_html()
 
 ```
@@ -2413,7 +2416,7 @@ We assessed the fit of a typical Gaussian likelihood versus a robust Student-t l
 #| label: tbl-loo-gaussian-student-t-dep
 #| tbl-cap: "Comparison of Gaussian and Student-t likelihoods via leave-one-out assessment for depression outcomes. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through fourth columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses. In all cases, the Student-t likelihood fits better than the Gaussian likelihood."
 
-loo_gauss <- readRDS(here::here("outputs","depression","table","loo_compare_tab.rds"))
+loo_gauss <- readRDS(here::here("outputs","depression","tables","gt","loo_compare_gaussian_tab.rds"))
 
 loo_gauss %>% gt::rm_caption() %>% gt::rm_header() %>% gt::as_raw_html()
 
@@ -2424,7 +2427,7 @@ loo_gauss %>% gt::rm_caption() %>% gt::rm_header() %>% gt::as_raw_html()
 #| label: tbl-loo-gaussian-student-t-anx
 #| tbl-cap: "Comparison of Gaussian and Student-t likelihoods via leave-one-out assessment for anxiety. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through fourth columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses. In all cases, the Student-t likelihood fits better than the Gaussian likelihood."
 
-loo_gauss <- readRDS(here::here("outputs","anxiety","table","loo_compare_tab.rds"))
+loo_gauss <- readRDS(here::here("outputs","anxiety","tables","gt","loo_compare_gaussian_tab.rds"))
 
 loo_gauss %>% gt::rm_caption() %>% gt::rm_header() %>% gt::as_raw_html()
 
@@ -2617,7 +2620,7 @@ The results for data included in our main analysis (i.e., low bias studies) are 
 #| label: tab-dose-response-dep
 #| caption: "Dose response estimates for depression outcomes in low bias data. The table shows the estimated treatment effect in standardized meand differences (SMD) for each dose category of micronutrient supplementation compared to placebo. The table is ordered alphabetically by intervention and then by dose category. Estimates with very large intervals are based on the prior as the placebo effect is not identified."
 #| 
-dose_tab_dep <- here::here("outputs", "depression","table",
+dose_tab_dep <- here::here("outputs", "depression","tables","gt",
                               glue::glue("nma_depression_dose_response_table_low_bias.rds")) %>% 
   readRDS()
 
@@ -2648,7 +2651,7 @@ Evidence for dose response in vitamin D appears consistent across bias levels.
 #| label: tab-dose-response-anx
 #| caption: "Dose response estimates for anxiety outcomes in low bias data. The table shows the estimated treatment effect in standardized meand differences (SMD) for each dose category of micronutrient supplementation compared to placebo. The table is ordered alphabetically by intervention and then by dose category. Estimates with very large intervals are based on the prior as the placebo effect is not identified."
 #| 
-dose_tab_anx <- here::here("outputs", "anxiety","table",
+dose_tab_anx <- here::here("outputs", "anxiety","tables","gt",
                               glue::glue("nma_anxiety_dose_response_table_low_bias.rds")) %>% 
   readRDS()
 
@@ -2681,7 +2684,7 @@ To assess whether the duration of treatment was associated with treatment effect
 #| label: tab-duration-response-dep
 #| caption: "Duration response estimates for depression outcomes in low bias data. The table shows the estimated treatment effect in standardized mean differences (SMD) for each duration category of micronutrient supplementation compared to placebo. The table is ordered by duration category."
 
-duration_tab_dep <- here::here("outputs", "depression","table",
+duration_tab_dep <- here::here("outputs", "depression","tables","gt",
                               glue::glue("nma_depression_time_response_table_low_bias.rds")) %>% 
   readRDS()
 
@@ -2694,7 +2697,7 @@ duration_tab_dep %>% gt::as_raw_html()
 #| label: tab-duration-response-anx
 #| caption: "Duration response estimates for anxiety outcomes in low bias data. The table shows the estimated treatment effect in standardized mean differences (SMD) for each duration category of micronutrient supplementation compared to placebo. The table is ordered by duration category."
 
-duration_tab_anx <- here::here("outputs", "anxiety","table",
+duration_tab_anx <- here::here("outputs", "anxiety","tables","gt",
                               glue::glue("nma_anxiety_time_response_table_low_bias.rds")) %>% 
   readRDS()
 
@@ -2764,7 +2767,7 @@ Forest plots for the effect of vitamin D on depression based on models broken do
 #| label: tab-deficiency-response-dep
 #| caption: "Deficiency response estimates for depression outcomes in low bias data. The table shows the estimated treatment effect in standardized mean differences (SMD) for each intervention based on the percentage of participants with baseline micro-nutrient deficiency and depression. The table is ordered alphabetically by intervention. Values are based on models with using estimated percentages of depression and deficiency status as covariates."
 
-deficiency_tab_dep <- here::here("outputs", "depression","table",
+deficiency_tab_dep <- here::here("outputs", "depression","tables","gt",
                               glue::glue("nma_depression_pct_table_low_bias.rds")) %>% 
   readRDS()
 
@@ -2787,7 +2790,7 @@ Forest plots for the effect of vitamin D on anxiety based on models broken down 
 #| label: tab-deficiency-response-anx
 #| caption: "Deficiency response estimates for anxiety outcomes in low bias data with a model utilizing percentages of anxious and deficient individuals. The table shows the estimated treatment effect in standardized mean differences (SMD) for each intervention based on populations with different baseline micro-nutrient deficiency and anxiety status The table is ordered alphabetically by intervention. Values are based on models with using estimated percentages of depression and deficiency status as covariates."
 
-deficiency_tab_anx <- here::here("outputs", "anxiety","table",
+deficiency_tab_anx <- here::here("outputs", "anxiety","tables","gt",
                               glue::glue("nma_anxiety_pct_table_low_bias.rds")) %>% 
   readRDS()
 
@@ -2857,10 +2860,10 @@ We downgraded overall confidence in the evidence by one level for any category m
 ## CINeMA ratings for interventions  {.appendix}
 
 ```{r}
-cinema_low_dep <- readRDS(here::here("outputs","depression","table","cinema_table_low_bias_placebo.rds"))
-cinema_low_dep_def <- readRDS(here::here("outputs","depression","table","cinema_table_deficiency_low_bias_placebo.rds"))
-cinema_low_anx <- readRDS(here::here("outputs","anxiety","table","cinema_table_low_bias_placebo.rds"))
-cinema_low_anx_def <- readRDS(here::here("outputs","anxiety","table","cinema_table_deficiency_low_bias_placebo.rds"))
+cinema_low_dep <- readRDS(here::here("outputs","depression","tables","cinema_table_low_bias_placebo.rds"))
+cinema_low_dep_def <- readRDS(here::here("outputs","depression","tables","cinema_table_deficiency_low_bias_placebo.rds"))
+cinema_low_anx <- readRDS(here::here("outputs","anxiety","tables","cinema_table_low_bias_placebo.rds"))
+cinema_low_anx_def <- readRDS(here::here("outputs","anxiety","tables","cinema_table_deficiency_low_bias_placebo.rds"))
 
 cinema_low_dep %>% gt::tab_caption("CINeMA ratings for all treatments in low bias studies compared to placebo for depression scales.") %>%  gt::as_raw_html()
 cinema_low_dep_def %>% gt::tab_caption("CINeMA ratings for all treatments in low bias studies compared to placebo for depression scales. Estimates broken out by depression status and vitamin deficiency status.") %>% gt::as_raw_html()
