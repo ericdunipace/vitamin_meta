@@ -377,7 +377,7 @@ net_plot_combined_def_dis <- function(dat, size = NULL, nudge = 0) {
 #### load data ####
 # full data
 data_full <- vit$get_vitamin_data(outcome = NULL, simple_analysis = FALSE,
-                             include_full_bias = TRUE)
+                             include_full_bias = TRUE, additive_tx = TRUE)
 data <- vit$get_vitamin_data(outcome = NULL, simple_analysis = TRUE,
                                     include_full_bias = TRUE)
 
@@ -929,17 +929,17 @@ for(outcome in outcomes) {
     )
     
     fit_dose_low <- readRDS(
-      here::here("outputs", "saved_models", outcome,
+      here::here("outputs", "saved_models", outcome, "sensitivity",
                  glue::glue("model_", 
                             outcome, 
                             "_low_bias_data_by_dose.rds"))
     )
     
     fit_dose <- readRDS(
-      here::here("outputs", "saved_models", outcome,
+      here::here("outputs", "saved_models", outcome, "sensitivity",
                  glue::glue("model_", 
                             outcome, 
-                            "_all_data_by_dose_and_bias_and_def_and_disease.rds"))
+                            "_all_data_by_dose.rds"))
     )
     
     # bias_reg <- readRDS(here::here("outputs", 
@@ -1037,6 +1037,7 @@ for(outcome in outcomes) {
     ) %>% 
       plot(level = "treatment", weight_nodes = TRUE, nudge = 0.05) +
       theme(legend.position = "none")
+    saveRDS(net, here::here("outputs",outcome, "nma_network_low_bias.rds"))
     
     # dose data network
     full_dose_net <- vit$construct_nma_network(data_full %>% filter(target == outcome)) %>%
@@ -2925,7 +2926,74 @@ for(outcome in outcomes) {
   }
 }
 
-# placebo effects over time
+#### adverse events ####
+fit_adv <- here::here("outputs", "saved_models", "adverse_events.rds") %>% readRDS()
+newdata <- vit$nma_newdata_for_summary(fit_adv)
+newdata$final.N <- 1
+newdata$.study <- fit_adv$data$.study[1]
+newdata$.obs_re <- as.factor(newdata$.obs_re)
+adverse_summ <- vit$summary_brms_nma(fit_adv, newdata = newdata)
+
+plot(adverse_summ %>% 
+       filter(.observed) %>% 
+       select(-.observed) %>% 
+       mutate(value = value)) + 
+  theme(plot.margin = margin(5,10,5,5)) + xlab("Odds Ratio") + 
+  scale_x_continuous(
+    breaks = log(10^(-3:3)),
+    labels = scales::trans_format("exp", scales::math_format(.x))) %>% 
+  figure_save(
+    outdir = "outputs",
+    outcome = "overall",
+    filename = "adverse_events_odds_ratios_overall",
+    height = 6, width = 6.5)
+
+fit_adv_low <- here::here("outputs", "saved_models", "adverse_events_low_bias.rds") %>% readRDS()
+newdata_low <- vit$nma_newdata_for_summary(fit_adv_low)
+newdata_low$final.N <- 1
+newdata_low$.study <- fit_adv_low$data$.study[1]
+newdata_low$.obs_re <- as.factor(newdata_low$.obs_re)
+adverse_summ_low <- vit$summary_brms_nma(fit_adv_low, newdata = newdata_low)
+
+
+plot(adverse_summ_low %>% 
+       filter(.observed) %>% 
+       select(-.observed) %>% 
+       mutate(value = value)) + 
+  theme(plot.margin = margin(5,10,5,5)) + xlab("Odds Ratio") + 
+  scale_x_continuous(
+    breaks = log(10^(-3:3)),
+    labels = scales::trans_format("exp", scales::math_format(.x))) %>% 
+  figure_save(
+    outdir = "outputs",
+    outcome = "overall",
+    filename = "adverse_events_odds_ratios_low_bias_overall",
+    height = 4, width = 6.5)
+
+
+fit_adv_low_ssri <- here::here("outputs", "saved_models", "adverse_events_low_bias_ssri.rds") %>% readRDS()
+newdata_ssri <- vit$nma_newdata_for_summary(fit_adv_low_ssri)
+newdata_ssri$final.N <- 1
+newdata_ssri$.study <- fit_adv_low_ssri$data$.study[1]
+newdata_ssri$.obs_re <- as.factor(newdata_ssri$.obs_re)
+adverse_summ_ssri <- vit$summary_brms_nma(fit_adv_low_ssri, newdata = newdata_ssri)
+
+
+plot(adverse_summ_ssri %>% 
+       filter(.observed) %>% 
+       select(-.observed) %>% 
+       mutate(value = value)) + 
+  theme(plot.margin = margin(5,10,5,5)) + xlab("Odds Ratio") + 
+  scale_x_continuous(
+    breaks = log(10^(-3:3)),
+    labels = scales::trans_format("exp", scales::math_format(.x))) %>% 
+  figure_save(
+    outdir = "outputs",
+    outcome = "overall",
+    filename = "adverse_events_odds_ratios_ssri_overall",
+    height = 4, width = 6.5)
+
+#### placebo effects over time ####
 {
   readRDS(here::here("data","vitamins_full.rds")) %>% 
     filter(intervention == "z.placebo") ->
@@ -2968,7 +3036,42 @@ for(outcome in outcomes) {
     )
 }
 
-# make combined plot easier to read in 
+
+#### Add figures for vitamin levels ####
+
+level_low <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_low_bias.rds"))
+level_ssri_low <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_low_bias_ssri.rds"))
+level_ssri <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_all_ssri.rds"))
+level_all <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_all.rds"))
+
+level_plot <- function(lev, nm) {
+  for(i in seq_along(lev)) {
+    unit <- lev[[i]]$unit
+    name <- names(lev)[i] %>% stringr::str_remove("end\\.")
+    if(is.null(lev[[i]])) next
+    llp <- lev[[i]] %>% 
+      vit$summary_brms_nma(keep = c(".trt")) %>% 
+      filter(.observed) %>% 
+      select(-.observed) %>% 
+      plot() +
+      xlab(glue::glue("M.D. ({unit})"))
+    
+    figure_save(llp,
+                outdir = "outputs",
+                outcome = "overall",
+                filename = glue::glue("vitamin_levels_{nm}_{name}"),
+                height = 3.5,
+                width = 3.25)
+  }
+  
+}
+
+level_plot(level_low, "low_bias")
+level_plot(level_ssri_low, "low_bias_ssri")
+level_plot(level_ssri, "all_data_ssri")
+level_plot(level_all, "all_data")
+
+#### make combined plot easier to read in ####
 main_plot_dep <- readRDS(here::here("outputs", "depression", "main_arrow.rds"))
 main_plot_anx <- readRDS(here::here("outputs", "anxiety", "main_arrow.rds"))
 leg           <- readRDS(here::here("outputs", "depression", "main_plot_legend_only.rds"))
@@ -2983,3 +3086,16 @@ figure_save(main_plot_cmb,
             height = 8,
             width = 6.5)
 
+net_dep <- readRDS(here::here("outputs","depression", "nma_network_low_bias.rds"))
+net_anx <- readRDS(here::here("outputs","anxiety", "nma_network_low_bias.rds"))
+
+main_net <- ((net_dep + theme(plot.margin = margin(r = 80))) + 
+               (net_anx + theme(plot.margin = margin(l = 80))) +
+                plot_annotation(tag_levels = "A"))
+
+figure_save(main_net,
+            outdir = "outputs",
+            outcome = "overall",
+            filename = "network_combined",
+            height = 4,
+            width = 13)

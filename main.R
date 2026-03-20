@@ -45,12 +45,12 @@ run_function <- function() {
   # will run when function crashes or exists
   # clears file connections, sink, and prints errors etc
   on.exit({
-    sink(type = "message") # Stop capturing messages
-    sink()                # Stop capturing output
-    close(log_file)       # Close the log file connection
     # rlang::last_messages() %>% print()
     rlang::last_warnings() %>% print()
     tryCatch(rlang::last_error() %>% print(), error = function(e) {NULL})
+    sink(type = "message") # Stop capturing messages
+    sink()                # Stop capturing output
+    close(log_file)       # Close the log file connection
   }, add = TRUE)
   
   # clear out Stan files; can cause some difficulty if model code is changed
@@ -80,7 +80,7 @@ run_function <- function() {
       source(here("R","tables.R"))
       cli::cli(cli::cli_h2("Generating figures"))
       source(here("R","figures.R"))
-      cli::cli(cli::cli_h2("Generating sensitivity analysis markdown"))
+      # cli::cli(cli::cli_h2("Generating sensitivity analysis markdown"))
       cli::cli(cli::cli_h2("Generating main document results text"))
       rmarkdown::render(
         input = here::here("outputs","documents","Results.qmd"),

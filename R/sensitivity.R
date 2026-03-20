@@ -912,7 +912,8 @@ for(outcome in outcomes) {
   loo_some <- vit$loo_estimates(
     fit = some_t,
     seed = seeds[[outcome]]["loo_some"],
-    cores = 8L
+    cores = 8L,
+    reuse_metric = TRUE
   )
   saveRDS(loo_some, file = here::here(outdir, "loo_some.rds"))
   
@@ -921,7 +922,8 @@ for(outcome in outcomes) {
     fit = fit_def,
     seed = seeds[[outcome]]["loo_def_high"],
     cores = 8L,
-    keep = c(".trt","def","bias", outcome_label)
+    keep = c(".trt","def","bias", outcome_label),
+    reuse_metric = TRUE
   )
   saveRDS(loo_def, file = here::here(outdir, "loo_def.rds"))
   
@@ -929,7 +931,8 @@ for(outcome in outcomes) {
   loo_high <- vit$loo_estimates(
     fit = high_t,
     seed = seeds[[outcome]]["loo_high"],
-    cores = 8L
+    cores = 8L,
+    reuse_metric = TRUE
   )
   saveRDS(loo_high, file = here::here(outdir, "loo_high.rds"))
   
@@ -940,7 +943,8 @@ for(outcome in outcomes) {
   loo_gauss_low <- vit$loo_estimates(
     fit = fit_brms_low_gaussian,
     seed = seeds[[outcome]]["loo_low_gauss"],
-    cores = 8L
+    cores = 8L,
+    reuse_metric = FALSE
   )
   saveRDS(loo_gauss_low, file = here::here(outdir, "loo_gaussian_low.rds"))
   
@@ -948,7 +952,8 @@ for(outcome in outcomes) {
   loo_gauss_some <- vit$loo_estimates(
     fit = fit_brms_some_gaussian,
     seed = seeds[[outcome]]["loo_some_gauss"],
-    cores = 8L
+    cores = 8L,
+    reuse_metric = FALSE
   )
   saveRDS(loo_gauss_some, , file = here::here(outdir, "loo_gaussian_some.rds"))
   
@@ -957,7 +962,8 @@ for(outcome in outcomes) {
     fit = fit_brms_high_gaussian,
     seed = seeds[[outcome]]["loo_high_gauss"],
     cores = 8L,
-    verbose = FALSE
+    verbose = FALSE,
+    reuse_metric = TRUE
   )
   saveRDS(loo_gauss_high, file = here::here(outdir,
                                             "loo_gaussian_high.rds"))
@@ -971,7 +977,8 @@ for(outcome in outcomes) {
     seed = seeds[[outcome]]["loo_low_ume"],
     cores = 8L,
     verbose = FALSE,
-    get_estimates = FALSE
+    get_estimates = FALSE,
+    reuse_metric = FALSE
   )
   
   loo_ume_some <- vit$loo_estimates(
@@ -979,7 +986,8 @@ for(outcome in outcomes) {
     seed = seeds[[outcome]]["loo_some_ume"],
     cores = 8L,
     verbose = FALSE,
-    get_estimates = FALSE
+    get_estimates = FALSE,
+    reuse_metric = TRUE
   )
   
   loo_ume_high <- vit$loo_estimates(
@@ -987,7 +995,8 @@ for(outcome in outcomes) {
     seed = seeds[[outcome]]["loo_high_ume"],
     cores = 8L,
     verbose = FALSE,
-    get_estimates = FALSE
+    get_estimates = FALSE,
+    reuse_metric = TRUE
   )
   
   saveRDS(loo_ume_low, file = here::here(outdir,

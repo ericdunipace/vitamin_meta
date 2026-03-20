@@ -50,12 +50,29 @@ log_normal_prob_dis <- function(mu, sigma, scale, lower = FALSE) {
   return(out)
 }
 
+normal_prob_dis <- function(mu, sigma, scale, lower = FALSE) {
+  cutoff <- cutoff_lookup[scale]
+  mu[scale == "Log BAI"] <- exp(mu[scale == "Log BAI"] + 0.5 * sigma[scale == "Log BAI"]^2)
+  sigma[scale == "Log BAI"] <- sqrt((exp(sigma[scale == "Log BAI"]^2) - 1) * exp(2 * mu[scale == "Log BAI"] + sigma[scale == "Log BAI"]^2))
+  cutoff[scale == "Log BAI"] <- exp(cutoff[scale == "Log BAI"])
+  
+  complete <- !is.na(cutoff) & !is.na(mu) & !is.na(sigma)
+  out <- ifelse(complete, stats::pnorm(q=cutoff, mean = mu, sd = sigma, lower.tail = lower), NA)
+  return(out)
+}
+
 
 log_normal_prob_from_mom <- function(mu, sigma, cutoff, lower = FALSE) {
   moments <- mom_log_normal(mu, sigma)
   
   complete <- !is.na(cutoff) & !is.na(moments$mean) & !is.na(moments$sd)
   out <- ifelse(complete, stats::pnorm(q=log(cutoff), mean = moments$mean, sd = moments$sd, lower.tail = lower), NA)
+  return(out)
+}
+
+normal_prob_from_mom <- function(mu, sigma, cutoff, lower = FALSE) {
+  complete <- !is.na(cutoff) & !is.na(mu) & !is.na(sigma)
+  out <- ifelse(complete, stats::pnorm(q=cutoff, mean = mu, sd = sigma, lower.tail = lower), NA)
   return(out)
 }
 
@@ -226,7 +243,7 @@ convert_vitamin_from_molar <- function(vitamin, value) {
   return(sprintf("%s: %.2f %s", vitamin, new_val, vitamin_cutoff_tbl$unit[vitamin_cutoff_tbl$vitamin == vitamin]))
 }
 
-#' convert without 
+#' convert based on the vitamin name, and also convert to more human-friendly units if the value is large
 numeric_convert_vitamin_from_molar <- function(vitamin, value) {
   search_string <- glue::glue("{vitamin}$")
   mw <- molecular_mass[grepl(search_string, names(molecular_mass))]
@@ -239,7 +256,7 @@ numeric_convert_vitamin_from_molar <- function(vitamin, value) {
   
   unit <- vitamin_cutoff_tbl$unit[vitamin_cutoff_tbl$vitamin == vitamin]
   
-  if (as.numeric(new_val)/1000 >= 1) {
+  if (any(as.numeric(new_val)/1000 >= 1)) {
     new_val <- new_val/1000
     unit <- dplyr::case_when(
       unit == "ug/dL" ~ "mg/dL",
@@ -258,6 +275,43 @@ numeric_convert_vitamin_from_molar <- function(vitamin, value) {
   
   
   return(sprintf("%.2f %s", new_val, unit))
+}
+
+
+vector_convert_vitamin_from_molar <- function(vitamin, value) {
+  search_string <- glue::glue("{vitamin}$")
+  mw <- molecular_mass[grepl(search_string, names(molecular_mass))]
+  if(vitamin == "rbc.B9") {
+    search_string <- "Red Blood Cell B9$"
+    vitamin <- "Red Blood Cell B9"
+  }
+  if( grepl("B9", vitamin) &  !grepl("rbc", vitamin, ignore.case = TRUE)) {
+    search_string <- "vitamin B9$"
+  }
+  unit <- vitamin_cutoff_tbl$unit[grepl(search_string, vitamin_cutoff_tbl$vitamin)]
+  
+  new_val <- convert_from_molar(value, mw, 
+                                to_unit = unit)
+  
+  if (any(as.numeric(new_val)/1000 >= 1)) {
+    new_val <- new_val/1000
+    unit <- dplyr::case_when(
+      unit == "ug/dL" ~ "mg/dL",
+      unit == "ug/L" ~ "mg/L",
+      unit == "µg/L" ~ "mg/L",
+      unit == "µg/dL" ~ "mg/dL",
+      unit == "ng/mL" ~ "µg/mL",
+      unit == "pg/mL" ~ "ng/mL",
+      unit == "nmol/L" ~ "µmol/L",
+      unit == "umol/L" ~ "mmol/L",
+      unit == "mg/dL" ~ "g/dL",
+      unit == "mg/L" ~ "g/L",
+      TRUE ~ unit
+    )
+  }
+  
+  
+  return(list(value = new_val, unit = unit))
 }
 
 #' convert from mass per volume to molar
@@ -368,6 +422,64 @@ convert_to_molar <- function(conc, unit = "mol") {
   }
   
   return(conc * unit_factors[mol_units] / volume_factors[vol_units])
+}
+
+#' clean vitamin data to SI units
+vitamin_data_to_SI <- function(data, colname) {
+  data.frame(
+    id = data$study,
+    intervention = data$intervention,
+    dose = data$tdd,
+    name = data[[colname]]) %>% 
+  distinct(id, intervention, dose, .keep_all = TRUE) %>% 
+    tidyr::separate_rows(name, sep = ",\\s*") %>%
+    tidyr::separate_wider_delim(name, delim = ": ", 
+                         names = c("name", "value"),
+                         too_few = "align_start") %>% 
+    mutate(name = ifelse(stringr::str_starts(name, "normal|insufficient|deficient|deficiency"),
+                         "",name)) %>% 
+    mutate(value = ifelse(stringr::str_starts(value, "deficiency"),
+                          "",value)) %>% 
+    mutate(name = forcats::fct_recode(as.character(name), "vitamin D" = "25(OH)D",
+                             "ferritin" = "Ferritin",
+                             "vitamin B9" ="folate",
+                             "vitamin D" = "vitamin d",
+                             "vitamin B12" = "vitamin b12",
+                             "vitamin B12" = "vitaminb12",
+                             "vitamin B2" = "Vitamin B2",
+                             "selenoproteinP" = "selenoprotein P",
+                             "rbc.B9" = "RBC vitamin B9"),
+           name = forcats::fct_na_level_to_value(name, extra_levels = "")) %>% 
+    mutate(value = ifelse(name %>% is.na(), NA, value)) %>% 
+    # tidyr::separate_wider_regex(
+    #   value,
+    #   patterns = c(
+    #     "\\s*",
+    #     value = "\\S+",   # first non-space chunk
+    #     "\\s+",           # one or more spaces (dropped; unnamed)
+    #     units = ".*"      # the rest
+    #   ),
+    #   too_few = "align_start"
+    # ) %>% 
+    tidyr::separate_wider_regex(
+      value,
+      patterns = c(
+        "\\s*",
+        value = "[-+]?(?:\\d*\\.\\d+|\\d+\\.?\\d*)(?:[eE][-+]?\\d+)?",
+        "\\s*",
+        units = ".*"
+      ),
+      too_few = "align_start"
+    ) %>% 
+    mutate(value = as.numeric(value)) %>% 
+    mutate(std_value = 
+             ifelse(
+               # units %in% c("ng/mL", "md/dL","ug/L","pg/mL","mg/dL", "ng/mL", "µg/L","µg/l"), 
+               grepl("g",units),
+               convert_conc(value, molecular_mass[as.character(name)], units),
+               convert_to_molar(value, units))) %>% 
+    distinct() %>% 
+    mutate(name = stringr::str_remove(as.character(name), "^vitamin\\s+") %>% as.factor())
 }
 
 #' get hedge's g from cohen's d
@@ -1034,8 +1146,49 @@ mvt_nma <- brms::custom_family(
   log_lik = log_lik_mvt_nma
 )
 
+{binomial_stan_fun <- "
+int binomial_logit_nma_lpdf(int y, vector mu,
+                      real tau,
+                      vector z_u, // standard normal random effects
+                      array[] int study,
+                      array[] int trials,
+                      matrix R_L // cholesky factor of correlation of random effects
+                      ) {
+    vector[rows(y)] u = tau * (R_L * z_u); // study level random effects
+    real lp = binomial_logit_lpmf(y | trials,  mu + u); 
+    return lp;
+  }
 
+  vector binomial_logit_nma_rng(vector mu,
+                      real tau,
+                      vector z_u, // standard normal random effects
+                      array[] int study,
+                      array[] int trials,
+                      matrix R_L // cholesky factor of correlation of random effects
+                      ) {
+    vector[rows(mu)] u = tau * (R_L * z_u); // study level random effects
+    vector[rows(mu)] prob = inv_logit(mu + u);
+    vector[rows(mu)] y_sim;
+    y_sim = binomial_rng(trials, prob); 
+    return y_sim;
+  }
+"}
 
+binomial_nma <- brms::custom_family(
+  "binomial_logit_nma",
+  dpars = c("mu", "tau","zU"),  
+  lb = c(NA, 0, NA),
+  ub = c(NA, NA, NA),
+  vars = c(
+    "vint1", "vint2",
+    "R_L"),
+  links = c("identity","identity","identity"),
+  type  = "int",
+  loop = FALSE,
+  posterior_epred = posterior_epred_mvt_nma,
+  posterior_predict = NULL,
+  log_lik = NULL
+)
 
 
 log_lik.vitfit <- function(object, newdata = NULL, re_formula = NULL,
@@ -1173,11 +1326,11 @@ reloo.vitfit <- function(x, loo = NULL, k_threshold = 0.7, newdata = NULL,
     up_args$newdata <- mf_omitted
     up_args$data2 <- brms:::subset_data2(x$data2, -omitted)
     
-    cov_mats <- list(R = x$prep$R[-omitted, -omitted],
-                     S = x$prep$Sigma[-omitted, -omitted],
-                     R_l = chol(x$prep$R[-omitted, -omitted]),
-                     Sigma_l = chol(x$prep$Sigma[-omitted, -omitted]))
-    up_args$stanvars <- make_stanvar(cov_mats, x$prep$stan_fun)
+    # cov_mats <- list(R = x$prep$R[-omitted, -omitted],
+    #                  S = x$prep$Sigma[-omitted, -omitted],
+    #                  R_l = chol(x$prep$R[-omitted, -omitted]),
+    #                  Sigma_l = chol(x$prep$Sigma[-omitted, -omitted]))
+    # up_args$stanvars <- make_stanvar(cov_mats, x$prep$stan_fun)
     fit_j <- brms:::SW(brms:::do_call(stats::update, up_args))
     class(fit_j) <- c("vitfit", "brmsfit")
     ll_args$object <- fit_j
@@ -1763,11 +1916,11 @@ construct_nma_data <- function(network, nma_form) {
     names()
   db <- contrast_dat %>% dplyr::filter(!is.na(y)) %>% 
     select(-all_of(cols_to_drop_z))
-  R <- multinma::RE_cor(db$.study, db$.trt, rep(TRUE, nrow(db)), "reftrt")
-  Sigma <- multinma:::make_Sigma(network$agd_contrast) %>% Matrix::bdiag()
-  
-  R_l  <- t(chol(R))
-  S_l  <- t(chol(Sigma))
+  # R <- multinma::RE_cor(db$.study, db$.trt, rep(TRUE, nrow(db)), "reftrt")
+  # Sigma <- multinma:::make_Sigma(network$agd_contrast) %>% Matrix::bdiag()
+  # 
+  # R_l  <- t(chol(R))
+  # S_l  <- t(chol(Sigma))
   
   db$.cov <- get_se_values(network$agd_contrast)
   db$.obs <- as.factor(1:nrow(db))
@@ -1803,10 +1956,10 @@ construct_nma_data <- function(network, nma_form) {
   
   return(list(X_nma = X_nma,
               dat = db %>% cbind(X_nma),
-              R_l = R_l,
-              Sigma_l = S_l,
-              R = R,
-              S = Sigma,
+              # R_l = R_l,
+              # Sigma_l = S_l,
+              # R = R,
+              # S = Sigma,
               dose_prior_ids = dose_prior_ids))
 }
 
@@ -2660,10 +2813,10 @@ prep_brms_nma <- function(data,
       formula = bf_mu,
       priors = bf_prior,
       X_nma = data_list$X_nma,
-      R_l = data_list$R_l,
-      Sigma_l = data_list$Sigma_l,
-      Sigma = data_list$Sigma,
-      R = data_list$R,
+      # R_l = data_list$R_l,
+      # Sigma_l = data_list$Sigma_l,
+      # Sigma = data_list$Sigma,
+      # R = data_list$R,
       stanvar = stanvar,
       network = network,
       orig_form = orig_form,
@@ -2871,10 +3024,10 @@ drop_desired_study <- function(fit, study_i) {
                  newdata = fit$data %>% filter(.study != study_i),
                  allow_new_levels = TRUE)
   
-  data$Sigma_L <- data$Sigma_L[-drop.idx, -drop.idx, drop = FALSE]
-  data$R_L     <- data$R_L[-drop.idx, -drop.idx, drop = FALSE]
-  data$Sigma   <- data$Sigma[-drop.idx, -drop.idx, drop = FALSE]
-  data$R       <- data$R[-drop.idx, -drop.idx, drop = FALSE]
+  # data$Sigma_L <- data$Sigma_L[-drop.idx, -drop.idx, drop = FALSE]
+  # data$R_L     <- data$R_L[-drop.idx, -drop.idx, drop = FALSE]
+  # data$Sigma   <- data$Sigma[-drop.idx, -drop.idx, drop = FALSE]
+  # data$R       <- data$R[-drop.idx, -drop.idx, drop = FALSE]
   
   return(data)
   
@@ -4303,7 +4456,7 @@ loo_plot <- function(x, loo_est) {
   if(missing(x)) stop("x is required")
   if(missing(loo_est)) stop("loo_est is required")
   check_vitfit(x)
-  if(!inherits(loo_est, "summary_brms_nma")) loo_est <- loo_est %>% summary_brms_nma()
+  if(!inherits(loo_est, "summary_brms_nma") & inherits(loo_est, "vitfit")) loo_est <- loo_est %>% summary_brms_nma()
   if(!inherits(x, "summary_brms_nma")) x <- x %>% summary_brms_nma()
   loo_edit <- loo_est %>% 
     group_by(.trt, left_out_study, interventions_affected) %>% 
@@ -5028,6 +5181,7 @@ loo_estimates <- function(fit, seed = NULL,
   stand <- fit %>% brms::make_standata()
   if (backend == "cmdstanr") {
     cat("Compiling base model for reuse with cmdstanr backend...\n")
+    sample_iter   <- iter - warmup
     metric_info           <- extract_metric_brms(fit)
     metric                <- average_metric_info(metric_info)
     layout                <- get_param_layout_true(fit)
@@ -5036,7 +5190,8 @@ loo_estimates <- function(fit, seed = NULL,
     inv_metric    <- metric$inv_metric
     inits <- NULL
     cm  <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(stanc))
-    if(reuse_metric) {
+    exe <- cm$exe_file()
+    if (reuse_metric) {
       adapt_engaged <- FALSE
       orig  <- cm$sample(data = stand, 
                          metric = metric$metric,
@@ -5044,12 +5199,11 @@ loo_estimates <- function(fit, seed = NULL,
                          adapt_engaged = adapt_engaged, 
                          step_size = step_size, 
                          iter_sampling = iter, iter_warmup = floor(warmup/2L), 
-                         parallel_chains = cores, chains = chains,
+                         parallel_chains = min(cores, chains), chains = chains,
                          show_messages = show_messages, 
                          show_exceptions = FALSE,
                          diagnostics = NULL, refresh = refresh, 
-                         max_treedepth = control$max_treedepth,
-                         threads_per_chain = max(floor(cores/chains),1))
+                         max_treedepth = control$max_treedepth)
       inits <- posterior::as_draws_list(orig)
       warmup <- 1L
     }
@@ -5085,10 +5239,10 @@ loo_estimates <- function(fit, seed = NULL,
                    .export = c("unique_studies",
                                "control", "iter", "warmup", "chains",
                                "main","interactions","confounders", "addl_form",
-                               "family",
+                               "family","sample_iter",
                                "fit","mod_sc","sm","studies","stand",
                                "metric","layout","init_fun",
-                               "data"
+                               "data","cm","exe","adapt_engaged","step_size","inv_metric"
                                )) %dopar% {
                                  
       # pullout study to drop
@@ -5119,21 +5273,21 @@ loo_estimates <- function(fit, seed = NULL,
                                         study_i)
       if(fit$backend == "cmdstanr") { # reuses step size
         # init_fun <- function() make_init_from_brms(fit, layout, studies, study_i)
-        outs <- cm$sample(data = mod_stand, 
+        m <- cmdstanr::cmdstan_model(cm$stan_file(), exe_file = exe, compile = FALSE)
+        outs <- m$sample(data = mod_stand, 
                           init = inits,
                           metric = metric$metric,
                           inv_metric = inv_metric, 
                           adapt_engaged = adapt_engaged, 
                           step_size = step_size, 
-                          iter_sampling = iter, iter_warmup = warmup, 
+                          iter_sampling = sample_iter, iter_warmup = warmup, 
                           parallel_chains = 1, chains = chains,
                           show_messages = show_messages, 
                           show_exceptions = FALSE,
                           diagnostics = NULL, refresh = refresh, 
                           seed = seed_i,
-                          max_treedepth = control$max_treedepth,
-                          threads_per_chain = 1L)
-        fit_loo$fit <- brms::read_csv_as_stanfit(outs$output_files(), model = cm) 
+                          max_treedepth = control$max_treedepth)
+        fit_loo$fit <- brms::read_csv_as_stanfit(outs$output_files(), model = m) 
       } else if(fit$backend == "rstan") {
       
         fit_loo$fit <- rstan::sampling(sm, data = mod_stand, chains = chains,
@@ -5360,15 +5514,21 @@ nstudies <- function(x, ...) {
 
 ntreatments.vitfit <- function(x) {
   check_vitfit(x)
-  ntreatments(x$prep$network)
+  ntr <- if(is.null(x$prep$network)) {
+    length(unique(x$prep$data$intervention))  
+  } else {
+    ntreatments(x$prep$network)
+  }
+  ntr
 }
 
 ntreatments.summary_brms_nma <- function(x) {
   check_vitsum(x)
   ntrt <- attr(x, "ntreatments")
   if(is.null(ntrt)) {
-    length(unique(x$.trt)) + 1
+    ntrt <- length(unique(x$.trt)) + 1
   }
+  ntrt
 }
 
 ntreatments.nma_data <- function(x) {

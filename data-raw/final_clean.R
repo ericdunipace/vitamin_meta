@@ -30,8 +30,11 @@ labels <- read.csv("data-raw/raw_clean.csv",nrows = 1, header = FALSE)[1,] %>%
 c("study", "title", "design",
   "blinded", "target",
   "population",
+  "pct_def_obs",
   "baseline.vitamin",
+  "baseline.vitamin.sd",
   "end.vitamin",
+  "end.vitamin.sd",
   "selection.criteria",
   "psych.dx","vit.def",
   "pop.dx","total.N", 
@@ -51,114 +54,21 @@ c("study", "title", "design",
   "bias.incomplete.outcome", "bias.selective.outcome",
   "bias.other","bias.overall","notes","flag",
   "gain.score.mean","gain.score.sd","gain.score.se","p",
-  "secondary.flag","secondary.gm.mean","secondary.gm.sd","adverse.rate") -> cn
+  "secondary.flag","secondary.gm.mean","secondary.gm.sd","adverse.rate", 
+  "adverse.count",
+  "adverse.censor.dir","adverse.censor.cut","adverse.total") -> cn
 
 colnames(data) <- cn
 
 # get and separate vitamin info
-vb <- data$baseline.vitamin 
-ve <- data$end.vitamin
-
-vitamin.baseline <- data.frame(
-                      id = data$study,
-                      intervention = data$intervention,
-                      dose = data$tdd,
-                      name = vb) %>% 
-  distinct(id, intervention, dose, .keep_all = TRUE) %>% 
-  separate_rows(name, sep = ",\\s*") %>%
-  separate_wider_delim(name, delim = ": ", names = c("name", "value"),
-                       too_few = "align_start"
-                       ) %>%
-  mutate(name = ifelse(str_starts(name, "normal|insufficient|deficient|deficiency"),
-                       "",name)) %>% 
-  mutate(value = ifelse(str_starts(value, "deficiency"),
-                       "",value)) %>% 
-  mutate(name = fct_recode(as.character(name), "vitamin D" = "25(OH)D",
-                           "ferritin" = "Ferritin",
-                           "vitamin B9" ="folate",
-                           "vitamin D" = "vitamin d",
-                           "vitamin B12" = "vitamin b12",
-                           "vitamin B2" = "Vitamin B2",
-                           "selenoproteinP" = "selenoprotein P",
-                           "rbc.B9" = "RBC vitamin B9"),
-         name = fct_na_level_to_value(name, extra_levels = "")) %>% 
-  mutate(value = ifelse(name %>% is.na(), NA, value)) %>% 
-  separate_wider_regex(
-    value,
-    patterns = c(
-      "\\s*",
-      value = "\\S+",   # first non-space chunk
-      "\\s+",           # one or more spaces (dropped; unnamed)
-      units = ".*"      # the rest
-    ),
-    too_few = "align_start"
-  ) %>% 
-  mutate(value = as.numeric(value)) %>% 
-  mutate(
-    std_value = ifelse(grepl("g",units), 
-           vit$convert_conc(value, vit$molecular_mass[as.character(name)], units),
-           vit$convert_to_molar(value, units))) %>% 
-  distinct() %>% 
-  mutate(cutoff = vit$cutoff_vitamins[as.character(name)]) %>% 
-  mutate(pct_deficient = ifelse(name %>% is.na(), NA, 
-                                vit$log_normal_prob_from_mom(std_value,
-                                                             0.3 * std_value,
-                                                             cutoff,
-                                                             lower = TRUE
-                                ))
-  ) %>% 
-  mutate(name = str_remove(as.character(name), "^vitamin\\s+") %>% as.factor()) 
-vitamin.baseline[vitamin.baseline$id == "Nguyen/2009/Guatemala", "pct_deficient"] <- c(.155,.175,.287,.171,.231,.167, .167,.140)
-
-
-  
-vitamin.end <- data.frame(
-                  id = data$study,
-                  intervention = data$intervention,
-                  dose = data$tdd,
-                  name = ve) %>% 
-  distinct(id, intervention, dose, .keep_all = TRUE) %>% 
-  separate_rows(name, sep = ",\\s*") %>%
-  separate_wider_delim(name, delim = ": ", 
-                       names = c("name", "value"),
-                       too_few = "align_start") %>% 
-  mutate(name = ifelse(str_starts(name, "normal|insufficient|deficient|deficiency"),
-                       "",name)) %>% 
-  mutate(value = ifelse(str_starts(value, "deficiency"),
-                        "",value)) %>% 
-  mutate(name = fct_recode(as.character(name), "vitamin D" = "25(OH)D",
-                           "ferritin" = "Ferritin",
-                           "vitamin B9" ="folate",
-                           "vitamin D" = "vitamin d",
-                           "vitamin B12" = "vitamin b12",
-                           "vitamin B12" = "vitaminb12",
-                           "vitamin B2" = "Vitamin B2",
-                           "selenoproteinP" = "selenoprotein P",
-                           "rbc.B9" = "RBC vitamin B9"),
-         name = fct_na_level_to_value(name, extra_levels = "")) %>% 
-  mutate(value = ifelse(name %>% is.na(), NA, value)) %>% 
-  separate_wider_regex(
-    value,
-    patterns = c(
-      value = "\\S+",   # first non-space chunk
-      "\\s+",           # one or more spaces (dropped; unnamed)
-      units = ".*"      # the rest
-    ),
-    too_few = "align_start"
-  ) %>% 
-  mutate(value = as.numeric(value)) %>% 
-  mutate(std_value = 
-           ifelse(
-             # units %in% c("ng/mL", "md/dL","ug/L","pg/mL","mg/dL", "ng/mL", "µg/L","µg/l"), 
-             grepl("g",units),
-                            vit$convert_conc(value, vit$molecular_mass[as.character(name)], units),
-                            vit$convert_to_molar(value, units))) %>% 
-  distinct() %>% 
-  mutate(name = str_remove(as.character(name), "^vitamin\\s+") %>% as.factor())
+vitamin.baseline <- vit$vitamin_data_to_SI(data, "baseline.vitamin")
+vitamin.end <- vit$vitamin_data_to_SI(data, "end.vitamin")
+vb.sd  <- vit$vitamin_data_to_SI(data, "baseline.vitamin.sd")
+ve.sd  <- vit$vitamin_data_to_SI(data, "end.vitamin.sd")
   
 # combine vitamin data
 vitamins <- vitamin.baseline %>% 
-  select(id, intervention, name, dose, std_value, pct_deficient) %>%
+  select(id, intervention, name, dose, std_value, any_of("pct_deficient")) %>%
   pivot_wider(id_cols = c("id","intervention","dose"),
               names_from = "name",
               names_prefix = "baseline.",
@@ -172,6 +82,24 @@ vitamins <- vitamin.baseline %>%
                           values_from = "std_value") %>% 
               select(- `end.NA`) 
             , by = c("id", "intervention", "dose")
+            ) %>% 
+  full_join(vb.sd %>% 
+              select(id, intervention, name, dose, std_value) %>%
+              pivot_wider(id_cols = c("id","intervention","dose"),
+                          names_from = "name",
+                          names_prefix = "sd.baseline.",
+                          values_from = "std_value") %>% 
+              select(- `sd.baseline.NA`),
+            by = c("id", "intervention", "dose")
+            ) %>% 
+  full_join(ve.sd %>% 
+              select(id, intervention, name, dose, std_value) %>%
+              pivot_wider(id_cols = c("id","intervention","dose"),
+                          names_from = "name",
+                          names_prefix = "sd.end.",
+                          values_from = "std_value") %>% 
+              select(- `sd.end.NA`),
+            by = c("id", "intervention", "dose")
             )
 
 vit_tbl <- tribble(
@@ -480,9 +408,9 @@ dose <- data %>%
 full_data <- data %>% 
   select(-starts_with("bias"), bias.overall) %>% 
   select(-c(baseline.vitamin, end.vitamin)) %>% 
-  select(-c(notes)) %>% 
+  select(-c(notes, adverse.events)) %>% 
   select(-c(population, selection.criteria, number.treatment.arms)) %>% 
-  select(-c(adverse.events, findings)) %>% 
+  select(-c(findings)) %>% 
   left_join(vitamins, by = c("study" = "id", "intervention","tdd"="dose")) %>% 
   mutate(age = as.numeric(age),
          male = as.numeric(male) / 100,
@@ -516,7 +444,13 @@ full_data <- data %>%
          orig.dose = dose,
          orig.tdd = tdd,
          # dose = tdd,
-         frequency = as.factor(frequency)
+         frequency = as.factor(frequency),
+         adverse.rate = as.numeric(adverse.rate),
+         adverse.count = as.numeric(adverse.count),
+         adverse.censor.cut = as.numeric(adverse.censor.cut),
+         adverse.total = as.numeric(adverse.total),
+         adverse.censor.dir = ifelse(adverse.censor.dir == "", NA_character_,
+                                     adverse.censor.dir)
          ) %>% 
   select(-c(intervention, tdd)) %>% 
   left_join(dose, by = c("study", "group", "orig.tdd")) %>%
@@ -626,245 +560,259 @@ names(cutoffs_temp) <- names(cutoffs_temp) |>
   str_replace("selenium$", "selenium") |> # explicit (optional clarity)
   str_replace("^", "baseline.")           # add baseline prefix
 
-dose_data <- full_data %>% 
-  # mutate(intervention.class = case_when(z.citalopram == 1 ~ "SSRI",
-  #                                       z.escitalopram == 1 ~ "SSRI",
-  #                                       z.imipramine == 1 ~ "TCA",
-  #                                       z.fluoxetine == 1 ~ "SSRI",
-  #                                       z.nortriptyline == 1 ~ "TCA",
-  #                                       z.amitriptyline == 1 ~ "TCA",
-  #                                       z.SSRI == 1 ~ "SSRI",
-  #                                       z.SSRI_TCA == 1 ~ "TCA",
-  #                                       starts_with("z.B") == 1 ~ "B vitamin",
-  #                                       z.D == 1 ~ "vitamin D/Calcium",
-  #                                       z.calcium == 1 ~ "vitamin D/Calcium",
-  #                                       .default = NA)) %>%
-  # mutate(
-  #   intervention = apply(select(., z.A:z.zinc) == 1, 1, function(x) {
-  #     paste(names(select(., z.A:z.zinc))[x], collapse = ",")
-  #   }),
-  #   intervention = as.factor(intervention)
-  # ) %>% 
-  select(-c(`z.omega-3`, z.calcium, z.multinutrient, z.A, z.folinate, z.glycine, z.phosphatidylserine,
-            `d.omega-3`, d.calcium, d.multinutrient, d.A, d.folinate, d.glycine, d.phosphatidylserine)) %>% 
-  mutate(priority = case_when(
-    intervention == "z.placebo" ~ 1,
-    intervention == "z.antidepressant" ~ 2,
-    intervention == "z.B12,z.B9,z.iron" ~ 3,
-    intervention == "z.B9" ~ 4,
-    intervention == "z.none" ~ 5,
-    tdd.cat == "D (2.5e-05 g)" ~ 6,
-    TRUE ~ 99  # default for all others
-  ),
+{
+  dose_data <- full_data %>% 
+    # mutate(intervention.class = case_when(z.citalopram == 1 ~ "SSRI",
+    #                                       z.escitalopram == 1 ~ "SSRI",
+    #                                       z.imipramine == 1 ~ "TCA",
+    #                                       z.fluoxetine == 1 ~ "SSRI",
+    #                                       z.nortriptyline == 1 ~ "TCA",
+    #                                       z.amitriptyline == 1 ~ "TCA",
+    #                                       z.SSRI == 1 ~ "SSRI",
+    #                                       z.SSRI_TCA == 1 ~ "TCA",
+    #                                       starts_with("z.B") == 1 ~ "B vitamin",
+    #                                       z.D == 1 ~ "vitamin D/Calcium",
+    #                                       z.calcium == 1 ~ "vitamin D/Calcium",
+    #                                       .default = NA)) %>%
+    # mutate(
+    #   intervention = apply(select(., z.A:z.zinc) == 1, 1, function(x) {
+    #     paste(names(select(., z.A:z.zinc))[x], collapse = ",")
+    #   }),
+    #   intervention = as.factor(intervention)
+    # ) %>% 
+    select(-c(`z.omega-3`, z.calcium, z.multinutrient, z.A, z.folinate, z.glycine, z.phosphatidylserine,
+              `d.omega-3`, d.calcium, d.multinutrient, d.A, d.folinate, d.glycine, d.phosphatidylserine)) %>% 
+    mutate(priority = case_when(
+      intervention == "z.placebo" ~ 1,
+      intervention == "z.antidepressant" ~ 2,
+      intervention == "z.B12,z.B9,z.iron" ~ 3,
+      intervention == "z.B9" ~ 4,
+      intervention == "z.none" ~ 5,
+      tdd.cat == "D (2.5e-05 g)" ~ 6,
+      TRUE ~ 99  # default for all others
+    ),
     final.outcome.mean = ifelse(is.na(final.outcome.mean) & !is.na(baseline.outcome.mean) & !is.na(gain.score.mean) & flag == "gain scores",
                                 baseline.outcome.mean + gain.score.mean,
                                 final.outcome.mean)
-  # , final.outcome.sd = ifelse(is.na(final.outcome.mean) & !is.na(baseline.outcome.mean) & !is.na(gain.score.mean),
-  #                           sqrt(gain.score.sd^2), # need other terms
-  #                           final.outcome.sd
-  # )
-  ) %>% 
-  group_by(study,target,scale) %>%
-  reframe(
-    idx = which.min(priority),
-    contrast = (paste0(as.character(intervention), " - ",as.character(intervention)[idx])),
-    treatment = (as.character(intervention)),
-    control = (intervention[idx]),
-    contrast.mean = final.outcome.mean[idx],
-    contrast.gain = gain.score.mean[idx],
-    contrast.sd = final.outcome.sd[idx],
-    contrast.gain.sd = gain.score.sd[idx],
-    contrast.N = final.N[idx],
-    baseline.contrast.mean = baseline.outcome.mean[idx],
-    baseline.contrast.sd = baseline.outcome.sd[idx],
-    baseline.contrast.N = baseline.N[idx],
-    is.comparator = 1:n() == idx,
-    , pick(everything())# keeps all columns
+    # , final.outcome.sd = ifelse(is.na(final.outcome.mean) & !is.na(baseline.outcome.mean) & !is.na(gain.score.mean),
+    #                           sqrt(gain.score.sd^2), # need other terms
+    #                           final.outcome.sd
+    # )
     ) %>% 
-  ungroup() %>% 
-  mutate(
-    pool.sd = sqrt(((final.N- 1) * final.outcome.sd^2 + (contrast.N-1) * contrast.sd^2)/(final.N + contrast.N - 2)),
-    J = vit$J_fun(final.N + contrast.N - 2),
-    baseline.J = vit$J_fun(baseline.N + baseline.contrast.N - 2),
-    y = (final.outcome.mean - contrast.mean)/pool.sd * J ,
-    sd.y = sqrt(y^2/(2 * (final.N + contrast.N - 2)) + J^2 * (final.N + contrast.N )/(final.N * contrast.N  )),
-    baseline.y = (baseline.outcome.mean - baseline.contrast.mean)/pool.sd * baseline.J ,
-    baseline.sd.y = sqrt(baseline.y^2/(2 * (baseline.N + baseline.contrast.N - 2)) + baseline.J^2 * (baseline.N + contrast.N )/(baseline.N * baseline.contrast.N  )),,
-    pool.sd.gain = sqrt(((final.N- 1) * gain.score.sd^2 + (contrast.N-1) * contrast.gain.sd^2)/(final.N + contrast.N - 2)),
-    y.gain = (gain.score.mean - contrast.gain)/pool.sd.gain  * J,
-    sd.y.gain = sqrt(y.gain^2/(2 * (final.N + contrast.N - 2)) + J^2 * (final.N + contrast.N )/(final.N * contrast.N  ))
-  ) %>% 
+    group_by(study,target,scale) %>%
+    reframe(
+      idx = which.min(priority),
+      contrast = (paste0(as.character(intervention), " - ",as.character(intervention)[idx])),
+      treatment = (as.character(intervention)),
+      control = (intervention[idx]),
+      contrast.mean = final.outcome.mean[idx],
+      contrast.gain = gain.score.mean[idx],
+      contrast.sd = final.outcome.sd[idx],
+      contrast.gain.sd = gain.score.sd[idx],
+      contrast.N = final.N[idx],
+      baseline.contrast.mean = baseline.outcome.mean[idx],
+      baseline.contrast.sd = baseline.outcome.sd[idx],
+      baseline.contrast.N = baseline.N[idx],
+      is.comparator = 1:n() == idx,
+      , pick(everything())# keeps all columns
+    ) %>% 
+    ungroup() %>% 
     mutate(
-    # treatment = ifelse(treatment == control, NA_character_,
-    #                         as.character(treatment)) %>% as.factor(),
-         treatment = as.factor(treatment),
-         control = as.factor(control),
-         intervention = as.factor(intervention)
-         ) %>%
-  left_join(ranked_scales, by = "scale") %>%
-  mutate(scale.preference = coalesce(rank, 99)) %>% 
-  # mutate(depression.scale.preference = 
-  #          case_when(
-  #            scale == "Beck Depression Inventory" ~ 1,
-  #            scale == "HAM-D" ~ 2,
-  #            scale == "BDI-II" ~ 2
-  #            scale == "AUC BDI-II" ~ 2,
-  #            scale == "BAI" ~ 3,
-  #            scale == "EPDS" ~ 4,
-  #            scale == "PHQ-9" ~ 5,
-  #            scale == "HADS-D" ~ 6,
-  #            scale == "DASS-21, depression" ~ 7,
-  #            scale == "CES-D" ~ 8,
-  #            scale == "MADRS" ~ 9, 
-  #            scale == "AUC MADRS" ~ 9,
-  #            scale == "HADS-A" ~ 10,
-  #            
-  #            scale == "HAM-D" ~ 5,
-  #            scale == "MADRS" ~ 6,
-  #            scale == "Beck Depression Inventory II" ~ 7,
-  #            scale == "AUC BDI-II" ~ 8,
-  #            TRUE  ~ 99
-  #          ) %>% as.numeric()) %>% 
-  # mutate(anxiety.scale.preference = 
-  #          case_when(
-  #            scale == "BAI" ~ 1,
-  #            scale == "HADS-A" ~ 2,
-  #            scale == "STAI-S" ~ 3,
-  #            scale == "SCAARED" ~ 5,
-  #            scale == "log BAI" ~ 1,
-  #            scale == "DASS-21, anxiety" ~ 4,
-  #            TRUE  ~ 99
-  #          ) %>% as.numeric()) %>% 
-  # mutate(baseline.vit.of.z = ) %>% 
-  mutate(y.gain = case_when(
-    flag == "OLS" ~ vit$ols_to_g(b = gain.score.mean,
-                             seb = gain.score.se,
-                             sdy = gain.score.sd,
-                             n1 = final.N,
-                             n2 = contrast.N,
-                             p = p)$g,
-    flag == "LMM" ~ vit$lmer_to_g(b = gain.score.mean,
-                              seb = gain.score.se,
-                              sdy = gain.score.sd,
-                              n1 = final.N,
-                              n2 = contrast.N,
-                              extra = p)$g,
-    flag == "logistic" ~ vit$logistic_to_g(b = gain.score.mean,
-                                       seb = gain.score.se,
-                                       n1 = final.N,
-                                       n2 = contrast.N,
-                                       p = p)$g,
-    flag == "hedge's g" ~ gain.score.mean,
-    flag == "cohen's d" ~ vit$gfromd(gain.score.mean, final.N, contrast.N, p = 2),
-    TRUE ~ y.gain
-  ) %>% as.numeric()) %>% 
-  mutate(
-  sd.y.gain = case_when(
-    flag == "OLS" ~ vit$ols_to_g(b = gain.score.mean,
-                             seb = gain.score.se,
-                             sdy = gain.score.sd,
-                             n1 = final.N,
-                             n2 = contrast.N,
-                             p = p)$sd,
-    flag == "logistic" ~ vit$logistic_to_g(b = gain.score.mean,
-                                       seb = gain.score.se,
-                                       n1 = final.N,
-                                       n2 = contrast.N,
-                                       p = p)$sd,
-    flag == "hedge's g" ~ gain.score.sd,
-    flag == "cohen's d" ~ vit$J_fun(final.N + contrast.N - 2) * gain.score.sd,
-    TRUE ~ sd.y.gain
-  ) %>% as.numeric()) %>% 
-  mutate(treatment = ifelse(is.comparator,
-                            NA_character_,
-                            treatment %>% as.character()) %>% 
-           as.factor(),
-         contrast = ifelse(is.comparator,
-                           NA_character_,
-                           contrast %>% as.character) %>% 
-           as.factor()
-         ) %>% 
-  group_by(study,target,scale) %>%
-  reframe(
-    y.gain = ifelse(1:n() == which.min(priority), NA_real_, y.gain),
-    # sd.y.gain = ifelse(1:n() == which.min(priority), NA_real_, sd.y),
-    y = ifelse(1:n() == which.min(priority), NA_real_, y),
-    sd.y = ifelse(1:n() == which.min(priority), sd.y/sd.y * sqrt(1/contrast.N) * J, sd.y),
-    baseline.y = ifelse(1:n() == which.min(priority), NA_real_, baseline.y),
-    baseline.sd.y = ifelse(1:n() == which.min(priority), baseline.sd.y/baseline.sd.y * sqrt(1/contrast.N) * baseline.J, baseline.sd.y),
-    sd.y.gain = ifelse(1:n() == which.min(priority), sd.y.gain/sd.y.gain * sqrt(1/contrast.N) * J, sd.y.gain),
-    , pick(everything())# keeps all columns
-  ) %>% 
-  ungroup() %>% 
-  filter(!(scale %in% c("MFQ","HSCL-25","von Zersen mood scale (ZMS)", "SF-36 MH", "SF-12 MCS"))) %>% 
-  mutate(pct_dis = vit$log_normal_prob_dis(baseline.outcome.mean, baseline.outcome.sd, scale = scale, lower = FALSE)) %>%
-  mutate(pct_dep = ifelse(target == "depression", pct_dis, NA_real_)) %>%
-  mutate(pct_anx = ifelse(target == "anxiety", pct_dis, NA_real_)) %>% 
-  # mutate(pct_dep = ifelse(grepl("depression", psych.dx)  & is.na(pct_dep) & target == "depression", 1.0, pct_dep)) %>%
-  # mutate(pct_anx = ifelse(grepl("anxiety", psych.dx) & is.na(pct_anx) & target == "anxiety", 1.0, pct_anx)) %>%
-  # mutate(pct_dep = ifelse(is.na(pct_dep) & target == "depression", 0.0, pct_dep)) %>%
-  # mutate(pct_anx = ifelse(is.na(pct_anx) & target == "anxiety", 0.0, pct_anx)) %>%
-  mutate(
-  across(
-    any_of(baseline.vit.names),
-    ~ {
-      mu <- .x
-      # guardrails: need positive mean for log-normal moment parameterization
-      ifelse(
-        is.na(mu) | mu <= 0,
-        NA_real_,
-        vit$log_normal_prob_from_mom(
-          mu,
-          mu * 0.3,                 # SD = 0.3 * mean
-          cutoff   = cutoffs_temp[[cur_column()]],
-          lower    = TRUE
-        )
-      )
-    },
-    .names = "pdef_{.col}"
-  ) ) %>%
-  # rowwise() %>%
-  mutate(
-    pct_deficient = rowMeans(across(starts_with("pdef_baseline.")), na.rm = TRUE),
-    n_measured    = rowSums(!is.na(across(starts_with("pdef_baseline."))))
-  ) %>%
-  # ungroup() %>% 
-  mutate(
-    pct_deficient = if_else(n_measured > 0, pct_deficient, NA_real_)) %>% 
-  # mutate(pct_deficient = if_else(
-  #   is.na(pct_deficient) & !is.na(vit.def), 1, pct_deficient
-  # )) %>% 
-  select(c(study, author, country, year, design, blinded,
-           target, total.N, assigned.N, baseline.N, final.N,
-           duration, scale, frequency, tdd, tdd.cat,
-           age,
-           male, 
-           y, sd.y,
-           treatment, control,
-           contrast,
-           y.gain, sd.y.gain,
-           starts_with("baseline"),
-           starts_with("end"),
-           starts_with("z."),
-           starts_with("d."),
-           -baseline.J,
-           bias,
-           intervention,
-           scale.preference,
-           vit.def, calc.vit.def.total,
-           psych.dx,
-           flag, priority,
-           pct_dep, pct_anx, pct_deficient
-           ))
-
-for(i in 1:nrow(dose_data)) {
-  if(dose_data$control[i] != "z.placebo" && !is.na(dose_data$contrast[i])) {
-    temp_control <- dose_data$control[i] %>% as.character()
-    dose_data[[temp_control]][i] <- dose_data[[temp_control]][i]-1
-  } else {
-    dose_data$z.placebo[i] <- 0
+      pool.sd = sqrt(((final.N- 1) * final.outcome.sd^2 + (contrast.N-1) * contrast.sd^2)/(final.N + contrast.N - 2)),
+      J = vit$J_fun(final.N + contrast.N - 2),
+      baseline.J = vit$J_fun(baseline.N + baseline.contrast.N - 2),
+      y = (final.outcome.mean - contrast.mean)/pool.sd * J ,
+      sd.y = sqrt(y^2/(2 * (final.N + contrast.N - 2)) + J^2 * (final.N + contrast.N )/(final.N * contrast.N  )),
+      baseline.y = (baseline.outcome.mean - baseline.contrast.mean)/pool.sd * baseline.J ,
+      baseline.sd.y = sqrt(baseline.y^2/(2 * (baseline.N + baseline.contrast.N - 2)) + baseline.J^2 * (baseline.N + contrast.N )/(baseline.N * baseline.contrast.N  )),,
+      pool.sd.gain = sqrt(((final.N- 1) * gain.score.sd^2 + (contrast.N-1) * contrast.gain.sd^2)/(final.N + contrast.N - 2)),
+      y.gain = (gain.score.mean - contrast.gain)/pool.sd.gain  * J,
+      sd.y.gain = sqrt(y.gain^2/(2 * (final.N + contrast.N - 2)) + J^2 * (final.N + contrast.N )/(final.N * contrast.N  ))
+    ) %>% 
+    mutate(
+      # treatment = ifelse(treatment == control, NA_character_,
+      #                         as.character(treatment)) %>% as.factor(),
+      treatment = as.factor(treatment),
+      control = as.factor(control),
+      intervention = as.factor(intervention)
+    ) %>%
+    left_join(ranked_scales, by = "scale") %>%
+    mutate(scale.preference = coalesce(rank, 99)) %>% 
+    # mutate(depression.scale.preference = 
+    #          case_when(
+    #            scale == "Beck Depression Inventory" ~ 1,
+    #            scale == "HAM-D" ~ 2,
+    #            scale == "BDI-II" ~ 2
+    #            scale == "AUC BDI-II" ~ 2,
+    #            scale == "BAI" ~ 3,
+    #            scale == "EPDS" ~ 4,
+    #            scale == "PHQ-9" ~ 5,
+    #            scale == "HADS-D" ~ 6,
+    #            scale == "DASS-21, depression" ~ 7,
+    #            scale == "CES-D" ~ 8,
+    #            scale == "MADRS" ~ 9, 
+    #            scale == "AUC MADRS" ~ 9,
+    #            scale == "HADS-A" ~ 10,
+    #            
+    #            scale == "HAM-D" ~ 5,
+    #            scale == "MADRS" ~ 6,
+    #            scale == "Beck Depression Inventory II" ~ 7,
+    #            scale == "AUC BDI-II" ~ 8,
+    #            TRUE  ~ 99
+    #          ) %>% as.numeric()) %>% 
+    # mutate(anxiety.scale.preference = 
+    #          case_when(
+    #            scale == "BAI" ~ 1,
+    #            scale == "HADS-A" ~ 2,
+    #            scale == "STAI-S" ~ 3,
+    #            scale == "SCAARED" ~ 5,
+    #            scale == "log BAI" ~ 1,
+    #            scale == "DASS-21, anxiety" ~ 4,
+    #            TRUE  ~ 99
+    #          ) %>% as.numeric()) %>% 
+    # mutate(baseline.vit.of.z = ) %>% 
+    mutate(y.gain = case_when(
+      flag == "OLS" ~ vit$ols_to_g(b = gain.score.mean,
+                                   seb = gain.score.se,
+                                   sdy = gain.score.sd,
+                                   n1 = final.N,
+                                   n2 = contrast.N,
+                                   p = p)$g,
+      flag == "LMM" ~ vit$lmer_to_g(b = gain.score.mean,
+                                    seb = gain.score.se,
+                                    sdy = gain.score.sd,
+                                    n1 = final.N,
+                                    n2 = contrast.N,
+                                    extra = p)$g,
+      flag == "logistic" ~ vit$logistic_to_g(b = gain.score.mean,
+                                             seb = gain.score.se,
+                                             n1 = final.N,
+                                             n2 = contrast.N,
+                                             p = p)$g,
+      flag == "hedge's g" ~ gain.score.mean,
+      flag == "cohen's d" ~ vit$gfromd(gain.score.mean, final.N, contrast.N, p = 2),
+      TRUE ~ y.gain
+    ) %>% as.numeric()) %>% 
+    mutate(
+      sd.y.gain = case_when(
+        flag == "OLS" ~ vit$ols_to_g(b = gain.score.mean,
+                                     seb = gain.score.se,
+                                     sdy = gain.score.sd,
+                                     n1 = final.N,
+                                     n2 = contrast.N,
+                                     p = p)$sd,
+        flag == "logistic" ~ vit$logistic_to_g(b = gain.score.mean,
+                                               seb = gain.score.se,
+                                               n1 = final.N,
+                                               n2 = contrast.N,
+                                               p = p)$sd,
+        flag == "hedge's g" ~ gain.score.sd,
+        flag == "cohen's d" ~ vit$J_fun(final.N + contrast.N - 2) * gain.score.sd,
+        TRUE ~ sd.y.gain
+      ) %>% as.numeric()) %>% 
+    mutate(treatment = ifelse(is.comparator,
+                              NA_character_,
+                              treatment %>% as.character()) %>% 
+             as.factor(),
+           contrast = ifelse(is.comparator,
+                             NA_character_,
+                             contrast %>% as.character) %>% 
+             as.factor()
+    ) %>% 
+    group_by(study,target,scale) %>%
+    reframe(
+      y.gain = ifelse(1:n() == which.min(priority), NA_real_, y.gain),
+      # sd.y.gain = ifelse(1:n() == which.min(priority), NA_real_, sd.y),
+      y = ifelse(1:n() == which.min(priority), NA_real_, y),
+      sd.y = ifelse(1:n() == which.min(priority), sd.y/sd.y * sqrt(1/contrast.N) * J, sd.y),
+      baseline.y = ifelse(1:n() == which.min(priority), NA_real_, baseline.y),
+      baseline.sd.y = ifelse(1:n() == which.min(priority), baseline.sd.y/baseline.sd.y * sqrt(1/contrast.N) * baseline.J, baseline.sd.y),
+      sd.y.gain = ifelse(1:n() == which.min(priority), sd.y.gain/sd.y.gain * sqrt(1/contrast.N) * J, sd.y.gain),
+      , pick(everything())# keeps all columns
+    ) %>% 
+    ungroup() %>% 
+    filter(!(scale %in% c("MFQ","HSCL-25","von Zersen mood scale (ZMS)", "SF-36 MH", "SF-12 MCS"))) %>% 
+    mutate(pct_dis = vit$log_normal_prob_dis(baseline.outcome.mean, baseline.outcome.sd, scale = scale, lower = FALSE)) %>%
+    mutate(pct_dep = ifelse(target == "depression", pct_dis, NA_real_)) %>%
+    mutate(pct_anx = ifelse(target == "anxiety", pct_dis, NA_real_)) %>% 
+    # mutate(pct_dep = ifelse(grepl("depression", psych.dx)  & is.na(pct_dep) & target == "depression", 1.0, pct_dep)) %>%
+    # mutate(pct_anx = ifelse(grepl("anxiety", psych.dx) & is.na(pct_anx) & target == "anxiety", 1.0, pct_anx)) %>%
+    # mutate(pct_dep = ifelse(is.na(pct_dep) & target == "depression", 0.0, pct_dep)) %>%
+    # mutate(pct_anx = ifelse(is.na(pct_anx) & target == "anxiety", 0.0, pct_anx)) %>%
+    mutate(
+      across(
+        any_of(baseline.vit.names),
+        ~ {
+          mu <- .x
+          nm <- dplyr::cur_column()
+          sd_name <- paste0("sd.", nm)
+          
+          sigma <- if (sd_name %in% names(dplyr::cur_data())) {
+            dplyr::cur_data()[[sd_name]]
+          } else {
+            rep(NA_real_, n())
+          }
+          # guardrails: need positive mean for log-normal moment parameterization
+          ifelse(
+            is.na(mu) | mu <= 0,
+            NA_real_,
+            vit$log_normal_prob_from_mom(
+              mu,
+              sigma,                 # SD = 0.3 * mean
+              cutoff   = cutoffs_temp[[cur_column()]],
+              lower    = TRUE
+            )
+          )
+        },
+        .names = "pdef_{.col}"
+      ) ) %>%
+    # rowwise() %>%
+    mutate(
+      pct_deficient = rowMeans(across(starts_with("pdef_baseline.")), na.rm = TRUE),
+      n_measured    = rowSums(!is.na(across(starts_with("pdef_baseline."))))
+    ) %>%
+    # ungroup() %>% 
+    mutate(
+      pct_deficient = if_else(n_measured > 0, pct_deficient, NA_real_)) %>% 
+    # mutate(pct_deficient = if_else(
+    #   is.na(pct_deficient) & !is.na(vit.def), 1, pct_deficient
+    # )) %>% 
+    select(c(study, author, country, year, design, blinded,
+             target, total.N, assigned.N, baseline.N, final.N,
+             duration, scale, frequency, tdd, tdd.cat,
+             age,
+             male, 
+             y, sd.y,
+             treatment, control,
+             contrast,
+             y.gain, sd.y.gain,
+             starts_with("baseline"),
+             starts_with("end"),
+             starts_with("z."),
+             starts_with("d."),
+             starts_with("sd.baseline."),
+             starts_with("sd.end."),
+             -baseline.J,
+             bias,
+             intervention,
+             scale.preference,
+             vit.def, calc.vit.def.total,
+             psych.dx,
+             flag, priority,
+             pct_dep, pct_anx, pct_deficient,
+             adverse.count, adverse.censor.cut, adverse.total, adverse.censor.dir
+    ))
+  
+  for(i in 1:nrow(dose_data)) {
+    if(dose_data$control[i] != "z.placebo" && !is.na(dose_data$contrast[i])) {
+      temp_control <- dose_data$control[i] %>% as.character()
+      dose_data[[temp_control]][i] <- dose_data[[temp_control]][i]-1
+    } else {
+      dose_data$z.placebo[i] <- 0
+    }
   }
 }
+
 
 analysis_data <- dose_data %>% 
   filter(!(study %in% c(
