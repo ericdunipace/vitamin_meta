@@ -1,0 +1,3011 @@
+---
+title: "Appendix"
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+
+library(approxOT)
+library(loo)
+library(brms)
+library(dplyr)
+library(multinma)
+library(ggplot2)
+library(posterior)
+library(tidyr)
+library(here)
+library(stringr)
+library(english)
+library(tibble)
+library(flextable)
+
+to_sentence_oxford <- function(x) {
+  n <- length(x)
+  if (n == 0) return("")
+  if (n == 1) return(x)
+  if (n == 2) return(paste(x, collapse = " and "))
+  paste(paste(x[-n], collapse = ", "), ", and ", x[n], sep = "")
+}
+
+vitamin_range_to_text <- function(r) {
+  ranges <- c("min", "max")
+  txt <- ""
+  min <- dose_ranges[[paste0("min_d.", r)]]
+  max <- dose_ranges[[paste0("max_d.", r)]]
+  
+  if (min == max) {
+    txt <- glue::glue("the total daily dose was {min}")
+    
+  } else {
+    txt <- glue::glue("the total daily dose ranged from {min} to {max}")
+  }
+ 
+  return(txt)
+}
+
+vitamin_duration_to_text <- function(r) {
+  txt <- ""
+  min <- duration %>% filter(grepl(glue::glue("{r}(?![0-9])"), intervention, perl = TRUE)) %>% select(duration) %>% min()
+  max <- duration %>% filter(grepl(glue::glue("{r}(?![0-9])"), intervention, perl = TRUE)) %>% select(duration) %>% max()
+  
+  min_unit <- max_unit <- " weeks"
+  if(min == 52) {
+    min <- min/52
+    min_unit <- " year"
+  }
+  if(min > 52) {
+    min <- min/52
+    min_unit <- " years"
+  }
+  if(max == 52) {
+    max <- max/52
+    max_unit <- " year"
+  }
+  if(max > 52) {
+    max <- max/52
+    max_unit <- " years"
+  }
+  
+  if(min_unit == max_unit) {
+    min_unit <- ""
+  }
+  
+  if (min == max) {
+    txt <- glue::glue("and the duration of supplementation was {max}{max_unit}")
+    
+  } else {
+    txt <- glue::glue("and the duration of supplementation ranged from {min}{min_unit} to {max}{max_unit}")
+  }
+ 
+  return(txt)
+}
+flextable_fmt <- function(x, digits = 2, ...) {
+    
+    fmt <- function(v, d) formatC(v, format = "f", digits = d)
+    
+    safe_merge_hierarchy <- function(ft,
+                                     keys = c("Intervention", "Depressed", "Deficient"),
+                                     targets = c("Deficient", "Depressed", "Intervention")) {
+      # ft: a flextable made from `data`
+      # data: the data.frame used to build ft (used only to detect columns robustly)
+      # keys: ordered left->right hierarchy (most general to most specific)
+      # targets: merge targets in order most-specific->most-general (right->left)
+      
+      if (!length(keys) || !length(targets)) return(ft)
+      
+      # helper: keys up to and including a target, e.g.
+      # target="Deficient" -> keys=c("Intervention","Depressed","Deficient")
+      key_upto <- function(target) {
+        if (!target %in% keys) return(keys[1]) # fallback
+        keys[seq_len(match(target, keys))]
+      }
+      
+      # merge right-to-left (most specific first)
+      for (tgt in targets) {
+        kj <- key_upto(tgt)
+        
+        # If we're merging Depressed but Deficient exists, we *don't* include Deficient in the key
+        # because we want Depressed merged across all Deficient levels within Intervention.
+        # (That’s the usual journal-table look.)
+        if (tgt == "Depressed" && "Depressed" %in% keys) {
+          kj <- keys[seq_len(match("Depressed", keys))]
+        }
+        if (tgt == "Intervention" && "Intervention" %in% keys) {
+          kj <- "Intervention"
+        }
+        
+        ft <- flextable::merge_v(
+          x = ft,
+          j = kj,
+          target = tgt,
+          combine = TRUE
+        )
+      }
+      
+      ft
+    }
+    
+    df <- x %>% 
+      mutate(
+        across(
+          any_of("depressed"),
+          ~ recode(factor(.x), "0" = "No", "1" = "Yes")
+        )
+      ) %>% 
+      mutate(
+        across(
+          any_of("anxiety"),
+          ~ recode(factor(.x), "0" = "No", "1" = "Yes")
+        )
+      ) %>% 
+      mutate(
+        across(
+          any_of("depressed"),
+          ~ recode(factor(.x), "no" = "No", "yes" = "Yes")
+        )
+      ) %>% 
+      mutate(
+        across(
+          any_of("anxiety"),
+          ~ recode(factor(.x), "no" = "No", "yes" = "Yes")
+        )
+      ) %>% 
+      mutate(
+        across(
+          any_of("def"),
+          ~ recode(factor(.x),
+                   "NA" = "Unknown",
+                   "no" = "No",
+                   "yes" = "Yes"
+          ))
+      ) %>%
+      rename(Intervention = any_of("intervention")) %>%
+      rename(Intervention = any_of(".trt")) %>% 
+      rename(Dose = any_of(".dose")) %>% 
+      rename(Depressed = any_of("depressed")) %>% 
+      rename(Anxious = any_of("anxiety")) %>% 
+      rename(Bias = any_of("bias")) %>%
+      rename(Bias = any_of("bias.overall")) %>%
+      rename(Deficient = any_of("def")) %>% 
+      mutate(
+        across(
+          any_of("Bias"),
+          ~ forcats::fct_recode(.x, 
+                                "Low" = "low",
+                                "Unclear" = "some concerns",
+                                "High" = "high")
+        )
+      ) %>%
+      mutate(
+        across(
+          any_of("Bias"),
+          ~ forcats::fct_relevel(.x, "Low", "Unclear", "High")
+        )
+      ) %>% 
+      arrange(across(any_of(c("Intervention", "Bias","Dose", "Depressed","Anxious",  "Deficient")))) %>% 
+      select(any_of(c("Intervention", "Bias","Dose", "Depressed","Anxious",  "Deficient")), 
+             everything()) %>% 
+      select(-c(S.E., `q50%`)) %>%
+      mutate(
+        est_ci = dplyr::case_when(
+          # only compute if these columns exist; otherwise leave NA and we won't drop them
+          !all(c("Estimate", "q2.5%", "q97.5%") %in% names(.)) ~ NA_character_,
+          is.na(Estimate) & is.na(`q2.5%`) & is.na(`q97.5%`) ~ "—",
+          TRUE ~ glue::glue("{fmt(Estimate, digits)} ({fmt(`q2.5%`, digits)}, {fmt(`q97.5%`, digits)})")
+        )
+      ) %>%
+      select(-c(Estimate, `q2.5%`, `q97.5%`)) 
+    
+    merge_cols <- intersect(c("Intervention", "Bias","Dose", "Depressed","Anxious",  "Deficient"), colnames(df))
+    
+    df %>% 
+      # { if (length(merge_cols)>1) flextable::as_grouped_data(., groups = "Intervention")  else . } %>%
+      flextable::flextable() %>% 
+      # { if (length(merge_cols)>1) merge_v(., j = merge_cols) else . } %>%
+      { if (length(merge_cols)>1) {
+        safe_merge_hierarchy(
+          ft = .,
+          keys = merge_cols,
+          targets = rev(merge_cols)  # right-to-left
+        )
+      }  else . } %>%
+      flextable::set_header_labels(
+        Intervention = "Intervention",
+        est_ci = "Effect Size (95% Credible Interval)"
+      ) %>%
+      flextable::autofit() %>% 
+      flextable::hline(border = officer::fp_border(color = "gray70", width = 0.5), part = "body")
+    
+}
+
+box::use(../../R/vit)
+
+data <- vit$get_vitamin_data(outcome = NA_character_, 
+                             simple_analysis = TRUE,
+                             include_full_bias = TRUE)
+full_data <- vit$get_vitamin_data(outcome = NA_character_, 
+                             simple_analysis = FALSE,
+                             include_full_bias = TRUE, additive_tx = TRUE)
+
+```
+
+```{r}
+#| label: prisma
+
+  ## N_main_analysis <- vit$nstudies(data, "study")
+  ## 
+  ## N_sensitivity_only <- (vit$get_vitamin_data(
+  ##     outcome = NA_character_, 
+  ##     simple_analysis = FALSE,
+  ##     include_full_bias = TRUE,
+  ##     additive_tx = TRUE
+  ##   ) %>%  vit$nstudies("study")) - N_main_analysis
+  ## 
+  ## 
+  ## N_initial_studies <- 5036L
+  ## N_exclude <- 1886L
+  ## N_screened <- N_initial_studies - N_exclude ## 3156
+  ## N_exclude_screen <- 2849L
+  ## N_full_text <- N_screened - N_exclude_screen ## 301
+  ## N_exclude_full_text <- 190L
+  ## N_extracted <- N_full_text - N_exclude_full_text ## 111
+  ## N_exclude_after_extract <- N_extracted - N_sensitivity_only - N_main_analysis 
+  ## N_included <- N_extracted - N_exclude_after_extract ## 101
+  
+  prisma_data <- readRDS(here::here("outputs","overall", "prisma_data.rds"))
+  ## prismaFormat <-
+  ##   data.frame(
+  ##     prismaLvl = c(1,1,2,2,3,3,4,4,5,5,6
+  ##                   ),
+  ##     nodeType =  c("Node", "Filter", "Node", "Filter", "Node", "Filter", "Node", "Filter",
+  ##                   "Node", "Filter", "End"),
+  ##     prismaTxt = c(
+  ##       sprintf("Records identified from databases\n(n = %s)",N),
+  ##       sprintf("Duplicates excluded\n(n = %s)", 1886),
+  ##       sprintf("Records screened\n(n = %s)",N - 1886),
+  ##       paste0("Records excluded as irrelevant\n(n = ", 2849,")"),
+  ##       paste0("Full-text studies assessed for eligibility\n(n = ", N - 1886- 2849, ")"),
+  ##       paste0("Records excluded\n(n = ", 190, ")"),
+  ##       paste0("Studies included for extraction\n(n = ", N - 1886- 2849 - 190, ")"),
+  ##       paste0("Studies excluded after extraction\nfor not meeting inclusion criteria,\nhaving duplicate data,\n or not having usable data\n(n = ", 3 + 2 + 2, ")"),
+  ##       ## Kennedy/2011/UK multinutrient
+  ##       ## Katta/2023/New Zealand multinutrient
+  ##       ## Mech/2016/USA multinutrient intervention
+  ##       ## Kaviani/2020/Iran  duplicate
+  ##       ## Khajehnasiri/2015/Iran duplicate and excluded treatments
+  ##       ## Calissendorff/2015/Sweden data not usable due to not reporting means in each group
+  ##       ## Muhihi/2022/Tanzania-USA not a usuable depression or anxiety scale
+  ##       paste0("Studies included in analyses\n(n = ", N - 1886- 2849 - 190-7, ")"),
+  ##       paste0("Studies only included in sensitivity analyses due to:\nOnly being connected in additive treatment models (n = ",1, ")","\nOnly having dose comparisons (n = ", 4, ")"),
+  ##       paste0("Studies included in main analysis\n(n = ", N - 1886- 2849 - 190-7-1-4, ")")
+  ##     )
+  ##   )
+```
+```{r}
+#| label: scales
+#| warning: false
+#| message: false
+
+depression_measures <- data %>%
+  filter(target == "depression") %>%
+  distinct(study, scale, bias)
+
+anxiety_measures <- data %>%
+  filter(target == "anxiety") %>%
+  distinct(study, scale, bias)
+
+depression_measures <- depression_measures %>% 
+  mutate(scale = forcats::fct_recode(
+    as.factor(scale),
+    ## "HADS-D" = "HADS-D >=8",
+    "BDI-II" = "AUC BDI-II",
+    "BDI-I" = "Beck Depression Inventory",
+    "GDS-15" = "GDS-15 >=5",
+    "HADS-D" = "HADS-D >= 8"
+  ) %>%  as.character())
+  
+anxiety_measures <- anxiety_measures %>% 
+  mutate(scale = forcats::fct_recode(
+    as.factor(scale),
+    "HADS-A" = "HADS-A >=8",
+    "BAI" = "Log BAI"
+  ) %>%  as.character())
+
+```
+```{r}
+#| label: characteristics
+#| message: false
+#| warning: false
+
+n_tx_summary <-  data %>%
+  select(study, intervention) %>% 
+  distinct() %>%
+  arrange(intervention) %>% 
+  mutate(tx = intervention) %>% 
+  separate_rows(intervention, sep = ",\\s*") %>%
+  group_by(study) %>%
+  summarize(
+    N_antidepressant = any(grepl("antidepressant", intervention)),
+    N_aerobic = any(grepl("aerobic exercise", intervention)),
+    N_D = any(intervention == "D"),
+    N_B = any(grepl("B\\d*", intervention)),
+    N_C = any(grepl("C",intervention)),
+    N_mag = any(grepl("magnesium",intervention)),
+    N_zinc = any(grepl("zinc",intervention)),
+    N_selenium = any(grepl("selenium",intervention)),
+    N_iron = any(grepl("iron",intervention)),
+    N_plac = any(grepl("placebo",intervention)),
+    N_multi = any(table(tx) >1)) %>% 
+  ungroup() %>% 
+  summarize(
+    N_antidepressant = sum(N_antidepressant),
+    N_aerobic = sum(N_aerobic),
+    N_B = sum(N_B),
+    N_C = sum(N_C),
+    N_D = sum(N_D),
+    N_zinc = sum(N_zinc),
+    N_mag = sum(N_mag),
+    N_selenium = sum(N_selenium),
+    N_iron = sum(N_iron),
+    N_multi = sum(N_multi))
+
+age <- data %>% distinct(study, intervention, .keep_all = TRUE) %>% select(age, baseline.N, final.N)
+
+male <- data %>% distinct(study, intervention, .keep_all = TRUE) %>% select(male, baseline.N, final.N) %>% mutate(male = male * 100)
+
+n_depression <- data %>% filter(target == "depression") %>% 
+    distinct(study,.keep_all = TRUE) %>% 
+    nrow()
+  
+n_anxiety <- data %>% filter(target == "anxiety") %>% 
+    distinct(study,.keep_all = TRUE) %>% 
+    nrow()
+
+vit_levels <- data %>% distinct(study, intervention, .keep_all = TRUE) %>% 
+  select(starts_with("baseline."),-c(baseline.outcome.mean, baseline.outcome.sd,
+         baseline.y, baseline.sd.y, baseline.contrast.mean, baseline.contrast.N, baseline.contrast.sd), study, baseline.N)
+
+measured <- vit_levels %>% select(-baseline.N) %>% group_by(study) %>% summarize(across(starts_with("baseline"), ~ mean(!is.na(.x)))) %>% mutate(
+    total_obs = rowSums(across(-study))
+) %>% select(total_obs, study)
+
+n_tx_summary_low <-  data %>%
+  filter(bias == "low") %>% 
+  select(study, intervention) %>% 
+  distinct() %>%
+  arrange(intervention) %>% 
+  mutate(tx = intervention) %>% 
+  separate_rows(intervention, sep = ",\\s*") %>%
+  group_by(study) %>%
+  summarize(
+    N_antidepressant = any(grepl("antidepressant", intervention)),
+    N_aerobic = any(grepl("aerobic exercise", intervention)),
+    N_D = any(intervention == "D"),
+    N_B = any(grepl("B\\d*", intervention)),
+    N_C = any(grepl("C",intervention)),
+    N_mag = any(grepl("magnesium",intervention)),
+    N_zinc = any(grepl("zinc",intervention)),
+    N_selenium = any(grepl("selenium",intervention)),
+    N_iron = any(grepl("iron",intervention)),
+    N_plac = any(grepl("placebo",intervention)),
+    N_multi = any(table(tx) >1)) %>% 
+  ungroup() %>% 
+  summarize(
+    N_antidepressant = sum(N_antidepressant),
+    N_aerobic = sum(N_aerobic),
+    N_B = sum(N_B),
+    N_C = sum(N_C),
+    N_D = sum(N_D),
+    N_zinc = sum(N_zinc),
+    N_mag = sum(N_mag),
+    N_selenium = sum(N_selenium),
+    N_iron = sum(N_iron),
+    N_multi = sum(N_multi))
+
+age_low <- data %>% filter(bias == "low") %>% distinct(study, intervention, .keep_all = TRUE) %>% select(age, baseline.N, final.N)
+
+male_low <- data  %>% filter(bias == "low")%>% distinct(study, intervention, .keep_all = TRUE) %>% select(male, baseline.N, final.N) %>% mutate(male = male * 100)
+
+n_depression_low <- data  %>% filter(bias == "low")%>% filter(target == "depression") %>% 
+    distinct(study,.keep_all = TRUE) %>% 
+    nrow()
+  
+n_anxiety_low <- data %>% filter(bias == "low") %>% filter(target == "anxiety") %>% 
+    distinct(study,.keep_all = TRUE) %>% 
+    nrow()
+
+vit_levels_low <- data %>% filter(bias == "low") %>% distinct(study, intervention, .keep_all = TRUE) %>% 
+  select(starts_with("baseline."),-c(baseline.outcome.mean, baseline.outcome.sd,
+         baseline.y, baseline.sd.y, baseline.contrast.mean, baseline.contrast.N, baseline.contrast.sd), study, baseline.N)
+
+measured_low <- vit_levels_low %>% select(-baseline.N) %>% group_by(study) %>% summarize(across(starts_with("baseline"), ~ mean(!is.na(.x)))) %>% mutate(
+    total_obs = rowSums(across(-study))
+) %>% select(total_obs, study)
+
+```
+
+```{r}
+#| label: duration and doses
+
+duration <- data %>% 
+  filter(bias == "low") %>% 
+    distinct(study, intervention,
+             .keep_all = TRUE) %>%
+    select(intervention, duration) %>%
+    group_by(intervention) %>% 
+reframe(duration = range(duration, na.rm = TRUE),
+        which = c("min","max"))
+
+dose_ranges <- readRDS(
+        here::here("outputs","overall","tables","raw","dose_ranges_low_bias.rds"))
+
+pop_demo <- readRDS(
+        here::here("outputs","overall","tables","raw","pop_demo_low_bias.rds"))
+study_demo <- readRDS(
+        here::here("outputs","overall","tables","raw","study_demo_low_bias.rds"))
+
+most_common_multi <- study_demo %>% 
+  filter(grepl(",", Intervention) &
+           !grepl("antidepressant|aerobic",Intervention)) %>% 
+  arrange(desc(N)) %>% 
+  slice(1) %>% pull(Intervention)
+
+```
+```{r}
+#| label: rob info
+#| message: false
+#| warning: false
+
+qual <- readRDS(here::here("data","quality.rds")) %>% 
+    filter(study %in% full_data$study) %>% 
+    mutate(study = forcats::fct_recode(study, "Vyas/2023/US" = "Vyas/2023/US/2"))
+
+most_common_bias <- qual %>%
+  select(-study, -bias.overall) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "domain",
+    values_to = "judgment"
+  ) %>%
+  filter(judgment != "low") %>%
+  group_by(domain, judgment) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(domain) %>%
+  slice_max(order_by = n, n = 1) %>%
+  ungroup() %>% 
+  mutate(domain = forcats::fct_recode(domain %>% as.factor(),
+                               "Random sequence generation" = "bias.sequence",
+                               "Allocation concealment" = "bias.concealment",
+                               "Blinding of participants and personnel" = "bias.blinding.participants",
+                               "Blinding of outcome assessment" = "bias.blinding.outcome",
+                               "Incomplete outcome data" = "bias.incomplete.outcome",
+                               "Selective outcome reporting" = "bias.selective.outcome",
+                               "Other sources of bias" = "bias.other"
+    )) %>% 
+  arrange(desc(n)) %>% 
+  slice(1) %>% pull(domain)
+```
+```{r}
+#| label: regression models
+#| cache: true
+
+fit_dep <- readRDS(
+      here::here("outputs", "saved_models", "depression", 
+                 glue::glue("model_", 
+                            "depression", 
+                            "_low_bias_data.rds"))
+    ) 
+
+fit_anx <- readRDS(
+      here::here("outputs", "saved_models", "anxiety", 
+                 glue::glue("model_", 
+                            "anxiety", 
+                            "_low_bias_data.rds"))
+    ) 
+
+fit_ssri_dep <- readRDS(here::here("outputs", "saved_models", "depression", 
+     glue::glue("model_", 
+                "depression",
+              "_low_bias_ssri_data.rds")
+    )
+    )
+
+fit_ssri_anx <- readRDS(here::here("outputs", "saved_models", "anxiety", 
+     glue::glue("model_", 
+                "anxiety",
+              "_low_bias_ssri_data.rds")
+    )
+    )
+
+
+fit_dep_def <- readRDS(
+      here::here("outputs", "saved_models", "depression", 
+                 glue::glue("model_", 
+                            "depression", 
+                            "_low_bias_data_by_deficiency_depression.rds"))
+    ) 
+
+fit_anx_def <- readRDS(
+      here::here("outputs", "saved_models", "anxiety", 
+                 glue::glue("model_", 
+                            "anxiety", 
+                            "_low_bias_data_by_deficiency_depression.rds"))
+    ) 
+
+fit_time_dep <- readRDS(
+      file = here::here("outputs", 
+                        "saved_models", 
+                        "depression",  
+                        "sensitivity",
+                        glue::glue("model_",
+                                   "depression",
+                                   "_low_bias_data_by_time_cat.rds"))
+    )
+
+fit_time_anx <- readRDS(
+      file = here::here("outputs", 
+                        "saved_models", 
+                        "anxiety",  
+                        "sensitivity",
+                        glue::glue("model_",
+                                   "anxiety",
+                                   "_low_bias_data_by_time_cat.rds")))
+
+
+fit_dose_dep <- readRDS(
+      here::here("outputs", "saved_models", "depression", "sensitivity",
+                 glue::glue("model_", 
+                            "depression", 
+                            "_low_bias_data_by_dose.rds"))
+    )
+
+fit_dose_anx <- readRDS(
+      here::here("outputs", "saved_models", "anxiety","sensitivity",
+                 glue::glue("model_", 
+                            "anxiety", 
+                            "_low_bias_data_by_dose.rds"))
+    )
+
+
+
+
+dep_results <- vit$summary_brms_nma(fit_dep) %>% summary()
+anx_results <- vit$summary_brms_nma(fit_anx) %>% summary()
+
+def_dep_results <- vit$summary_brms_nma(fit_dep_def, keep = c(".trt","def","depressed")) %>% summary()
+def_anx_results <- vit$summary_brms_nma(fit_anx_def, keep = c(".trt","def","anxiety")) %>% summary()
+
+ssri_results  <- vit$summary_brms_nma(fit_ssri_dep) %>% summary()
+
+time_dep_results <- vit$summary_brms_nma(fit_time_dep, keep = c(".trt","time_cat")) %>% summary()
+time_anx_results <- vit$summary_brms_nma(fit_time_anx, keep = c(".trt","time_cat")) %>% summary()
+
+dose_dep_results <- vit$summary_brms_nma(fit_dose_dep, keep = c(".trt",".dose")) %>% summary()
+dose_anx_results <- vit$summary_brms_nma(fit_dose_anx, keep = c(".trt",".dose")) %>% summary()
+
+```
+
+## PRISMA 2020 Checklist {#app-prisma .appendix}
+
+| Section | Item | Description | Location Reported |
+|----------|------|------------|-------------------|
+| Title | 1 | Identify the report as a systematic review. | |
+| Abstract | 2 | See PRISMA 2020 Abstract Checklist. | |
+| Introduction | 3 | Describe the rationale for the review in the context of existing knowledge. | |
+| Introduction | 4 | Provide explicit statement of objectives/questions. | |
+| Methods | 5 | Specify inclusion and exclusion criteria and grouping for syntheses. | |
+| Methods | 6 | Specify all information sources and dates searched. | |
+| Methods | 7 | Present full search strategies including filters and limits. | @sec-search-strategy |
+| Methods | 8 | Describe study selection process and reviewer roles. | |
+| Methods | 9 | Describe data collection process and reviewer roles. | |
+| Methods | 10a | Define all outcomes sought and handling of multiple measures/time-points. | |
+| Methods | 10b | Define other variables collected and assumptions about missing data. | |
+| Methods | 11 | Describe risk-of-bias assessment methods and tools used. | @sec-rob |
+| Methods | 12 | Specify effect measures used for each outcome. | |
+| Methods | 13a | Describe processes for determining study eligibility for each synthesis. | |
+| Methods | 13b | Describe data preparation methods (e.g., conversions, missing data handling). | |
+| Methods | 13c | Describe tabulation or visualization methods. | |
+| Methods | 13d | Describe synthesis methods, models, heterogeneity assessment, software. | |
+| Methods | 13e | Describe methods for exploring heterogeneity (subgroup/meta-regression). | |
+| Methods | 13f | Describe sensitivity analyses conducted. | |
+| Methods | 14 | Describe assessment of reporting bias. | |
+| Methods | 15 | Describe certainty/confidence assessment methods. | |
+| Results | 16a | Describe search and selection results (flow diagram recommended). | |
+| Results | 16b | Cite excluded studies and reasons for exclusion. | |
+| Results | 17 | Cite included studies and present characteristics. | |
+| Results | 18 | Present risk-of-bias assessments. | |
+| Results | 19 | Present summary statistics and effect estimates for each study. | |
+| Results | 20a | Summarize characteristics and bias of contributing studies. | @app-study-char |
+| Results | 20b | Present synthesis results including summary estimates and heterogeneity. | |
+| Results | 20c | Present heterogeneity investigations. | |
+| Results | 20d | Present sensitivity analyses. | |
+| Results | 21 | Present reporting bias assessments. | |
+| Results | 22 | Present certainty of evidence assessments. | |
+| Discussion | 23a | Interpret results in context of other evidence. | |
+| Discussion | 23b | Discuss limitations of included evidence. | |
+| Discussion | 23c | Discuss limitations of review process. | |
+| Discussion | 23d | Discuss implications for practice, policy, and research. | |
+| Other | 24a | Provide registration information. | |
+| Other | 24b | Indicate where protocol can be accessed. | |
+| Other | 24c | Describe amendments to protocol or registration. | |
+| Other | 25 | Describe financial or non-financial support. | |
+| Other | 26 | Declare competing interests. | |
+| Other | 27 | Report availability of data, code, and materials. | |
+
+From: Page MJ, McKenzie JE, Bossuyt PM, Boutron I, Hoffmann TC, Mulrow CD, et al. The PRISMA 2020 statement: an updated guideline for reporting systematic reviews. MetaArXiv. 2020, September 14. DOI: 10.31222/osf.io/v7gm2. For more information, visit: www.prisma-statement.org
+
+
+## Protocol  {#app-protocol .appendix}
+The protocol for this review was registered on PROSPERO (CRD42024575661) and is available at [https://www.crd.york.ac.uk/PROSPERO/view/CRD42024575661]. The protocol was developed in accordance with PRISMA-P guidelines and included detailed plans for literature search, study selection, data extraction, risk-of-bias assessment, and statistical analysis. Any deviations from the protocol are described in the Methods section of this report.
+
+<!-- ### Background and rationale {.appendx} -->
+
+<!-- #### Title -->
+<!-- Micronutrient supplementation for depressive and anxiety symptoms: a systematic review and Bayesian network meta-analysis of randomized controlled trials -->
+
+<!-- #### Background -->
+
+<!-- Depression and anxiety disorders are leading causes of disability worldwide. A substantial body of randomized controlled trials has examined micro-nutrient supplementation, including vitamin D, B vitamins, vitamin C, magnesium, zinc, selenium, and iron, for depressive and anxiety symptoms. However, trials vary considerably in population characteristics, baseline deficiency status, intervention composition, and duration. Pairwise meta-analyses cannot fully compare multiple micro-nutrients within a connected evidence network. -->
+
+<!-- Network meta-analysis (NMA) allows simultaneous comparison of multiple interventions while preserving randomization. This approach enables estimation of relative treatment effects among micro-nutrients that have not been directly compared in head-to-head trials. Given heterogeneity across populations and study designs, careful evaluation of transitivity, consistency, and study quality is required. -->
+
+<!-- This review aims to synthesize randomized controlled trial evidence on micro-nutrient supplementation for depressive and anxiety symptoms using a Bayesian random-effects NMA framework. -->
+
+<!-- ### Objectives {.appendx} -->
+
+<!-- #### Primary objectives {.appendx} -->
+<!-- To estimate the relative effects of micro-nutrient supplementation compared with placebo or other micro-nutrients on depressive and anxiety symptom severity. -->
+
+<!-- #### Secondary objectives {.appendix} -->
+
+<!-- 1. To explore whether baseline micro-nutrient deficiency status modifies treatment effects. -->
+<!-- 1. To explore whether baseline depression or anxiety severity modifies treatment effects. -->
+
+<!-- ### Eligibility Criteria {.appendix} -->
+
+<!-- #### Population -->
+
+<!-- <span class="custom-paragraph-header">Included</span> -->
+<!-- *  Adults (≥18 years). -->
+<!-- *  General population samples with a measure of depression or anxiety. -->
+<!-- *  Clinical diagnoses of depressive or anxiety disorders (e.g., major depressive disorder, persistent depressive disorder, generalized anxiety disorder, panic disorder, social anxiety disorder, premenstrual dysphoric disorder, postpartum depression, seasonal affective disorder, vascular depression). -->
+<!-- *  Diagnoses based on standardized psychiatric interviews, ICD criteria, clinical diagnosis, or validated scale cutoffs. -->
+<!-- *  Subsyndromal anxiety or depressive symptoms measured longitudinally. -->
+
+<!-- <span class="custom-paragraph-header">Excluded</span> -->
+
+<!-- *  Children or adolescents. -->
+<!-- *  Bipolar depression, psychotic disorders, schizophrenia. -->
+<!-- *  ADHD, cognitive disorders. -->
+
+<!-- #### Intervention -->
+
+<!-- <span class="custom-paragraph-header">Included</span> -->
+<!-- *  Oral supplementation with vitamin D, B vitamins (including individual B vitamins or B-complex), vitamin C, magnesium, zinc, selenium, or iron. -->
+<!-- *  Multi-nutrient interventions limited to combinations of the above micro-nutrients. -->
+<!-- *  No restriction on dose or duration. -->
+
+<!-- <span class="custom-paragraph-header">Excluded</span> -->
+<!-- *  Studies examining deficiency status without supplementation. -->
+<!-- *  Dietary modification alone. -->
+<!-- *  Herbal remedies or non-vitamin/mineral supplements. -->
+
+<!-- #### Comparators -->
+
+<!-- The following comparisons are eligible for inclusion in the review: -->
+
+<!-- 1.  Placebo -->
+<!-- 1.  Another eligible micro-nutrient -->
+<!-- 1.  Treatment as usual -->
+<!-- 1.  No treatment -->
+
+<!-- ### Outcomes {.appendix} -->
+
+<!-- Where multiple scales are reported, standardized mean differences (SMDs) will be calculated. If both change scores and endpoint scores are reported, change scores will be preferred where available. -->
+
+<!-- #### Primary Outcomes {.appendix} -->
+<!-- Our primary outcomes will be the change in depression and anxiety symptom severity as measured by validated scales. We will include all validated scales of depression and anxiety symptoms, including clinician-rated and self-report scales. If multiple scales are reported, we will preferentially choose scales such as Beck Depression Inventory or the Hamilton Depression Rating Scale for depression and the Beck Anxiety Inventory or the Hamilton Anxiety Rating Scale for anxiety. If multiple scales are reported and no clear preference can be established, we will use the scale with the largest number of studies reporting it. -->
+
+<!-- #### Secondary Outcomes {.appendix} -->
+<!-- *   Changes in micro-nutrient blood levels (if reported). -->
+<!-- *   Adverse effects. -->
+<!-- *   Intervention duration category (short-term <8 weeks; medium-term 2-6 months; long-term >6 months). -->
+<!-- *   Effect of dosage strength. -->
+
+<!-- Studies must report sufficient data for calculation of standardized mean differences (SMDs) for depression or anxiety symptom severity to be included in the primary analyses. -->
+
+<!-- ### Study Design -->
+
+<!-- <span class="custom-paragraph-header">Included</span> -->
+<!-- *  Randomized controlled trials (parallel or cluster) -->
+<!-- *  Crossover trials will be included if appropriate data from the first period are available prior to crossover -->
+
+
+<!-- <span class="custom-paragraph-header">Excluded</span> -->
+<!-- *  Nonrandomized trials. -->
+<!-- *  Observational studies. -->
+<!-- *  Animal studies. -->
+<!-- *  Reviews, meta-analyses, case reports, case series. -->
+<!-- *  Non–peer-reviewed publications. -->
+<!-- *  Studies without extractable outcome data. -->
+
+<!-- ### Information Sources and Search Strategy -->
+<!-- Databases searched: -->
+<!-- * Ovid MEDLINE -->
+<!-- * Embase -->
+<!-- * Web of Science -->
+<!-- * PsycINFO -->
+<!-- * Cochrane CENTRAL -->
+<!-- * ClinicalTrials.gov -->
+
+<!-- Search strategies combined controlled vocabulary and free-text terms for anxiety and depressive disorders with vitamin and mineral supplementation terms and randomized study filters. There is no restriction on language where feasible. -->
+
+<!-- ### Study Selection {.appendix} -->
+
+<!-- Abstracts will be reviewed by two reviewers for potential inclusion in the study. Disagreements will be handled by discussion. -->
+
+<!-- ### Data Extraction {.appendix} -->
+<!-- Two reviewers independently screened titles/abstracts and full texts according to prespecified PICOS criteria. Disagreements will be resolved through discussion or adjudication.  -->
+
+<!-- Data extracted will include: -->
+<!-- 1. Sample size -->
+<!-- 1. Population characteristics (age, percent male) -->
+<!-- 1. Baseline symptom severity (if reported) -->
+<!-- 1. Baseline micro-nutrient deficiency status (if reported) -->
+<!-- 1. Dose of micro-nutrients -->
+<!-- 1. Duration of study -->
+<!-- 1. Blinding status -->
+<!-- 1. Outcome measures -->
+<!-- 1. Risk-of-bias domains according to the Risk of Bias 1 -->
+
+<!-- The Covidence software ([](https://covidence.org)) software will be used for data extraction and management. -->
+
+<!-- ### Risk of Bias Assessment {.appendix} -->
+
+<!-- Risk of bias will be assessed using the Cochrane Risk of Bias 1 (RoB 1) tool. An overall risk-of-bias judgment will be derived for each study. -->
+
+<!-- Sensitivity analyses will be conducted including all studies while main studies will be restricted to studies at low overall risk of bias. -->
+
+<!-- ### Strategy for Data Synthesis {.appendix} -->
+<!-- We will provide a narrative synthesis describing study characteristics (population, diagnostic criteria, baseline severity and deficiency status where available), interventions (type, dose, duration), comparators, follow-up duration (excluding <4 weeks), and risk of bias. We will summarize network geometry and availability of direct comparisons, and describe how outcome scales/timepoints were harmonized. -->
+
+<!-- ### Quantitative Synthesis Planned {.appendix} -->
+<!-- Yes -->
+
+<!-- ### Effect measures {.appendix} -->
+<!-- Primary effect measure: standardized mean difference (SMD) for continuous depression and anxiety symptom scales. -->
+
+<!-- ### Statistical model {.appendix} -->
+<!-- Random-effects model (Bayesian random-effects NMA) to account for between-study heterogeneity. -->
+
+<!-- ### Statistical Software {.appendix} -->
+<!-- Primary analyses will be conducted in `R` using Bayesian NMA software (e.g., `multinma` and/or `Stan` via `cmdstanr`/`brms`), with supporting packages for data handling and visualization. -->
+
+<!-- ### Multi-arm Trials {.appendix} -->
+<!-- Multi-arm trials will be included and modeled accounting for the correlation between effect estimates within trials, using appropriate multi-arm likelihood specification (or equivalent multivariate structure) so that shared comparator arms do not lead to double counting -->
+
+<!-- ### Handling of Missing Data {.appendix} -->
+<!-- We will extract data preferentially from published results; when key statistics are missing (e.g., SDs), we will: -->
+<!-- *  derive SDs from SEs, CIs, p-values, or other reported statistics when possible; -->
+<!-- *  use recommended conversions (e.g., from change-score SDs if baseline/follow-up SDs available); -->
+<!-- *  contact authors when feasible. -->
+
+<!-- Studies that do not meet minimum reporting requirements for extraction will be excluded. -->
+
+<!-- ### Methods for network meta-analysis -->
+
+<!-- Bayesian random-effects NMA will be performed for depressive symptoms and anxiety symptoms (modeled separately). Nodes will represent individual micro-nutrients (vitamin D, B vitamins, vitamin C, magnesium, zinc, selenium, iron) and eligible combinations (modeled as separate nodes), consistent with eligibility criteria. -->
+
+<!-- Outcomes will be harmonized using SMD. The primary timepoint will be end of treatment / follow-up timepoint identified by each study -->
+
+<!-- ### Assessment of Transitivity -->
+<!-- We will assess transitivity by examining whether potential effect modifiers are similarly distributed across treatment comparisons in the network. Prespecified effect modifiers include: -->
+
+<!-- *  baseline symptom severity, -->
+<!-- *  baseline micro-nutrient deficiency status (when reported), -->
+<!-- *  duration of intervention / follow-up, -->
+<!-- *  risk of bias. -->
+
+<!-- We will summarize distributions overall and by comparison (e.g., tables/plots), and consider downgrading for indirectness when clear imbalances are present. -->
+
+<!-- ### Assessment of inconsistency -->
+<!-- We will assess inconsistency using: -->
+
+<!-- *  local approaches (e.g., node-splitting / side-splitting where feasible), and/or -->
+<!-- *  global approaches (e.g., design-by-treatment interaction or related global tests/diagnostics), depending on network connectivity and data sufficiency. -->
+<!-- *  Where inconsistency is detected, we will explore whether it is explained by effect modifiers (e.g., deficiency status, severity, duration) and/or study quality. -->
+
+<!-- ### Ranking methods -->
+<!-- If the network supports it, we will estimate posterior rank probabilities and summarize rankings (e.g., SUCRA or analogous Bayesian ranking summaries). Rankings will be interpreted cautiously, especially for sparse nodes and wide credible intervals. Ranking may not make sense depending on different populations and other factors---i.e., it may not make sense to rank vitamin D deficient populations to magnesium deficient populations. -->
+
+<!-- ### Pre-specified subgroup analyses -->
+
+<!-- Planned subsets include: -->
+<!-- *  Depression vs anxiety outcomes (separate primary networks/models). -->
+<!-- *  Restriction to low overall risk-of-bias studies -->
+<!-- *  Deficiency status subgrouping (deficient vs non-deficient/unclear), where reported. -->
+<!-- *  Baseline symptom subgrouping where baseline scales are reported -->
+
+<!-- ### Meta-regression plans -->
+<!-- Meta-regression analyses will be conducted if data permit (acknowledging these may be exploratory due to sparse data for some nodes), including: -->
+
+<!-- *  baseline symptom severity, -->
+<!-- *  baseline deficiency status, -->
+<!-- *  duration of follow-up/treatment -->
+<!-- *  standard error of intervention, -->
+<!-- *  country of study -->
+<!-- *  year of study -->
+<!-- *  percent male -->
+<!-- *  average age -->
+<!-- *  deficiency status -->
+<!-- *  population depression/anxiety status -->
+
+<!-- And other covariates that may be appropriate based on observed data and network structure. -->
+
+<!-- ### Assessment of heterogeneity {.appendix} -->
+
+<!-- We will estimate between-study heterogeneity ($\tau$) under a random-effects model and report posterior summaries (and, where feasible, prediction intervals). We will also examine heterogeneity via model fit/diagnostic checks and consider whether heterogeneity is reduced in low risk-of-bias analyses or explained by meta-regression covariates. -->
+
+<!-- ### Assessment of publication bias / small-study effects -->
+
+<!-- Where sufficient studies are available, we will use: -->
+
+<!-- *  comparison-adjusted funnel plots for NMA, -->
+<!-- *  and/or regression-based small-study effect assessments (as appropriate). -->
+
+<!-- Interpretation will be cautious given limited power in sparse networks and potential heterogeneity. -->
+
+<!-- ### Approach to assessing certainty (GRADE, CINeMA, etc.) -->
+
+<!-- We will assess certainty of evidence using CINeMA (Confidence in Network Meta-Analysis), evaluating within-study bias, indirectness, inconsistency, imprecision, heterogeneity, and publication bias, and summarizing confidence ratings for key comparisons. -->
+
+### Post-hoc analyses {.appendix}
+
+Given the restrictiveness of setting a whole population as deficient vs non-deficient, we will also consider meta-regression analyses using continuous measures of baseline deficiency where available such a estimated percent deficient. This will rely on the assumption of a log-Normal distribution to calculate these probabilities.
+
+Similarly for baseline depression and anxiety status, we will estimate percent of the population that is depressed or anxious at baseline using a log-Normal distribution.
+
+## Search Strategy and Study Selection {#app-search .appendix}
+### Full Search Strategy {#sec-search-strategy .appendix}
+
+test
+
+| filler | filler |
+|---|---|
+| filler | filler |
+
+more filler
+
+| filler | filler |
+|---|---|
+| filler | filler |
+
+more filler
+
+| filler | filler |
+|---|---|
+| filler | filler |
+
+### Inclusion and Exclusion Criteria  {.appendix}
+
+
+### List of Excluded Full-text Studies {.appendix}
+
+We excluded several studies at after the extraction phase for the reasons listed in the table below.
+
+::: {#tbl-excluded tbl-cap="List of studies excluded at the data extraction phase with reasons for exclusion."}
+
+| Study ID | Reason for Exclusion |
+|----------|----------------------|
+| Kennedy/2011/UK | multinutrient intervention |
+| Katta/2023/New Zealand | multinutrient intervention |
+| Mech/2016/USA | multinutrient intervention |
+| Kaviani/2020/Iran |  duplicate data |
+| Khajehnasiri/2015/Iran | duplicate data and also had treatments in the exclusion criteria |
+| Calissendorff/2015/Sweden | data not usable due to not reporting means in each group |
+| Muhihi/2022/Tanzania-USA | did not provide a usable depression or anxiety scale |
+
+
+:::
+
+## Study Characteristics and Coding Procedures {#app-study-char .appendix}
+
+### Data Tables  {.appendix}
+::: {.landscape}
+
+#### Baseline demographics  {#app-baseline .appendix}
+
+##### Low bias studies included in main analysis  {.appendix}
+```{r}
+#| label: tbl-baseline-low
+#| tbl-cap: "Baseline demographics of low bias studies. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
+comb_tab_low <- readRDS(here::here("outputs","overall","tables","ft","combined_demo_low_bias_table.rds"))
+
+comb_tab_low %>% knitr::knit_print()
+
+```
+
+<!-- ```{r} -->
+<!-- #| label: tbl-baseline-study-demographics-low -->
+<!-- #| tbl-cap: "Characteristics of low bias studies. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding." -->
+<!-- study_tab_low <- readRDS(here::here("outputs","overall","tables","study_demo_low_bias_table.rds")) -->
+
+<!-- study_tab_low %>%   knitr::knit_print() -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- #| label: tbl-baseline-pop-demographics-low -->
+<!-- #| tbl-cap: "Baseline demographics of population in low bias studies. Values are n (%) or mean (SD) where appropriate." -->
+<!-- pop_tab_low <- readRDS(here::here("outputs","overall","tables","pop_demo_low_bias_table.rds")) -->
+
+<!-- pop_tab_low %>%  knitr::knit_print() -->
+<!-- ``` -->
+
+```{r}
+#| label: tbl-comp-low
+#| tbl-cap: "Baseline demographics of low bias studies by comparison. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
+comb_tab_low.comp <- readRDS(here::here("outputs","overall","tables","ft","combined_demo_low_bias_table_comparison.rds"))
+
+comb_tab_low.comp %>%  knitr::knit_print()
+
+```
+
+<!-- ```{r} -->
+<!-- #| label: tbl-comp-study-demographics-low -->
+<!-- #| tbl-cap: "Characteristics of low bias studies by comparison. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding." -->
+<!-- study_tab_low.comp <- readRDS(here::here("outputs","overall","tables","ft","study_demo_low_bias_table_comparison.rds")) -->
+
+<!-- study_tab_low.comp  %>% knitr::knit_print() -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- #| label: tbl-comp-pop-demographics-low -->
+<!-- #| tbl-cap: "Baseline demographics of population in low bias studies by comparison. Values are n (%) or mean (SD) where appropriate." -->
+<!-- pop_tab_low.comp <- readRDS(here::here("outputs","overall","tables","ft","pop_demo_low_bias_table_comparison.rds")) -->
+
+<!-- pop_tab_low.comp  %>% knitr::knit_print() -->
+<!-- ``` -->
+
+##### All studies  {.appendix}
+```{r}
+#| label: tbl-baseline-all
+#| tbl-cap: "Baseline demographics of all studies. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
+comb_tab <- readRDS(here::here("outputs","overall","tables","ft","combined_demo_table.rds"))
+
+comb_tab %>%   knitr::knit_print()
+
+```
+
+
+<!-- ```{r} -->
+<!-- #| label: tbl-baseline-demographics-all -->
+<!-- #| tbl-cap: "Baseline demographics of included studies. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding." -->
+<!-- study_tab <- readRDS(here::here("outputs","overall","tables","ft", -->
+<!--                  "study_demo_table.rds")) -->
+
+<!-- (study_tab)   %>% knitr::knit_print() -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- #| label: tbl-baseline-pop-demographics-all -->
+<!-- #| tbl-cap: "Baseline demographics of population in all bias studies. Values are n (%) or mean (SD) where appropriate. Total sample size (N) percentages reflect percent of total population across all studies." -->
+<!-- pop_tab <- readRDS(here::here("outputs","overall","tables","ft","pop_demo_table.rds")) -->
+
+<!-- pop_tab   %>% knitr::knit_print() -->
+<!-- ``` -->
+
+
+```{r}
+#| label: tbl-comp-all
+#| tbl-cap: "Baseline demographics of all studies by comparison. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
+comb_tab.comp <- readRDS(here::here("outputs","overall","tables","ft","combined_demo_table_comparison.rds"))
+
+comb_tab.comp %>%  knitr::knit_print()
+
+```
+
+
+
+<!-- ```{r} -->
+<!-- #| label: tbl-comp-demographics-all -->
+<!-- #| tbl-cap: "Baseline demographics of included studies by comparison. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding." -->
+<!-- study_tab.comp <- readRDS(here::here("outputs","overall","tables","gt, -->
+<!--                  "study_demo_table_comparison.rds")) -->
+
+<!-- (study_tab.comp)   %>% knitr::knit_print() -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- #| label: tbl-comp-pop-demographics-all -->
+<!-- #| tbl-cap: "Baseline demographics of population in all bias studies. Values are n (%) or mean (SD) where appropriate. Total sample size (N) percentages reflect percent of total population across all studies." -->
+<!-- pop_tab.comp <- readRDS(here::here("outputs","overall","tables","ft","pop_demo_table_comparison.rds")) -->
+
+<!-- pop_tab.comp  %>% knitr::knit_print() -->
+<!-- ``` -->
+
+:::
+
+
+
+
+### Rating scales  {#app-rating-scales .appendix}
+
+The depression scales used across studies included `r to_sentence_oxford(depression_measures %>% filter(bias == "low") %>% pull(scale) %>% unique())`. The anxiety scales used included `r to_sentence_oxford(anxiety_measures %>% filter(bias == "low") %>% pull(scale) %>% unique())`. The frequency of each table are presented in the tables below.
+
+```{r}
+#| label: tbl-scale-depression
+#| tbl-cap: "Frequency of depression scales in included studies"
+
+depression_measures %>%
+  select(Name = scale, bias) %>% group_by(Name) %>% summarize('Frequency Overall' = n(), 'Frequency In Low Bias Studies' = sum(bias == "low"))  %>%  knitr::kable()
+```
+
+
+```{r}
+#| label: tbl-scale-anxiety
+#| tbl-cap: "Frequency of anxiety scales in included studies"
+
+anxiety_measures %>% select(Name = scale, bias) %>% group_by(Name) %>% summarize('Frequency Overall' = n(), 'Frequency In Low Bias Studies' = sum(bias == "low"))  %>%  knitr::kable()
+```
+
+
+### Coding decisions for data extraction  {.appendix}
+Most studies measured baseline depression status on the above validated scales and several studies measured baseline micro-nutrient status of the vitamin being repleted. However, to ease comparison between studies, we dichotomized these measures. For baseline depression status, we categorized studies as including a depressed population if the average baseline score on the primary depression scale used in the study met or exceeded the standard cutoff for mild depression. For baseline micro-nutrient status, we categorized studies as including a deficient population if they measured baseline levels of the vitamin being repleted and the average level was in the deficient range according to standard clinical cutoffs. These categorizations were used in subgroup and meta-regression analyses to evaluate potential effect modification by baseline depression and micro-nutrient status. These particular cutoffs are detailed in the tables below.
+
+``` {r}
+#| label: tbl-vitamin-cut
+#| tbl-cap: "Cutoff values used for vitamins in our study. These cutoffs were used to dichotomize baseline micronutrient status in subgroup and meta-regression analyses. For each vitamin, studies that measured baseline levels of that vitamin were categorized as including a deficient population if the average baseline level was below the cutoff value. The cutoffs were based on standard clinical thresholds for deficiency."
+#| 
+vit$vitamin_cutoff_tbl %>% 
+    filter(!(vitamin %in% c("rbc.B9", "homocysteine",
+                            "ferritin", "selenoproteinP",
+                            "cobalamin", "methylmalonate", "rbc.B9"))) %>% 
+    arrange(vitamin) %>% 
+  rename(value = cutoff_value) %>% 
+  rename(micronutrient = vitamin) %>% 
+  knitr::kable()
+
+```
+
+
+``` {r}
+#| label: tbl-psych-dx-cutoffs
+#| tbl-cap: "Cutoff values used for depression and anxiety scales in our study. These cutoffs were used to dichotomize baseline depression and anxiety status in subgroup and meta-regression analyses." 
+
+
+psych_dx_cutoffs <- data.frame(
+  scale = c(
+    "Beck Depression Inventory",
+    "von Zersen mood scale (ZMS)",
+    "PHQ-9",
+    "MADRS",
+    "BDI-II",
+    "HAM-D",
+    "HADS-D",
+    "DASS-21, depression",
+    "DASS-21, anxiety",
+    "CES-D",
+    "HAM-A",
+    "SIGH-SAD",
+    "BAI",
+    "Log BAI",
+    "EPDS",
+    "HADS-A",
+    "GDS",
+    "STAI-S",
+    "depression per HADS-D",
+    "SCAARED",
+    "MFQ",
+    "GAD-7",
+    "AUC BDI-II",
+    "AUC MADRS",
+    "HRS",
+    "Yasavage and Brink Depression Scale",
+    "BDI",
+    "GDS-15",
+    "MDI",
+    "STAI-T",
+    "SF-36 MH",
+    "SF-12 MCS",
+    "DASS-42, depression",
+    "DASS-42, anxiety",
+    "ΗDRS",
+    "HSCL-25",
+    "HADS-D >= 8",
+    "HADS-A >=8"
+  ),
+  cutoff = c(
+    14,
+    27,
+    10,
+    7,
+    14,
+    8,
+    8,
+    5,
+    4,
+    16,
+    8,
+    20,
+    8,
+    log(8),
+    10,
+    8,
+    10,
+    40,
+    8,
+    25,
+    27,
+    10,
+    14,
+    7,
+    18,
+    10,
+    10,
+    5,
+    20,
+    40,
+    -42,
+    -45.6,
+    10,
+    8,
+    8,
+    1.75,
+    8,
+    8
+  ),
+  direction = ">=",
+  diagnosis = c(
+    "depression",
+    "depression",
+    "depression",
+    "depression",
+    "depression",
+    "depression",
+    "depression",
+    "depression",
+    "anxiety",
+    "depression",
+    "anxiety",
+    "depression",
+    "anxiety",
+    "anxiety",
+    "depression",
+    "anxiety",
+    "depression",
+    "anxiety",
+    "depression",
+    "anxiety",
+    "depression",
+    "anxiety",
+    "depression",
+    "depression",
+    "anxiety",
+    "depression",
+    "depression",
+    "depression",
+    "depression",
+    "anxiety",
+    "depression",
+    "depression",
+    "depression",
+    "anxiety",
+    "depression",
+    "depression",
+    "depression",
+    "anxiety"
+  ),
+  stringsAsFactors = FALSE
+)
+
+psych_dx_cutoffs %>% 
+  filter((scale %in% depression_measures$scale) | scale %in% anxiety_measures$scale) %>% 
+  arrange(diagnosis, scale) %>% 
+  # gt::gt(groupname_col = "diagnosis") %>%
+  as_grouped_data(groups = "diagnosis") %>% 
+  flextable::flextable() %>% 
+knitr::knit_print()
+```
+
+Further, cross-over trials were permissible in our study but we only used the first period of randomization before cross-over to avoid carry-over effects. In studies with multiple active arms, we combined active arms together when appropriate to avoid double counting the placebo arm. In studies with multiple control arms, we selected the most appropriate control arm for comparison with the active arm(s) based on the study design and characteristics of the control arms. 
+
+### List of included studies  {.appendix}
+
+```{r}
+#| label: tbl-studies-main
+#| tbl-cap: "Included studies in the main meta-analysis."
+
+study_tab <- readRDS(here::here("outputs","overall","tables","ft",
+                 "study_level_demo_table_low.rds"))
+
+study_tab %>% knitr::knit_print()
+
+```
+
+### List of included studies in sensitivity analyses  {.appendix}
+
+```{r}
+#| label: tbl-studies
+#| tbl-cap: "Included studies in the meta-analysis. *Only studies with a low overall risk of bias are included in the main analysis. Studies with an unclear or high overall risk of bias are included in sensitivity analyses."
+
+study_tab <- readRDS(here::here("outputs","overall","tables","ft",
+                 "study_level_demo_table.rds"))
+
+study_tab %>% knitr::knit_print()
+
+```
+
+
+
+
+## Statistical Methods in Detail {#app-stats-detailed .appendix}
+
+<!-- Bayesian network meta-analyses allow for the incorporation of prior information (if any) as  -->
+### Measures of Treatment Effects {.appendix}
+The effect size for our studies was the standardized mean difference (SMD). This was selected because the included studies in our analysis use a variety of different depression and anxiety scales (See @app-rating-scales). We preferred utilizing regression estimates when available and relevant followed by gain scores and finally end point measures. To transform these into SMDs, we calculated the SMD following Hedge's g (Hedge year). When studies provided medians, interquartile ranges, and minima and maxima we calculated an estimate of the mean using the methods described in Wan et al. (2014). In most networks considered in the analysis, placebo was the reference treatment. In the antidepressant network, we used treatment with any kind of antidepressant (TCAs, SSRIs, SNRIs, etc.) as the reference treatment.
+
+Missing standard deviations were handled in a few ways when possible. First, some studies reported standard errors so these were transformed into standard deviations using the usual formula. Second, if both were missing but confidence intervals, t-values, or p-values were available we used the methods described in Section 7.7.3 of the Cochrane Handbook for Systematic Reviews (Higgins 2008). Finally, if only medians were available and the study reported either the interquartile range or range, we estimated the standard deviation following the method described in Wan et al. (2014).  
+
+### Network Meta-Analysis Model Specification {.appendix}
+
+We fitted our Bayesian network meta-analysis and meta-regression models using the `brms` package in `R` to interface with the Stan sampling language. We accounted for correlations between multi-arm studies by assuming a correlation parameter of 0.5 between arms of the same study.
+
+using the `brms` functionality for multivariate meta-analysis. We used weakly informative priors for all parameters and conducted sensitivity analyses to evaluate the impact of different prior choices on our results. The details of the model specification, including the likelihood, random effects structure, and priors, are described in the sections below.
+
+#### Likelihood {.appendix}
+The likelihood for our network meta-analysis model was specified as follows for each outcome (depression and anxiety:
+
+For all studies $i = 1, \dots, N$ and treatment arms $j = 1, \dots, J_{i}$, we observed effect sizes $y_{i,j}$ or the $i$-th study and $j$-th treatment arm with corresponding variances $\sigma_{i,j}^2$:
+
+$$ y_{i,1}, y_{i,2}, \ldots, y_{i,J_{i}} \sim \text{Multivariate Student-t}\left(\mathbf{\mu}_i, \Sigma_i, \nu \right),$$
+
+where $\mathbf{\mu}$ is the vector of true effect sizes for each treatment arm, $\Sigma_i$ is the covariance matrix for study $i$ that accounts for the within-study correlations between arms, and $\nu = 30$ is the degrees of freedom parameter for the Student-t distribution which allows for heavier tails to account for potential outliers. The covariance matrix $\Sigma_i$ was specified as $\sigma_{i,j}^2$ on the diagonal and $\sigma_{i,0}^2$ for the off-diagonal elements where $\sigma_{i,0}$ is the standard deviation of the reference arm for the trial. Note that $J_i$ is one less than the total number of arms in the trial, as the reference arm is not included in the likelihood.
+
+The vector $\mathbf{\mu}_i$ of true effect sizes for study $i$ corresponds to the treatment effects for each arm relative to a reference treatment (e.g., placebo) and was modeled as a function of the treatment effects, $\theta$ and random effects, $\upsilon$ as described in the next section. for example, for a study where the first arm compared treatment A to B, it's mean component would be equal to 
+$$ \theta_A - \theta_B + \upsilon_{i,1}. $$
+
+For the same arm in the same study, the mean for the effect modifier analysis including deficiency status and baseline depression/anxiety status would be calculated as
+<!-- $$ \theta_A - \theta_B + \alpha_A \cdot \mathbb{I}(\text{disease}_i = \text{yes") - \alpha_B \cdot \mathbb{I}(\text{disease}_i = \text{yes") + \delta_A \cdot \mathbb{I}(\text{deficient}_i = \text{yes") - \delta_B \cdot \mathbb{I}(\text{deficient} = \text{yes") +  \gamma_A \cdot \mathbb{I}(\text{disease}_i = \text{yes") \cdot \mathbb{I}(\text{disease}_i = \text{yes") - \gamma_B \cdot \mathbb{I}(\text{deficient}_i = \text{yes") \cdot \mathbb{I}(\text{disease}_i = \text{yes") + \upsilon_i$$ -->
+
+$$
+\begin{aligned}
+ \theta_A - \theta_B &+ \alpha_A \cdot \mathbb{I}(\text{disease}_i = \text{yes}) - \alpha_B \cdot \mathbb{I}(\text{disease}_i = \text{yes}) \\
+ &+ \delta_A \cdot \mathbb{I}(\text{deficient}_i = \text{yes}) - \delta_B \cdot \mathbb{I}(\text{deficient} = \text{yes}) \\
+ &+  \gamma_A \cdot \mathbb{I}(\text{disease}_i = \text{yes}) \cdot \mathbb{I}(\text{disease}_i = \text{yes}) \\
+ &- \gamma_B \cdot \mathbb{I}(\text{deficient}_i = \text{yes}) \cdot \mathbb{I}(\text{disease}_i = \text{yes}) + \upsilon_i
+\end{aligned}
+$$
+
+In our meta regression analysis, the same mean function would hold except we would also include confounders, $X$, in a standard linear regression term: $X\beta$.
+
+#### Random Effects Structure {.appendix}
+We specified a random effects structure to account for between-study heterogeneity in treatment effects. For each study $i$ with $J_i$ arms,
+
+$$  \upsilon_i \sim N(0, \tau^2 R_i),  $$
+where R is a $J_i \times J_i$ correlation matrix with 1's on the diagonal and $\rho$ for the off-diagonal elements, where $\rho$ is the assumed correlation between treatment effects within the same study. We set $\rho = 0.5$ based on previous literature and expert consensus on typical correlations in multi-arm trials. The parameter $\tau$ represents the between-study variance in treatment effects and was estimated from the data.
+
+#### Priors {.appendix}
+
+We set a prior on effect sizes of $\theta \sim N(0, 2.5^2)$ with the same prior on effect modifiers $\delta$ and $\alpha$. We took $\tau \sim N_+(0, 0.5^2)$, a half-normal prior which is commonly used for variance parameters in random effects.
+
+In our meta regression, we put a regularized prior as described in the BRMS documentation on $\beta$ to help prevent overfitting given the large number of covariates and relatively small number of studies (Carvalho, 2009; Piironen 2017):
+
+$$ \beta_1, \ldots \beta_K \sim \text{regularized-horseshoe}(\text{df} = 3, \text{global scale} = 0.1, \text{scale slab} = 1). $$
+
+Other parameters in the meta-regression were estimated as random effects, such as the effect of country of study and the effect of scale used, and these were given the same half-normal prior as $\tau$.
+
+#### Other details of meta-regression {.appendix}
+Several studies did not measure either sex or age, so we imputed the mean age and percent male in these studies. We utilized regression models in `brms` to jointly model our meta-regression as well as predict these missing covariates. To ease in sampling for Stan, we normalized continuous variables to have mean 0 and standard deviation of 1. 
+
+One important facet of the meta-regression is that we included an Egger regression term to account for potential small study effects and publication bias. This term is a function of the standard error of the effect size and allows us to evaluate whether there is evidence of small study effects in our data. We allowed this term to vary by country of study to account for potential differences in publication bias across different regions.
+
+#### Assessment of convergence {.appendix}
+
+To monitor convergence, we examined trace plots for all parameters and calculated the potential scale reduction factor (Rhat) for each parameter. We considered Rhat values below 1.05 as indicative of good convergence. We also examined the effective sample size for each parameter to ensure that we had sufficient sampling to obtain stable estimates.
+
+#### Software {.appendix}
+
+We utilize `R` version 4.5.1 for analyses. The `brms` package version 2.23.0 was used to fit the Bayesian network meta-analysis and meta-regression models, which interfaces with the Stan sampling language. We utilized the `cmdstanr` version 0.9.0.9000 backend to sample from the posterior distributions. The `tidyverse` suite of packages was used for data manipulation and visualization, and the `gt` package was used for creating tables.
+
+
+
+## Assessment of Quality {#app-trans .appendix}
+
+### Network geometry  {.appendix}
+The network between the full data differs from the low bias data in that all treatments are fully connected in a simple analysis, whereas in the low bias data antidepressant treatments are disconnected from the rest of the network. This is largely because there were no low bias studies comparing antidepressant treatment to placebo or to another micronutrient. The network geometry for the low bias data is presented in @fig-network.
+
+::: {#fig-full-network-dep layout-ncol=2}
+
+![](../depression/pdf/nma_network.pdf)
+
+![](../depression/pdf/nma_network_full.pdf)
+
+Network geometry for depression studies. Left panel is the network geometry for low bias studies; right panel is the network geometry for all studies.
+
+:::
+
+::: {#fig-full-network-anx layout-ncol=2}
+
+![](../anxiety/pdf/nma_network.pdf) 
+
+![](../anxiety/pdf/nma_network_full.pdf) 
+
+Network geometry for anxiety studies. Left panel is the network geometry for low bias studies; right panel is the network geometry for all studies.
+
+:::
+
+Given the suspected effect modification by baseline deficiency and depression/anxiety status, we also examined the network geometry broken out by these characteristics. The network geometry for low bias studies broken out by deficiency and depression/anxiety status is presented in @fig-network-def-dep and @fig-network-def-anx. We can see that some caution needs to be taken in interpreting simple analyses as some comparisons  are informed by studies with different distributions of baseline deficiency and depression/anxiety status. For example, the comparison of vitamin B9 to placebo is informed by a couple of studies in depressed and non-deficient populations across all data, but no studies in non-depressed or deficient populations.
+
+::: {#fig-network-def-dep}
+
+![](../depression/pdf/nma_def_and_dep_networks_low_bias.pdf)
+
+Network geometry for low bias studies broken out by deficiency and depression status. 
+
+:::
+
+::: {#fig-network-def-anx}
+
+![](../anxiety/pdf/nma_def_and_dep_networks_low_bias.pdf)
+
+Network geometry for low bias studies broken out by deficiency and anxiety status. 
+
+:::
+
+### Risk of bias assessment {#sec-rob .appendix}
+
+::: {#fig-traffic-1}
+
+![](../overall/pdf/rob_first_half_traffic_light.pdf){width=8.5in}
+
+:::
+
+::: {#fig-traffic-2}
+
+![](../overall/pdf/rob_second_half_traffic_light.pdf){width=8.5in}
+
+:::
+
+### Contribution Matrices  {.appendix}
+```{r}
+#| label: tbl-contribution-dep
+#| tbl-cap:  "Contribution matrix for depression scales in low bias studies. The contribution of each study to the overall network meta-analysis estimates is shown as a percentage. The rows correspond to the comparisons in the network meta-analysis and the columns correspond to the individual studies. The values in the table represent the percentage contribution of each study to each comparison."
+contribution.mat.dep <- readRDS(here::here("outputs","depression","tables","ft","contribution_matrix_low_bias.rds"))
+
+contribution.mat.dep %>%  knitr::knit_print()
+
+```
+
+```{r}
+#| label: tbl-contribution-anx
+#| tbl-cap: "Contribution matrix for anxiety scales in low bias studies. The contribution of each study to the overall network meta-analysis estimates is shown as a percentage. The rows correspond to the comparisons in the network meta-analysis and the columns correspond to the individual studies. The values in the table represent the percentage contribution of each study to each comparison."
+
+contribution.mat.anx<- readRDS(here::here("outputs","anxiety","tables","ft","contribution_matrix_low_bias.rds"))
+
+contribution.mat.anx %>%  knitr::knit_print()
+
+```
+
+### Assessment of Transitivity  {.appendix}
+
+The assumption of transitivity was evaluated by examining whether potential effect modifiers were similarly distributed across treatment comparisons. Based on clinical and methodological considerations, we identified baseline micro-nutrient deficiency status, baseline depression/anxiety severity, age, and sex as effect modifiers.
+
+We summarized the distribution of these characteristics across treatment comparisons and visually inspected network diagrams stratified by deficiency and depression status. In addition, meta-regression models incorporating deficiency status and depression status were fitted to assess whether treatment effects varied systematically according to these characteristics. Node splitting further assessed inconsistency between direct and indirect evidence for comparisons with both direct and indirect evidence.
+
+```{r}
+#| label: fig-age-trans-low-inter
+#| warning: false
+#| message: false
+#| tbl-cap: "Boxplot of age distribution across interventions in low bias studies. The distribution of age across interventions is relatively similar."
+data %>% filter(bias == "low") %>% 
+  ggplot(aes(x = intervention, y = age)) +
+  geom_point(
+  position = position_jitter(width = 0.15, height = 0),
+  alpha = 0.6
+)  +
+  vit$theme_vit() +
+    theme(
+        axis.text.x = element_text(
+            angle = 45,
+            hjust = 1
+        ),
+        plot.margin = margin(t = 5, r = 5, b = 0, l = 20)
+        ) + ylab("Age") +xlab("")
+
+```
+
+```{r}
+#| label: fig-sex-trans-low-inter
+#| warning: false
+#| message: false
+data %>% filter(bias == "low") %>% 
+  ggplot(aes(x = intervention, y = male * 100)) +
+  geom_point(
+  position = position_jitter(width = 0.15, height = 0),
+  alpha = 0.6
+)  +
+  vit$theme_vit() +
+    theme(
+        axis.text.x = element_text(
+            angle = 45,
+            hjust = 1
+        ),
+        plot.margin = margin(t = 5, r = 5, b = 0, l = 20)
+        )  + ylab("Pct. male") + xlab("")
+
+```
+
+```{r}
+#| label: fig-def-trans-low-inter
+#| warning: false
+#| message: false
+data %>% 
+  filter(bias == "low") %>% 
+  mutate(def = forcats::fct_recode(def, "unknown" = "NA" )) %>% 
+  mutate(def = forcats::fct_relevel(def, "unknown","no","yes")) %>%
+  rename(deficiency = def) %>% 
+    ggplot(aes(x = intervention, fill = deficiency, group = deficiency)) +
+    geom_bar(position = "fill") + scale_fill_manual(values = vit$def_colors) +
+    scale_y_continuous(labels = scales::percent_format(),
+                       expand = c(0,0))+
+  vit$theme_vit() +
+    theme(
+        axis.text.x = element_text(
+            angle = 45,
+            hjust = 1
+        ),
+        plot.margin = margin(t = 5, r = 5, b = 5, l = 10),
+        panel.grid.major.x = element_blank(),
+        legend.position = "bottom",
+    legend.margin = margin(t = -20),
+    legend.box.margin = margin(t = -20)
+        ) +
+  ylab("Pct. trials") + xlab("")
+
+```
+
+```{r}
+#| label: fig-dep-trans-low-inter
+#| warning: false
+#| message: false
+data %>% filter(bias == "low") %>% mutate(depressed = factor(depressed, levels = 1:0, labels = c("no","yes"))) %>% 
+    ggplot(aes(x = intervention, fill = depressed, group = depressed)) +
+    geom_bar(position = "fill") + scale_fill_manual(values = c("grey80","grey20")) +
+    scale_y_continuous(labels = scales::percent_format(),
+                       expand = c(0,0))+
+  vit$theme_vit() +
+    theme(
+        axis.text.x = element_text(
+            angle = 45,
+            hjust = 1
+        ),
+        plot.margin = margin(t = 5, r = 5, b = 5, l = 10),
+        panel.grid.major.x = element_blank(),
+        legend.position = "bottom",
+    legend.margin = margin(t = -20),
+    legend.box.margin = margin(t = -20)
+        )  +xlab("") + ylab("Pct. trials")
+
+```
+
+```{r}
+#| label: fig-dep-trans-low-inter-pct
+#| warning: false
+#| message: false
+data %>% filter(bias == "low") %>% 
+    select(intervention, pct_dep) %>% 
+    ggplot(aes(x = intervention, y = pct_dep * 100)) +
+  geom_point(
+  position = position_jitter(width = 0.15, height = 0),
+  alpha = 0.6
+)  +
+  vit$theme_vit() +
+    theme(
+        axis.text.x = element_text(
+            angle = 45,
+            hjust = 1
+        ),
+        plot.margin = margin(t = 5, r = 5, b = 0, l = 20)
+        )  + ylab("Estimated pct. depressed") + xlab("")
+
+```
+
+```{r}
+#| label: fig-anx-trans-low-inter
+#| warning: false
+#| message: false
+data %>% filter(bias == "low") %>% mutate(anxiety = factor(anxiety, levels = 1:0, labels = c("no","yes"))) %>% 
+    ggplot(aes(x = intervention, fill = anxiety, group = anxiety)) +
+    geom_bar(position = "fill") + scale_fill_manual(values = c("grey80","grey20")) +
+    scale_y_continuous(labels = scales::percent_format(),
+                       expand = c(0,0))+
+  vit$theme_vit() +
+    theme(
+        axis.text.x = element_text(
+            angle = 45,
+            hjust = 1
+        ),
+        plot.margin = margin(t = 5, r = 5, b = 5, l = 10),
+        panel.grid.major.x = element_blank(),
+        legend.position = "bottom",
+    legend.margin = margin(t = -20),
+    legend.box.margin = margin(t = -20)
+        ) +xlab("") + ylab("Pct. trials")
+
+```
+
+```{r}
+#| label: fig-anx-trans-low-inter-pct
+#| warning: false
+#| message: false
+
+## outcome <- "anxiety"
+## fit_pcts_approx <- readRDS(
+##       file = here::here("outputs", 
+##                         "saved_models", 
+##                         outcome,  
+##                         "sensitivity",
+##                                    glue::glue("model_", 
+##                                               outcome, 
+##                                               "_low_bias_data_by_pct_def_and_dep.rds")))
+## 
+## fit_pcts_approx %>% 
+
+data %>% filter(bias == "low") %>% 
+    select(intervention, pct_anx) %>% 
+    ggplot(aes(x = intervention, y = pct_anx * 100)) +
+  geom_point(
+  position = position_jitter(width = 0.15, height = 0),
+  alpha = 0.6
+)  +
+  vit$theme_vit() +
+    theme(
+        axis.text.x = element_text(
+            angle = 45,
+            hjust = 1
+        ),
+        plot.margin = margin(t = 5, r = 5, b = 5, l = 20)
+        ) + ylab("Estimated pct. anxious") + xlab("")
+
+```
+
+When examining the effect of placebo over time, there did not appear to be any major trend in response to placebo over time either by gain score or final endpoint mean. We ran random effects models adjusting for scale used and attempted to use varying slopes by scale but the variance of the slope random effect was estimated to be zero. Overall, we found very small changes in placebo response over time that were not statistically significant. On average, the end points trended downward while the gain scores trended upward. The mean placebo response over time is presented in  @fig-placebo-endpoint and @fig-placebo-gain. 
+
+::: {#fig-placebo-endpoint}
+
+![](../depression/pdf/placebo_effects_over_time.pdf)
+
+The mean end score of placebo arms by year of publication for placebo arms. The points are the observed points for placebo arms in studies included in our main and sensitivity analyses with and endpoint available. The line is the predicted mean from a random effects meta-regression model adjusting for scale used. There does not appear to be a major trend in placebo response over time.
+
+:::
+
+::: {#fig-placebo-gain}
+
+![](../depression/pdf/placebo_effects_over_time.pdf)
+
+The mean gain score of placebo arms by year of publication for placebo arms. The points are the gain scores for placebo arms in studies included in our main and sensitivity analyses with a gain score available. The line is the predicted mean from a random effects meta-regression model adjusting for scale used. There does not appear to be a major trend in placebo response over time.
+
+:::
+
+### Reporting bias  {.appendix}
+
+#### Funnel plots for main analysis
+We assessed reporting bias by examining funnel plots both for the simple model without effect modification and for the model including effect modification by baseline deficiency and depression/anxiety status. The funnel plots for the simple model are presented in @fig-funnel-dep and @fig-funnel-anx. The funnel plots for the model including effect modification are presented in @fig-funnel-dep-mod and @fig-funnel-anx-mod.
+
+::: {#fig-funnel-dep}
+
+![](../depression/pdf/funnel_plot.pdf)
+
+Contour enhanced funnel plot for effects on depression outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on simple model incorporating only treatment effects as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+::: {#fig-funnel-anx}
+
+![](../anxiety/pdf/funnel_plot.pdf)
+
+Contour enhanced funnel plot for effects on anxiety outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on simple model incorporating only treatment effects as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+::: {#fig-funnel-dep-mod}
+
+![](../depression/pdf/funnel_plot_by_def_centered_low_bias_only_with_contours.pdf)
+
+Contour enhanced funnel plot for effects on depression outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+::: {#fig-funnel-anx-mod}
+
+![](../anxiety/pdf/funnel_plot_by_def_centered_low_bias_only_with_contours.pdf)
+
+Contour enhanced funnel plot for effects on anxiety outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+Based on the funnel plots, there is some evidence of asymmetry in the simple model for depression and a anxiety outcomes, which may suggest the presence of small study effects or publication bias. The models incorporating baseline disease (depression/anxiety) and deficiency status appear more symmetric but still appear to have outliers. Thus, we also examined funnel plots by intervention to further explore potential sources of asymmetry. The funnel plots for the simple model by intervention are presented in @fig-funnel-dep-by-inter and @fig-funnel-anx-by-inter. The funnel plots for the model including effect modification by intervention are presented in @fig-funnel-dep-mod-by-inter and @fig-funnel-anx-mod-by-inter.
+
+::: {#fig-funnel-dep-by-inter}
+
+![](../depression/pdf/funnel_plot_by_intervention_centered.pdf)
+
+Contour enhanced funnel plot for effects on depression outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on a simple model incorporating only treatment effects and study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+::: {#fig-funnel-anx-by-inter}
+
+![](../anxiety/pdf/funnel_plot_by_intervention_centered.pdf)
+
+Contour enhanced funnel plot for effects on anxiety outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on a simple model incorporating only treatment effects and study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+::: {#fig-funnel-dep-mod-by-inter}
+
+![](../depression/pdf/funnel_plot_by_def_centered_low_bias_only_with_contours_facet.pdf)
+
+Contour enhanced funnel plot for effects on depression outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+::: {#fig-funnel-anx-mod-by-inter}
+
+![](../anxiety/pdf/funnel_plot_by_def_centered_low_bias_only_with_contours_facet.pdf)
+
+Contour enhanced funnel plot for effects on anxiety outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+#### Funnel plots for all data
+
+We also examined funnel plots for all data to assess reporting bias in the full dataset. The funnel plots for the simple model in all data are presented in @fig-funnel-dep-all and @fig-funnel-anx-all. The funnel plots for the model including effect modification in all data are presented in @fig-funnel-dep-mod-all and @fig-funnel-anx-mod-all.
+
+::: {#fig-funnel-dep-all}
+
+![](../depression/pdf/funnel_plot_high.pdf)
+
+Contour enhanced funnel plot for effects on depression outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on simple model incorporating only treatment effects as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+::: {#fig-funnel-anx-all}
+
+![](../anxiety/pdf/funnel_plot_high.pdf)
+
+Contour enhanced funnel plot for effects on anxiety outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on simple model incorporating only treatment effects as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+::: {#fig-funnel-dep-mod-all}
+
+![](../depression/pdf/funnel_plot_by_def_centered_with_contours.pdf)
+
+Contour enhanced funnel plot for effects on depression outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+::: {#fig-funnel-anx-mod-all}
+
+![](../anxiety/pdf/funnel_plot_by_def_centered_with_contours.pdf)
+
+Contour enhanced funnel plot for effects on anxiety outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+
+:::
+
+#### Publication bias assessment by country {.appendix}
+
+In this section we present the evidence from our meta-regression analyses as to whether there are any country level effects (1) in general and (2) with publication bias. We utilize a Egger regression (regression of the standard error of estimates on the outcome) with a random effect by country to assess whether there is evidence of small study effects by country. We also present funnel plots highlighting studies from Iran, which had the largest number of studies and thus may be driving any observed small study effects. The results of the meta-regression analyses are presented in @fig-country and the funnel plots are presented in @fig-funnel-country-dep and @fig-funnel-country-anx. 
+
+
+:::  {#fig-country}
+
+![](../depression/pdf/bias_regression_country_effects.pdf)
+
+![](../anxiety/pdf/bias_regression_country_effects.pdf)
+
+In these plots we present the coefficient for the random intercept for country and the random slopes by country for the Egger regression model. The coefficient for the intercept can be interpreted as the average difference in standardized mean differences (SMD) to be expected for the given country, while the coefficients correspond to the decrease in SMD expected for each unit change in standard error for each country. In depression studies, there is some evidence that there may be a small study effect that is larger in Iran (negative slope coefficient for Iran). In anxiety studies, there is no evidence of a small study effect on average across all countries (intercept coefficient is close to zero) and no evidence that this small study effect varies by country (slope coefficients are close to zero).
+
+:::
+
+
+::: {#fig-funnel-country-dep}
+![](../depression/pdf/funnel_plot_iran_studies_highlighted.pdf)
+
+Funnel plot with Iran studies highlighted for depression outcomes. The regression line corresponds to the predicted effect for these studies based on the Egger regression model. There is some evidence of asymmetry in the funnel plot for depression outcomes, which may be driven by studies from Iran. The regression line suggests that there may be a small study effect in these studies, with smaller studies showing larger effects.
+
+:::
+
+::: {#fig-funnel-country-anx}
+
+![](../anxiety/pdf/funnel_plot_iran_studies_highlighted.pdf)
+
+Funnel plot with Iran studies highlighted for anxiety outcomes. The regression line corresponds to the predicted effect for these studies based on the Egger regression model. It appears that Iranian studies may be more variable than one would predict but that this variability is not systematically related to the standard error of the studies, which would be expected in the presence of small study effects. 
+
+:::
+
+::: {#fit-funnel-debias}
+
+![](../depression/pdf/funnel_plot_debiasing_regression_adjusted.pdf)
+
+![](../anxiety/pdf/funnel_plot_debiasing_regression_adjusted.pdf)
+
+Contour enhanced funnel plot with studies centered by meta-regression adjusted estimates  ($\hat{\mu}$) for depression and anxiety outcomes. Compared to the funnel plots above, there appear to be fewer outliers. SMD = Standardized mean difference.
+
+:::
+
+::: {#fit-funnel-debias-by-intervention}
+
+![](../depression/pdf/funnel_plot_by_intervention_debiased.pdf)
+
+![](../anxiety/pdf/funnel_plot_by_intervention_debiased.pdf)
+
+Contour enhanced funnel plot by intervention with studies centered by meta-regression adjusted estimates ($\hat{\mu}$) for depression and anxiety outcomes. Compared to the funnel plots above, there appear to be fewer outliers. SMD = Standardized mean difference.
+
+:::
+
+
+### Inconsistency assessment  {.appendix}
+The assessment of inconsistency involved comparing direct and indirect evidence for each comparison in the network. This was done in two ways.
+
+First, a design-by-treatment interaction model was fitted to the data, which tests for inconsistency across the entire network. If there was a significant design-by-treatment interaction, this was considered evidence of inconsistency in the network.
+
+This was done using node-splitting models, which separate the evidence for a particular comparison into direct and indirect components and test for differences between them. If there was a significant difference between the direct and indirect estimates for a comparison, this was considered evidence of inconsistency. The results of the node-splitting analyses are presented in @fig-node-split-dep and @fig-node-split-anx.
+
+```{r}
+#| label: tbl-loo-ume-dep
+#| tbl-cap: "Comparison of design-by-treatment interaction (Unrestricted Model of Effects) and connected model (simple model) via leave-one-out assessment of model fit. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through fourth columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses. In all cases, the network model fits better. The deficiency by depression status model was not estimated with just Unclear/Low bias data."
+loo_ume_dep <- readRDS(here::here("outputs","depression","tables","ft","loo_compare_model_tab.rds"))
+
+loo_ume_dep %>%  knitr::knit_print()
+## "Comparison of Model Fit by Bias. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through third columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses."
+```
+
+```{r}
+#| label: tbl-loo-ume-anx
+#| tbl-cap: "Comparison of design-by-treatment interaction (Unrestricted Model of Effects) and connected model (simple model) via leave-one-out assessment of model fit. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through fourth columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses. The deficiency by anxiety status model was not estimated with just Unclear/Low bias data."
+loo_ume_anx <- readRDS(here::here("outputs","depression","tables","ft","loo_compare_model_tab.rds"))
+
+loo_ume_anx %>%  knitr::knit_print()
+## "Comparison of Model Fit by Bias. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through third columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses."
+```
+
+::: {#fig-node-split-dep}
+
+![](../depression/pdf/inconsistency_low_bias.pdf)
+
+![](../depression/pdf/inconsistency_some_and_low_bias.pdf)
+
+![](../depression/pdf/inconsistency_all_bias.pdf)
+
+Node-splitting analyses for depression outcomes. Each plot corresponds to a comparison in the network with both direct and indirect evidence. The x-axis shows the difference between the direct and indirect estimates for that comparison, with 95% credible intervals. If the credible interval includes zero, this suggests that there is no significant inconsistency between the direct and indirect evidence for that comparison.
+None of the nodes showed significant inconsistency.
+:::
+
+
+::: {#fig-node-split-anx}
+
+![](../anxiety/pdf/inconsistency_all_bias.pdf)
+
+
+Node-splitting analyses for anxiety outcomes. Each plot corresponds to a comparison in the network with both direct and indirect evidence. The x-axis shows the difference between the direct and indirect estimates for that comparison, with 95% credible intervals. If the credible interval includes zero, this suggests that there is no significant inconsistency between the direct and indirect evidence for that comparison. In anxiety studies, there were no nodes available for splitting in low bias and unclear/low bias data and only one node available for splitting in all data, which did not show significant inconsistency.
+
+:::
+
+### Heterogeneity assessments  {.appendix}
+Heterogeneity was assessed by examining the posterior distribution of the heterogeneity parameter ($\tau$) from the network meta-analysis models. The mean and 95% credible interval for $\tau$ are reported in the results section. A larger value of $\tau$ indicates greater heterogeneity between studies. 
+
+To get a sense of the scale of heterogeneity, we also report the 95% prediction interval for the treatment effects, which incorporates both the uncertainty in the estimated treatment effects and the heterogeneity between studies. If the prediction interval is wide and includes both clinically meaningful benefits and harms, this suggests that there is substantial heterogeneity in the treatment effects across studies. We set a minimal clinically important difference (MCID) of 0.5 standardized mean difference for both depression and anxiety outcomes, based on previous literature on the interpretation of standardized mean differences in mental health research (e.g., Cuijpers et al., 2014; Furukawa et al., 2014). If the prediction interval includes values greater than 0.5 or less than -0.5, this suggests that there is substantial heterogeneity in the treatment effects across studies.
+
+::: {#fig-heterogeneity-dep }
+
+![](../depression/pdf/heterogeneity_comparison_low_bias.pdf)
+
+Heterogeneity of low bias data for various models assessing the effects of micro-nutrients on depression. The models are a simple network model (simple), an interaction model accounting for depression and deficiency status (deficiency vs. depressed), and a model excluding Iranian studies. Heterogeneity decreases with the interaction model, suggesting that some of the heterogeneity may be explained by differences in baseline depression and deficiency status across studies. Heterogeneity also decreases with the exclusion of Iranian studies, suggesting that some of the heterogeneity may be explained by differences in study characteristics or populations in Iranian studies compared to other studies.
+:::
+
+
+::: {#fig-heterogeneity-anx }
+
+![](../anxiety/pdf/heterogeneity_comparison_low_bias.pdf)
+
+Heterogeneity of low bias data for various models assessing the effects of micro-nutrients on anxiety The models are a simple network model (simple), an interaction model accounting for anxiety and deficiency status (deficiency vs. depressed), and a model excluding Iranian studies. Heterogeneity increases somewhat with the interaction model, perhaps suggesting the extra covariates are adding noise. Heterogeneity decreases, however, with the exclusion of Iranian studies, suggesting that some of the heterogeneity may be explained by differences in study characteristics or populations in Iranian studies compared to other studies.
+:::
+
+
+
+::: {#fig-prediction-interval-dep}
+
+![](../depression/pdf/simple_model_low_bias_with_prediction_intervals.pdf)
+
+Prediction intervals for the main model in the paper assessing the effects of micro-nutrients on depression. The plot shows the estimated treatment effects (standardized mean differences) for each comparison in the network meta-analysis, along with 95% credible intervals (in black) and 95% prediction intervals (in red). The prediction intervals are wider than the credible intervals, reflecting the additional uncertainty due to heterogeneity between studies. If the prediction interval includes values greater than 0.5 or less than -0.5, this suggests that there is substantial heterogeneity in the treatment effects across studies.
+:::
+
+
+::: {#fit-prediction-interval-anx}
+
+![](../anxiety/pdf/simple_model_low_bias_with_prediction_intervals.pdf)
+
+Prediction intervals for the main model in the paper assessing the effects of micro-nutrients on anxiety The plot shows the estimated treatment effects (standardized mean differences) for each comparison in the network meta-analysis, along with 95% credible intervals (in black) and 95% prediction intervals (in red). The prediction intervals are wider than the credible intervals, reflecting the additional uncertainty due to heterogeneity between studies. If the prediction interval includes values greater than 0.5 or less than -0.5, this suggests that there is substantial heterogeneity in the treatment effects across studies.
+
+:::
+
+## Additional results {.appendix}
+
+### Effects of depression outcomes {.appendix}
+
+#### Tables of effects of micronutrients on depression outcomes  {.appendix}
+
+In the main analysis we present forest plots of the effect of micro-nutrients. Here we also include tables of the effects in @tbl-dep-low-bias.
+
+```{r}
+#| label: tbl-dep-low-bias
+#| tbl-cap: "Table of depression treatments compared to placebo. The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+
+dep_results %>% rename(Intervention = .trt) %>% 
+  filter(.observed) %>% select(-.observed) %>% 
+  ## mutate(`Estimate (95% CrI)` = paste0(round(Estimate,digits=2), " (", round(`q2.5%`,digits=2),", ", round(`q97.5%`,digits = 2) ,")")) %>%
+  ## select(Intervention, `Estimate (95% CrI)`) %>%
+  ## knitr::kable(digits = 2)
+  # select(Intervention, Estimate, `q2.5%`, `q97.5%`) %>%
+  flextable_fmt() %>% 
+  # gt::gt() %>% 
+  # gt::cols_merge(
+  #   columns = c(Estimate, `q2.5%`, `q97.5%`),
+  #   pattern = "{1} ({2}, {3})"
+  # ) %>% 
+  # gt::cols_label(Estimate = "Estimate (95% CrI)") %>%
+  # gt::fmt_number() %>% 
+  knitr::knit_print()
+
+```
+
+#### Effects of micronutrients on depression outcomes by baseline disesase and deficiency  {.appendix}
+
+##### Low bias data
+In the main analysis, we presented forest plots only for vitamin D of the effect of micro-nutrients by baseline disease and deficiency status. Here we also include the tables of the effects in @tbl-dep-mod-low-bias.
+
+
+::: {#fig-dep-mod-low}
+
+![](../depression/pdf/deficiency_summary_low_bias.pdf)
+
+Forest plot for the effect of micronutrients broken down by baseline disease, deficiency, and bias of study. SMD = Standardized mean difference. Estimates with very large intervals (e.g., B9 and B9/Iron) are based on the prior as the placebo effect is not identified.
+
+:::
+
+```{r}
+#| label: tbl-dep-mod-low-bias
+#| tbl-cap: "Table of depression treatments compared to placebo for low bias data by disease and deficiency status. The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+
+readRDS(
+  glue::glue("../depression/tables/gt/nma_depression_deficiency_table_low_bias.rds")
+        ) %>% 
+  knitr::knit_print()
+
+
+
+```
+
+##### All data by deficiency and depression status
+In our sensitivity analysis, we included all data with slopes for treatment effect allowed to vary by bias level. Results presented in @tbl-dep-mod-all-bias. Vitamin D estimates have been presented as forest plots in @fig-dep-mod-all-D.
+
+::: {#fig-dep-mod-all-D}
+
+![](../depression/pdf/deficiency_plots_vitamin_D.pdf)
+
+Forest plot for the effect of vitamin D on depression broken down by baseline disease, deficiency, and bias of study. SMD = Standardized mean difference.
+
+:::
+
+
+```{r}
+#| label: tbl-dep-mod-all-bias
+#| tbl-cap: "Table of depression treatments compared to placebo for all data by disease (depression yes or no) and deficiency status. The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+
+outcome <- "depression"
+outcome_label <- "depressed"
+
+## readRDS(
+##       here::here("outputs", "saved_models", outcome,
+##                  glue::glue("model_", 
+##                             outcome, 
+##                             "_all_data_by_deficiency_depression_and_bias.rds"))
+##     ) %>% 
+##       vit$summary_brms_nma(keep = c(".trt","def",outcome_label,"bias")) %>% 
+##       mutate(!!outcome_label := if(!is.factor(.data[[outcome_label]]) && is.numeric(.data[[outcome_label]])) {factor(.data[[outcome_label]], levels = 1:0, labels = c("yes", "no"))} else {.data[[outcome_label]]}) %>%
+##       mutate(!!outcome_label := forcats::fct_relevel(.data[[outcome_label]], "yes","no")) %>% 
+##       mutate(def = forcats::fct_recode(as.factor(def), "unknown" = "NA")) %>%
+##       mutate(def = forcats::fct_relevel(def, "unknown", "no","yes")) %>%
+##       rename(deficiency = def)  %>% 
+##       mutate(bias = forcats::fct_recode(bias,
+##                                         "unclear" = "some concerns")) %>% 
+##       mutate(bias = forcats::fct_relevel(bias, "low", "unclear", "high")) %>% 
+##         summary() %>% 
+##         arrange(.trt, .data[[outcome_label]], deficiency, bias) %>% 
+##       
+##       select(Intervention = .trt,dplyr::any_of(outcome_label), deficiency, bias, Estimate, `q2.5%`, `q97.5%`) %>%
+##       gt::gt() %>% 
+##       gt::cols_merge(
+##         columns = c(Estimate, `q2.5%`, `q97.5%`),
+##         pattern = "{1} ({2}, {3})"
+##       ) %>% 
+##       gt::cols_label(Estimate = "Estimate (95% CrI)") %>%
+##       gt::fmt_number() %>% 
+##       knitr::knit_print()
+      
+
+readRDS(glue::glue("../depression/tables/gt/nma_depression_deficiency_table_all_data.rds")) %>% 
+  knitr::knit_print()
+```
+
+#### Augmentation of Antidepressants  {.appendix}
+
+Here we present the results of the network meta-analysis assessing the effects of micro-nutrients as augmentation to antidepressants in low bias data. The results are presented in @fig-augmentation-dep and @tbl-agumentation-dep. As a reminder, this network is disconnected from the other low bias studies.
+
+::: {#fig-augmentation-dep}
+
+![](../depression/pdf/relative_effects_low_bias_ssri_only.pdf)
+
+Relative effects of micro-nutrients as augmentation to antidepressants for depression outcomes. The plot shows the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered by effect size, with the most effective treatments at the top. The vertical dashed line represents no effect (SMD = 0). Treatments with credible intervals that do not include zero are considered to have a statistically significant effect compared to placebo.
+
+:::
+
+```{r}
+#| label: tbl-augmentation-dep
+#| tbl-cap: "Table of depression treatments compared to placebo for studies comparing augmentation to antidepressants The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+
+fit_ssri_dep %>% 
+  vit$summary_brms_nma(keep = ".trt") %>% 
+  summary() %>%
+  filter(.observed) %>% select(-.observed) %>% 
+  rename(Intervention = .trt) %>% 
+  ## mutate(`Estimate (95% CrI)` = paste0(round(Estimate,digits=2), " (", round(`q2.5%`,digits=2),", ", round(`q97.5%`,digits = 2) ,")")) %>%
+  ## select(Intervention, `Estimate (95% CrI)`) %>%
+  ## knitr::kable(digits = 2)
+  # select(Intervention, Estimate, `q2.5%`, `q97.5%`) %>%
+  #  gt::gt() %>% 
+  # gt::cols_merge(
+  #   columns = c(Estimate, `q2.5%`, `q97.5%`),
+  #   pattern = "{1} ({2}, {3})"
+  # ) %>% 
+  # gt::cols_label(Estimate = "Estimate (95% CrI)") %>%
+  # gt::fmt_number() %>% 
+  flextable_fmt() %>% 
+  knitr::knit_print()
+```
+
+#### Cumulative ranking plots
+Cumulative ranking plots for deficient populations do not make sense; however, they may have utility for non-deficient populations or populations in which the deficiency status is unknown. Thus, we present combinations of depression status and deficiency status other than in deficient populations.
+
+::: {#fig-cumulative-ranking-dep-no-def}
+
+![](../depression/pdf/treatment_ranks_low_bias_data_no_def_dis.pdf)
+
+Cumulative probability that a treatment has a rank as high or higher than the current rank in depressed, non-deficient populations.
+:::
+
+
+::: {#fig-cumulative-ranking-no-dep-no-def}
+
+![](../depression/pdf/treatment_ranks_low_bias_data_no_def_no_dis.pdf)
+
+Cumulative probability that a treatment has a rank as high or higher than the current rank in non-depressed, non-deficient populations.
+:::
+
+::: {#fig-cumulative-ranking-dep-unk-def}
+
+![](../depression/pdf/treatment_ranks_low_bias_data_by_unknown_def_and_dis.pdf)
+
+Cumulative probability that a treatment has a rank as high or higher than the current rank in depressed populations with unknown deficiency status.
+:::
+
+
+::: {#fig-cumulative-ranking-no-dep-unk-def}
+
+![](../depression/pdf/treatment_ranks_low_bias_data_unknown_def_no_dis.pdf)
+
+Cumulative probability that a treatment has a rank as high or higher than the current rank in non-depressed populations with unknown deficiency status.
+:::
+
+
+### Effects on anxiety outcomes  {.appendix}
+
+
+#### Effects of micronutrients on anxiety outcomes  {.appendix}
+
+
+In the main analysis, we present forest plots of the effect of micro-nutrients. Here we also include tables of the effects in @tbl-anx-low-bias. Note that no studies using antidepressants also examined anxiety scales.
+
+```{r}
+#| label: tbl-anx-low-bias
+#| tbl-cap: "Table of anxiety treatments compared to placebo. The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+
+anx_results %>% rename(Intervention = .trt) %>% 
+  filter(.observed) %>% select(-.observed) %>% 
+  ## mutate(`Estimate (95% CrI)` = paste0(round(Estimate,digits=2), " (", round(`q2.5%`,digits=2),", ", round(`q97.5%`,digits = 2) ,")")) %>%
+  ## select(Intervention, `Estimate (95% CrI)`) %>%
+  ## knitr::kable(digits = 2)
+  # select(Intervention, Estimate, `q2.5%`, `q97.5%`) %>%
+  # gt::gt() %>% 
+  # gt::cols_merge(
+  #   columns = c(Estimate, `q2.5%`, `q97.5%`),
+  #   pattern = "{1} ({2}, {3})"
+  # ) %>% 
+  # gt::cols_label(Estimate = "Estimate (95% CrI)") %>%
+  # gt::fmt_number() %>% 
+  flextable_fmt() %>% 
+  knitr::knit_print()
+
+```
+
+#### Effects of micronutrients on anxiety outcomes by baseline disesase and deficiency  {.appendix}
+
+##### Low bias data
+In the main analysis, we presented forest plots only for vitamin D of the effect of micro-nutrients by baseline disease and deficiency status. Here we also include the tables of the effects for all miconutrients in @tbl-anx-mod-low and forest plots for those outcomes in @fig-anx-mod-low.
+
+::: {#fig-anx-mod-low}
+
+![](../anxiety/pdf/deficiency_summary_low_bias.pdf)
+
+Forest plot for the effect of micronutrients broken down by baseline disease, deficiency, and bias of study. SMD = Standardized mean difference. Estimates with very large intervals are based on the prior as the placebo effect is not identified.
+:::
+
+
+##### All data
+
+In our sensitivity analysis, we included all data with slopes for treatment effect allowed to vary by bias level. Results presented in @tbl-anx-mod-all-bias. Vitamin D estimates have been presented as forest plots in @fig-dep-mod-all-D.
+
+::: {#fig-anx-mod-all-D}
+
+![](../anxiety/pdf/deficiency_plots_vitamin_D.pdf)
+
+Forest plot for the effect of vitamin D on anxiety broken down by baseline disease, deficiency, and bias of study. SMD = Standardized mean difference.
+
+:::
+
+```{r}
+#| label: tbl-anx-mod-all-bias
+#| tbl-cap: "Table of anxiety treatments compared to placebo for all data by disease (depression yes or no) and deficiency status. The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+
+outcome <- "anxiety"
+outcome_label <- "anxiety"
+
+## readRDS(
+##       here::here("outputs", "saved_models", outcome,
+##                  glue::glue("model_", 
+##                             outcome, 
+##                             "_all_data_by_deficiency_depression_and_bias.rds"))
+##     ) %>% 
+##       vit$summary_brms_nma(keep = c(".trt","def",outcome_label,"bias")) %>% 
+##       mutate(!!outcome_label := if(!is.factor(.data[[outcome_label]]) && is.numeric(.data[[outcome_label]])) {factor(.data[[outcome_label]], levels = 1:0, labels = c("yes", "no"))} else {.data[[outcome_label]]}) %>%
+##       mutate(!!outcome_label := forcats::fct_relevel(.data[[outcome_label]], "yes","no")) %>% 
+##       mutate(def = forcats::fct_recode(as.factor(def), "unknown" = "NA")) %>%
+##       mutate(def = forcats::fct_relevel(def, "unknown", "no","yes")) %>%
+##       rename(deficiency = def)  %>% 
+##       mutate(bias = forcats::fct_recode(bias,
+##                                         "unclear" = "some concerns")) %>% 
+##       mutate(bias = forcats::fct_relevel(bias, "low", "unclear", "high")) %>% 
+##         summary() %>% 
+##         arrange(.trt, .data[[outcome_label]], deficiency, bias) %>% 
+##       
+##       select(Intervention = .trt,dplyr::any_of(outcome_label), deficiency, bias, Estimate, `q2.5%`, `q97.5%`) %>%
+##       gt::gt() %>% 
+##       gt::cols_merge(
+##         columns = c(Estimate, `q2.5%`, `q97.5%`),
+##         pattern = "{1} ({2}, {3})"
+##       ) %>% 
+##       gt::cols_label(Estimate = "Estimate (95% CrI)") %>%
+##       gt::fmt_number() %>% 
+##       knitr::knit_print()
+      
+
+readRDS(glue::glue("../anxiety/tables/gt/nma_anxiety_deficiency_table_all_data.rds")) %>% 
+  knitr::knit_print()
+
+```
+
+#### Augmentation of Antidepressants {.appendix}
+Here we present the results of the network meta-analysis assessing the effects of micro-nutrients as augmentation to antidepressants in low bias data. The results are presented in @fig-augmentation-anx and @tbl-agumentation-anx. As a reminder, this network is disconnected from the other low bias studies.
+
+::: {#fig-augmentation-anx}
+
+![](../anxiety/pdf/relative_effects_low_bias_ssri_only.pdf)
+
+Relative effects of micro-nutrients as augmentation to antidepressants for depression outcomes. The plot shows the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered by effect size, with the most effective treatments at the top. The vertical dashed line represents no effect (SMD = 0). Treatments with credible intervals that do not include zero are considered to have a statistically significant effect compared to placebo.
+
+:::
+
+```{r}
+#| label: tbl-augmentation-anx
+#| tbl-cap: "Table of anxiety treatments compared to placebo for studies comparing augmentation to antidepressants. The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+
+fit_ssri_anx %>% 
+  vit$summary_brms_nma(keep = ".trt") %>% 
+  summary() %>%
+  filter(.observed) %>% select(-.observed) %>% 
+  rename(Intervention = .trt) %>% 
+  ## mutate(`Estimate (95% CrI)` = paste0(round(Estimate,digits=2), " (", round(`q2.5%`,digits=2),", ", round(`q97.5%`,digits = 2) ,")")) %>%
+  ## select(Intervention, `Estimate (95% CrI)`) %>%
+  ## knitr::kable(digits = 2)
+  # select(Intervention, Estimate, `q2.5%`, `q97.5%`) %>%
+  #  gt::gt() %>% 
+  # gt::cols_merge(
+  #   columns = c(Estimate, `q2.5%`, `q97.5%`),
+  #   pattern = "{1} ({2}, {3})"
+  # ) %>% 
+  # gt::cols_label(Estimate = "Estimate (95% CrI)") %>%
+  # gt::fmt_number() %>% 
+  flextable_fmt() %>% 
+  knitr::knit_print()
+```
+
+### Adverse Events
+Here were present adverse events results for low bias studies, all studies, and studies comparing augmentation to antidepressants in @fig-ae-low-bias, @fig-ae-all-bias, and @fig-ae-ssri-all-bias respectively. We also present tables of the odds ratios for adverse events for these comparisons in @tbl-ae-low-bias, @tbl-ae-all-bias, and @tbl-ae-ssri-all-bias respectively. Of note, only `r full_data %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow()` (`r round((full_data %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow())/nrow(full_data %>% distinct(study)) * 100, digits = 2)`%) of all  studies reported on adverse events and only `r data %>% filter(bias == "low") %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow()` (`r round((data %>% filter(bias == "low") %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow())/nrow(data %>% filter(bias == "low") %>% distinct(study)) * 100, digits = 2)`%) of low bias studies included in the main analysis, which may limit the conclusions that can be drawn from these analyses.
+
+::: {#fig-ae-low-bias}
+![](../overall/pdf/adverse_events_odds_ratios_low_bias_overall.pdf)
+
+Forest plots for odds ratios of adverse events as compared to placebo for low bias studies. Values less than 1 indicate that the intervention had fewer adverse events than placebo, while values greater than 1 indicate that the intervention had more adverse events than placebo. The vertical dashed line represents no effect (odds ratio = 1). Interventions with credible intervals that do not include 1 are considered to have a statistically significant effect compared to placebo.
+:::
+
+::: {#fig-ae-all-bias}
+![](../overall/pdf/adverse_events_odds_ratios_overall.pdf)
+
+Forest plots for odds ratios of adverse events as compared to placebo for all studies. Values less than 1 indicate that the intervention had fewer adverse events than placebo, while values greater than 1 indicate that the intervention had more adverse events than placebo. The vertical dashed line represents no effect (odds ratio = 1). Interventions with credible intervals that do not include 1 are considered to have a statistically significant effect compared to placebo.
+:::
+
+::: {#fig-ae-ssri-all-bias}
+![](../overall/pdf/adverse_events_odds_ratios_ssri_overall.pdf)
+
+Forest plots for odds ratios of adverse events for all studies considering augmentation of antidepressants with micronutrients. Values less than 1 indicate that the intervention had fewer adverse events than antidepressants alone, while values greater than 1 indicate that the intervention had more adverse events than antidepressants alone The vertical dashed line represents no effect (odds ratio = 1). Interventions with credible intervals that do not include 1 are considered to have a statistically significant effect compared to antidepressants alone.
+:::
+
+```{r}
+#| label: tbl-ae-low-bias
+#| tbl-cap: "Table of odds ratios for adverse events for low bias studies compared to placebo. The table lists the estimated odds ratios for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+
+readRDS(file.path("..","overall","tables","ft","adverse_outcomes_low_bias_table.rds")) %>% knitr::knit_print()
+
+
+
+```
+
+```{r}
+#| label: tbl-ae-all-bias
+#| tbl-cap: "Table of odds ratios for adverse events for all studies compared to placebo. The table lists the estimated odds ratios for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+
+readRDS(file.path("..","overall","tables","ft","adverse_outcomes_all_data_table.rds")) %>% knitr::knit_print()
+
+
+
+```
+
+```{r}
+#| label: tbl-ae-ssri-all-bias
+#| tbl-cap: "Table of odds ratios for adverse events for all studies comparing augmentation to antidepressants. The table lists the estimated odds ratios for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+
+readRDS(file.path("..","overall","tables","ft","adverse_outcomes_low_bias_ssri_table.rds")) %>% knitr::knit_print()
+
+
+
+```
+
+
+
+
+### Effects on Vitamin Levels
+The supplementation with vitamin levels might be expected to increase vitamin levels and this is a good check to be sure that the interventions are having the expected effect both due to adequate supplementation and compliance. We present the results of our secondary analysis of the effects of micro-nutrients on vitamin levels in the figures below.
+
+#### Vitamin Levels for Low Bias Studies
+```{r}
+#| label: fig-vitamin-levels-low-bias
+#| results: asis
+#| echo: false
+
+lev_dir <- file.path("..","overall","pdf")
+files <- list.files(lev_dir, pattern = "vitamin_levels_low_bias_", full.names = TRUE)
+names <- stringr::str_remove(basename(files), ".pdf") %>%
+  stringr::str_remove("vitamin_levels_low_bias_") %>%
+  stringr::str_replace_all("_", " ")
+
+comp <- ifelse(grepl("ssri", names), "as augmentation to antidepressants", "compared to placebo")
+
+names_final <- names %>% stringr::str_replace_all("ssri ", "") %>% 
+  stringr::str_replace_all("rbc.B9", "B9 in RBCs") 
+
+for (i in seq_along(files)) {
+  cat(sprintf(
+    "![Effect of supplementation on %s levels %s](%s){#fig-lev-%d}\n\n",
+    names_final[i], comp[i], files[i], i
+  ))
+}
+
+```
+
+
+#### Vitamin Levels for All Studies
+```{r}
+#| label: fig-vitamin-levels-all-data
+#| results: asis
+#| echo: false
+
+lev_dir <- file.path("..","overall","pdf")
+files <- list.files(lev_dir, pattern = "vitamin_levels_all_data_", full.names = TRUE)
+names <- stringr::str_remove(basename(files), ".pdf") %>%
+  stringr::str_remove("vitamin_levels_all_data_") %>%
+  stringr::str_replace_all("_", " ")
+
+comp <- ifelse(grepl("ssri", names), "as augmentation to antidepressants", "compared to placebo")
+
+names_final <- names %>% stringr::str_replace_all("ssri ", "") %>% 
+  stringr::str_replace_all("rbc.B9", "B9 in RBCs") 
+
+for (i in seq_along(files)) {
+  cat(sprintf(
+    "![Effect of supplementation on %s levels %s](%s){#fig-lev-%d}\n\n",
+    names_final[i], comp[i], files[i], i
+  ))
+}
+
+```
+
+## Meta-regression Results {#app-meta-reg .appendix}
+
+In this section, we present the evidence from our meta-regression analyses assessing potential effect modification by baseline depression/anxiety status and baseline micro-nutrient deficiency status.
+
+### Fixed effects for depression outcomes {.appendix}
+```{r}
+#| label: tbl-meta-reg-fe-dep
+#| tbl-cap: "Fixed effects from meta-regression assessing potential effect modifiers on depression outcomes. The table lists the estimated fixed effects for each parameter in the meta-regression model, along with 95% credible intervals. Parameters are ordered alphabetically. The full names of the parameters are listed in the table for clarity. These parameters were estimated using a Horseshoe prior."
+
+meta_reg  <- readRDS(here::here("outputs","saved_models","bias_regression_fit_overall.rds"))
+
+fe <- meta_reg %>% brms::fixef() 
+
+fe %>% 
+  as.data.frame() %>% 
+  tibble::rownames_to_column("parameter") %>% 
+  filter(grepl("y_confounders_", parameter)) %>%
+  mutate(parameter = stringr::str_remove(parameter, "y_confounders_")) %>%
+  mutate(parameter = stringr::str_remove(parameter, "s_")) %>% 
+  arrange(parameter) %>% 
+  mutate(parameter = as.factor(parameter)) %>% 
+  filter(parameter != "bias.selective.outcomehigh") %>% 
+  mutate(parameter = forcats::fct_recode(parameter,
+
+    ## Sample / design
+    "Assigned N" = "assignedN",
+    "Dropout rate" = "dropOut",
+    "Study SE" = "se",
+
+    ## Duration
+    "Duration (linear)" = "duration",
+    "Duration (quadratic)" = "durationE2",
+
+    ## Overall risk of bias
+    "Overall ROB: Low vs High" = "bias.overalllow",
+    "Overall ROB: Unclear vs High" = "bias.overallsomeconcerns",
+
+    ## Blinding – outcome assessment
+    "Blinding (Outcome): Low vs High" =
+      "bias.blinding.outcomelow",
+    "Blinding (Outcome): Unclear vs High" =
+      "bias.blinding.outcomesomeconcerns",
+
+    ## Blinding – participants
+    "Blinding (Participants): Low vs High" =
+      "bias.blinding.participantslow",
+    "Blinding (Participants): Unclear vs High" =
+      "bias.blinding.participantssomeconcerns",
+
+    ## Allocation concealment
+    "Allocation concealment: Low vs High" =
+      "bias.concealmentlow",
+    "Allocation concealment: Unclear vs High" =
+      "bias.concealmentsomeconcerns",
+
+    ## Incomplete outcome data
+    "Incomplete outcome data: Low vs High" =
+      "bias.incomplete.outcomelow",
+    "Incomplete outcome data: Unclear vs High" =
+      "bias.incomplete.outcomesomeconcerns",
+
+    ## Selective reporting
+    "Selective reporting: Low vs High" =
+      "bias.selective.outcomelow",
+    "Selective reporting: Unclear vs High" =
+      "bias.selective.outcomesomeconcerns",
+
+    ## Sequence generation
+    "Random sequence: Low vs High" =
+      "bias.sequencelow",
+    "Random sequence: Some concerns vs High" =
+      "bias.sequencesomeconcerns",
+
+    ## Other bias
+    "Other bias: Low vs High" =
+      "bias.otherlow",
+    "Other bias: Some concerns vs High" =
+      "bias.othersomeconcerns",
+
+    ## MI terms — baseline & contrasts
+    "Baseline SMD" =
+      "mibaseline.yidxEQ.obs",
+
+    "Age difference" =
+      "micontrastSAgeidxEQ.obs",
+    "Difference in Pct. Male" =
+      "micontrastSMaleidxEQ.obs",
+
+    "Study Mean Age" =
+      "migroupAgeidxEQ.obs",
+    "Baseline severity" =  "migroupBaselineidxEQ.obs",
+    "Study Mean Pct. Male" = "migroupMaleidxEQ.obs",
+    
+    "Year of Publication" = "year"
+  )) %>% 
+  select(parameter, Estimate, Q2.5, Q97.5) %>%
+  # gt::gt() %>% 
+  # gt::cols_merge(
+  #   columns = c("Estimate", "Q2.5", "Q97.5"),
+  #   pattern = "{1} ({2}, {3})"
+  # ) %>%
+  # gt::fmt_number() %>% 
+  # gt::cols_label(
+  #   parameter = "Parameter",
+  #   Estimate = "Estimate (95% CrI)"
+  # ) %>% 
+  mutate(`Estimate (95% CrI)` = paste0(round(Estimate,digits=2), 
+                                       " (", round(Q2.5,digits=2),", ",
+                                       round(Q97.5,digits = 2) ,")")) %>%
+  select(parameter, `Estimate (95% CrI)`) %>%
+  rename(Parameter = parameter) %>%
+  flextable::flextable() %>% 
+  knitr::knit_print()
+
+```
+
+#### Cumulative ranking plots
+Cumulative ranking plots for deficient populations do not make sense; however, they may have utility for non-deficient populations or populations in which the deficiency status is unknown. Thus, we present combinations of depression status and deficiency status other than in deficient populations.
+
+::: {#fig-cumulative-ranking-anx-no-def}
+
+![](../anxiety/pdf/treatment_ranks_low_bias_data_no_def_dis.pdf)
+
+Cumulative probability that a treatment has a rank as high or higher than the current rank in anxious, non-deficient populations.
+:::
+
+
+::: {#fig-cumulative-ranking-no-anx-no-def}
+
+![](../anxiety/pdf/treatment_ranks_low_bias_data_no_def_no_dis.pdf)
+
+Cumulative probability that a treatment has a rank as high or higher than the current rank in non-anxious, non-deficient populations.
+:::
+
+::: {#fig-cumulative-ranking-anx-unk-def}
+
+![](../anxiety/pdf/treatment_ranks_low_bias_data_by_unknown_def_and_dis.pdf)
+
+Cumulative probability that a treatment has a rank as high or higher than the current rank in anxious populations with unknown deficiency status.
+:::
+
+
+::: {#fig-cumulative-ranking-no-anx-unk-def}
+
+![](../anxiety/pdf/treatment_ranks_low_bias_data_unknown_def_no_dis.pdf)
+
+Cumulative probability that a treatment has a rank as high or higher than the current rank in non-anxious populations with unknown deficiency status.
+:::
+
+### Fixed effects for anxiety outcomes {.appendix}
+```{r}
+#| label: tbl-meta-reg-fe-anx
+#| tbl-cap: "Fixed effects from meta-regression assessing potential effect modifiers on anxiety outcomes. The table lists the estimated fixed effects for each parameter in the meta-regression model, along with 95% credible intervals. Parameters are ordered alphabetically. The full names of the parameters are listed in the table for clarity. These parameters were estimated using a Horseshoe prior."
+
+
+fe %>% 
+  as.data.frame() %>% 
+  tibble::rownames_to_column("parameter") %>% 
+  filter(grepl("yanx_confounders_", parameter)) %>%
+  mutate(parameter = stringr::str_remove(parameter, "yanx_confounder")) %>%
+  mutate(parameter = stringr::str_remove(parameter, "s_")) %>% 
+  mutate(parameter = stringr::str_remove(parameter, "s_")) %>% 
+  arrange(parameter) %>% 
+  filter(parameter != "bias.selective.outcomehigh") %>% 
+  mutate(parameter = as.factor(parameter)) %>% 
+  mutate(parameter = forcats::fct_recode(parameter,
+
+    ## Sample / design
+    "Assigned N" = "assignedN",
+    "Dropout rate" = "dropOut",
+    "Study SE" = "se_anx",
+
+    ## Duration
+    "Duration (linear)" = "duration",
+    "Duration (quadratic)" = "durationE2",
+
+    ## Overall risk of bias
+    "Overall ROB: Low vs High" = "bias.overalllow",
+    "Overall ROB: Unclear vs High" = "bias.overallsomeconcerns",
+
+    ## Blinding – outcome assessment
+    "Blinding (Outcome): Low vs High" =
+      "bias.blinding.outcomelow",
+    "Blinding (Outcome): Unclear vs High" =
+      "bias.blinding.outcomesomeconcerns",
+
+    ## Blinding – participants
+    "Blinding (Participants): Low vs High" =
+      "bias.blinding.participantslow",
+    "Blinding (Participants): Unclear vs High" =
+      "bias.blinding.participantssomeconcerns",
+
+    ## Allocation concealment
+    "Allocation concealment: Low vs High" =
+      "bias.concealmentlow",
+    "Allocation concealment: Unclear vs High" =
+      "bias.concealmentsomeconcerns",
+
+    ## Incomplete outcome data
+    "Incomplete outcome data: Low vs High" =
+      "bias.incomplete.outcomelow",
+    "Incomplete outcome data: Unclear vs High" =
+      "bias.incomplete.outcomesomeconcerns",
+
+    ## Selective reporting
+    "Selective reporting: Low vs High" =
+      "bias.selective.outcomelow",
+    "Selective reporting: Unclear vs High" =
+      "bias.selective.outcomesomeconcerns",
+
+    ## Sequence generation
+    "Random sequence: Low vs High" =
+      "bias.sequencelow",
+    "Random sequence: Some concerns vs High" =
+      "bias.sequencesomeconcerns",
+
+    ## Other bias
+    "Other bias: Low vs High" =
+      "bias.otherlow",
+    "Other bias: Some concerns vs High" =
+      "bias.othersomeconcerns",
+
+    ## MI terms — baseline & contrasts
+    "Baseline SMD" =
+      "mibaseline.y_anxidxEQ.obs",
+
+    "Age difference" =
+      "micontrastSAgeidxEQ.obs",
+    "Difference in Pct. Male" =
+      "micontrastSMaleidxEQ.obs",
+
+    "Study Mean Age" =
+      "migroupAgeidxEQ.obs",
+    "Baseline severity" =  "migroupBaseline_anxidxEQ.obs",
+    "Study Mean Pct. Male" = "migroupMaleidxEQ.obs",
+    
+    "Year of Publication" = "year"
+  )) %>% 
+  select(parameter, Estimate, Q2.5, Q97.5) %>%
+  # gt::gt() %>% 
+  # gt::cols_merge(
+  #   columns = c("Estimate", "Q2.5", "Q97.5"),
+  #   pattern = "{1} ({2}, {3})"
+  # ) %>%
+  # gt::fmt_number() %>% 
+  # gt::cols_label(
+  #   parameter = "Parameter",
+  #   Estimate = "Estimate (95% CrI)"
+  # ) %>% 
+  mutate(`Estimate (95% CrI)` = paste0(round(Estimate,digits=2), 
+                                       " (", round(Q2.5,digits=2),", ",
+                                       round(Q97.5,digits = 2) ,")")) %>%
+  select(parameter, `Estimate (95% CrI)`) %>%
+  rename(Parameter = parameter) %>%
+  flextable::flextable() %>% 
+  knitr::knit_print()
+
+```
+
+## Sensitivity Analyses {#app-sens .appendix}
+
+### Gaussian likelihood vs Student-t likelihood  {.appendix}
+
+We assessed the fit of a typical Gaussian likelihood versus a robust Student-t likelihood using leave-one-out cross validation. The results are presented in @tbl-loo-gaussian-student-t-dep and @tbl-loo-gaussian-student-t-anx. In all cases, the Student-t likelihood had a better fit than the Gaussian likelihood, perhaps suggesting that there were some outliers in the data.
+
+``` {r}
+#| label: tbl-loo-gaussian-student-t-dep
+#| tbl-cap: "Comparison of Gaussian and Student-t likelihoods via leave-one-out assessment for depression outcomes. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through fourth columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses. In all cases, the Student-t likelihood fits better than the Gaussian likelihood."
+
+loo_gauss <- readRDS(here::here("outputs","depression","tables","ft","loo_compare_gaussian_tab.rds"))
+
+loo_gauss %>% knitr::knit_print()
+
+```
+
+
+``` {r}
+#| label: tbl-loo-gaussian-student-t-anx
+#| tbl-cap: "Comparison of Gaussian and Student-t likelihoods via leave-one-out assessment for anxiety. Differences in expected log point-wise predictive densities (ELPD) estimated by leave-one-out cross validation. The second through fourth columns list the difference in ELPDs separated by the bias of the included studies. Standard error of difference in parentheses. In all cases, the Student-t likelihood fits better than the Gaussian likelihood."
+
+loo_gauss <- readRDS(here::here("outputs","anxiety","tables","ft","loo_compare_gaussian_tab.rds"))
+
+loo_gauss %>% knitr::knit_print()
+
+```
+
+### All measures vs only endline measures  {.appendix}
+
+We assessed the fit of models using best available outcome measure (regression estimates, gain scores, endpoint scores)  versus only endpoint measures using leave-one-out cross validation. The results between the two models were very similar.
+
+::: {#fig-gain-dep-low}
+
+![](../depression/pdf/gain_vs_no_gain_low_bias.pdf)
+
+Comparison of estimates on depression outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints) in low bias studies. For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
+
+
+:::
+
+::: {#fig-gain-dep-some}
+
+![](../depression/pdf/gain_vs_no_gain_low_and_some_bias.pdf)
+
+
+Comparison of estimates on depression outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints) in unclear and low bias studies. For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
+
+:::
+
+
+::: {#fig-gain-dep-high}
+
+![](../depression/pdf/gain_vs_no_gain_all_bias.pdf)
+
+Comparison of estimates on depression outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints) in all studies. For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
+
+:::
+
+
+::: {#fig-gain-anx-low}
+
+![](../anxiety/pdf/gain_vs_no_gain_low_bias.pdf)
+
+
+Comparison of estimates on anxiety outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints) in low bias studies. For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
+
+:::
+
+::: {#fig-gain-anx-some}
+
+![](../anxiety/pdf/gain_vs_no_gain_low_and_some_bias.pdf)
+
+
+Comparison of estimates on anxiety outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints) in low and unclear bias studies. For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
+
+:::
+
+::: {#fig-gain-anx-high}
+
+![](../anxiety/pdf/gain_vs_no_gain_all_bias.pdf)
+
+Comparison of estimates on anxiety outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints). For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
+
+:::
+
+### Leave-One-Out Estimates {.appendix}
+
+In addition to comparing leave-one-out (LOO) comparing model fit, we also calculated the change in treatment effect estimates when leaving out each study in turn. The results are presented in @fig-loo-dep and @fig-loo-anx. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
+
+#### Main Analysis
+
+::: {#fig-loo-dep}
+
+![](../depression/pdf/loo_plot_low_bias.pdf)
+
+Leave-one-out estimates for depression outcomes for the main analysis. Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the effect of leaving out a study with the intervention in question; purple circles are the changes in effects when leaving out studies that do not use the intervention in question. 
+
+:::
+
+::: {#fig-loo-anx}
+
+![](../depression/pdf/loo_plot_low_bias.pdf)
+
+Leave-one-out estimates for anxiety outcomes for the main analysis. Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the effect of leaving out a study with the intervention in question; purple circles are the changes in effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
+
+:::
+
+#### Leave-one-out estimates with all data
+
+::: {#fig-loo-dep-some}
+
+![](../depression/pdf/loo_plot_some_and_low_bias.pdf)
+
+Leave-one-out estimates for depression outcomes for the low and unclear bias data Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the effect of leaving out a study with the intervention in question; purple circles are the changes in effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
+
+:::
+
+::: {#fig-loo-anx-some}
+
+![](../anxiety/pdf/loo_plot_some_and_low_bias.pdf)
+
+Leave-one-out estimates for anxiety outcomes for the low and unclear bias data Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the effect of leaving out a study with the intervention in question; purple circles are the changes in effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
+
+:::
+
+::: {#fig-loo-dep-all}
+
+![](../depression/pdf/loo_plot_all_bias.pdf)
+
+Leave-one-out estimates for depression outcomes for all data. Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the effect of leaving out a study with the intervention in question; purple circles are the changes in effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
+
+:::
+
+::: {#fig-loo-anx-all}
+
+![](../anxiety/pdf/loo_plot_all_bias.pdf)
+
+Leave-one-out estimates for anxiety outcomes for data. Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the estimated mean effect when leaving out a study with the intervention in question; purple circles are the mean effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
+
+:::
+
+### Dose Response Estimates {.appendix}
+Part of our interest was to assess whether any dose response relationship existed between micro-nutrient supplementation and depression and anxiety outcomes. To do this, we followed the method of Watt et al. and estimated dose categories as a random effect (Watt 2022). This eliminates the need for complex modeling of the dose response curve and will also pool estimates toward the grand mean if data do not support them being different. The dose categories chose for each micro-nutrient were based on the distribution of doses in the included studies and clinical relevance. For example, for vitamin D, we categorized doses as low (<1000 IU/day), medium (1000-3000 IU/day), and high (>3000 IU/day). We then estimated the treatment effect for each dose category compared to placebo. This method also allowed us to include several additional studies that did not have a true comparison group but simply compared different doses of micro-nutrients, such as Penckofer et al. (2022) that used total daily doses of vitamin D about 700 IU versus 7000 IU. Full dose categories for micro-nutrients are presented in @tbl-dose-cat. 
+
+
+::: {#tbl-dose-cat}
+
+
+| Intervention | Band label |
+|---|---|
+| vitamin A | < 900 IU |
+|  | 900 - 3000 IU |
+|  | > 3000 IU |
+| vitamin D | < 1000 IU |
+|  | 1000 - 3000 IU |
+|  | > 3000 IU |
+| vitamin B1 | < 10 mg |
+|  | 10 - 100 mg |
+|  | > 100 mg |
+| vitamin B2 | < 10 mg |
+|  | 10 - 25 mg |
+|  | > 25 mg |
+| vitamin B3 | < 50 mg |
+|  | 50 - 500 mg |
+|  | > 500 mg |
+| vitamin B5 | < 10 mg |
+|  | 10 - 100 mg |
+|  | > 100 mg |
+| vitamin B6 | < 10 mg |
+|  | 10 - 50 mg |
+|  | > 50 mg |
+| vitamin B7 | < 30 µg |
+|  | 30 - 300 µg |
+|  | > 300 µg |
+| vitamin B9 | < 0.5 mg |
+|  | 0.5 - 5 mg |
+|  | > 5 mg |
+| vitamin B12 | < 250 µg |
+|  | 250 - 1000 µg |
+|  | > 1000 µg |
+| vitamin C | < 200 mg |
+|  | 200 - 1000 mg |
+|  | > 1000 mg |
+| vitamin E | < 100 IU |
+|  | 100 - 400 IU |
+|   | > 400 IU |
+| iron | < 18 mg |
+|  | 18 - 45 mg |
+|  | > 45 mg |
+| magnesium | < 200 mg |
+|  | 200 - 400 mg |
+|  | > 400 mg |
+| selenium | < 100 µg |
+| | 100 - 200 µg |
+| | > 200 µg |
+| zinc | < 15 mg |
+| | 15 - 30 mg |
+| | > 30 mg |
+| placebo | --- |
+| none | --- |
+
+
+Dose categories for each micro-nutrient. The table lists the dose categories for each micro-nutrient, along with the corresponding dose ranges. These categories were based on the distribution of doses in the included studies and clinical relevance.
+
+:::
+
+#### Depression outcomes
+
+The results for data included in our main analysis (i.e., low bias studies) are presented in @tbl-dose-response-dep. Only vitamin D had evidence for a robust dose effect in low bias data. We highlight these results in the forest plot @fig-dose-dep-D.
+
+``` {r}
+#| label: tbl-dose-response-dep
+#| tbl-cap: "Dose response estimates for depression outcomes in low bias data. The table shows the estimated treatment effect in standardized meand differences (SMD) for each dose category of micronutrient supplementation compared to placebo. The table is ordered alphabetically by intervention and then by dose category. Estimates with very large intervals are based on the prior as the placebo effect is not identified."
+#| 
+dose_tab_dep <- here::here("outputs", "depression","tables","ft",
+                              glue::glue("nma_depression_dose_response_table_low_bias.rds")) %>% 
+  readRDS()
+
+dose_tab_dep %>% knitr::knit_print()
+
+```
+
+::: {#fig-dose-dep-D}
+
+![](../depression/pdf/vitamin_d_dose_response_low_bias.pdf)
+
+Forest plots for the effect of vitamin D on depression broken down by dose category in low bias data. SMD = standardized mean difference. 
+
+:::
+
+
+Evidence for dose response in vitamin D appears consistent across bias levels.
+
+::: {#fig-dose-dep-D-all}
+
+![](../depression/pdf/vitamin_d_dose_response_by_bias.pdf)
+
+:::
+
+#### Anxiety outcomes
+
+``` {r}
+#| label: tbl-dose-response-anx
+#| tbl-cap: "Dose response estimates for anxiety outcomes in low bias data. The table shows the estimated treatment effect in standardized meand differences (SMD) for each dose category of micronutrient supplementation compared to placebo. The table is ordered alphabetically by intervention and then by dose category. Estimates with very large intervals are based on the prior as the placebo effect is not identified."
+#| 
+dose_tab_anx <- here::here("outputs", "anxiety","tables","ft",
+                              glue::glue("nma_anxiety_dose_response_table_low_bias.rds")) %>% 
+  readRDS()
+
+dose_tab_dep %>% knitr::knit_print()
+
+```
+
+::: {#fig-dose-anx-D}
+
+![](../anxiety/pdf/vitamin_d_dose_response_low_bias.pdf)
+
+Forest plots for the effect of vitamin D on depression broken down by dose category in low bias data. SMD = standardized mean difference. 
+
+:::
+
+
+Evidence for dose response in vitamin D appears consistent across bias levels for anxiety outcomes as well.
+
+::: {#fig-dose-anx-D-all}
+
+![](../anxiety/pdf/vitamin_d_dose_response_by_bias.pdf)
+
+:::
+
+### Duration Estimates {.appendix}
+
+To assess whether the duration of treatment was associated with treatment effects, we estimated the treatment by duration categories as a random effect. The duration categories were initially selected at 0-4 weeks, 4-8 weeks, and >8 weeks; however, given the actual distribution of study durations, we combined the 0-4 weeks and 4-8 weeks categories and separated the >8 week into 8-16 weeks, 16-26 weeks and > 26 weeks. The results are presented in @tbl-duration-response-dep and @tbl-duration-response-anx. Only vitamin D had studies in each duration category so we present it's results graphically. In low bias data, there is significant uncertainty but there does seem to be evidence of attenuation in treatment effects over time. Vitamin D figures presented in @fig-duration-dep-D and @fig-duration-anx-D.
+
+``` {r}
+#| label: tbl-duration-response-dep
+#| tbl-cap: "Duration response estimates for depression outcomes in low bias data. The table shows the estimated treatment effect in standardized mean differences (SMD) for each duration category of micronutrient supplementation compared to placebo. The table is ordered by duration category."
+
+duration_tab_dep <- here::here("outputs", "depression","tables","ft",
+                              glue::glue("nma_depression_time_response_table_low_bias.rds")) %>% 
+  readRDS()
+
+duration_tab_dep %>% knitr::knit_print()
+
+```
+
+
+``` {r}
+#| label: tbl-duration-response-anx
+#| tbl-cap: "Duration response estimates for anxiety outcomes in low bias data. The table shows the estimated treatment effect in standardized mean differences (SMD) for each duration category of micronutrient supplementation compared to placebo. The table is ordered by duration category."
+
+duration_tab_anx <- here::here("outputs", "anxiety","tables","ft",
+                              glue::glue("nma_anxiety_time_response_table_low_bias.rds")) %>% 
+  readRDS()
+
+duration_tab_anx %>% knitr::knit_print()
+
+```
+
+
+::: {#fig-duration-dep-D}
+
+![](../depression/pdf/follow_up_duration_distribution.pdf)
+
+Forest plots for the effect of vitamin D on depression broken down by duration category in low bias data. SMD = standardized mean difference.
+
+:::
+
+::: {#fig-duration-anx-D}
+
+![](../anxiety/pdf/follow_up_duration_distribution.pdf)
+
+Forest plots for the effect of vitamin D on anxiety broken down by duration category in low bias data. SMD = standardized mean difference.
+
+:::
+
+#### Results using all data
+Using all data, more certainty was available for the first two duration categories, but the results were generally consistent with the low bias data. The results for vitamin D are presented in @fig-duration-dep-D-all and @fig-duration-anx-D-all.
+
+::: {#fig-duration-dep-D-all}
+
+![](../depression/pdf/follow_up_duration_distribution_all_data.pdf)
+
+Forest plots for the effect of vitamin D on depression broken down by duration category in all data. SMD = standardized mean difference.
+
+:::
+
+::: {#fig-duration-anx-D-all}
+
+![](../anxiety/pdf/follow_up_duration_distribution.pdf)
+
+Forest plots for the effect of vitamin D on anxiety broken down by duration category in all data. SMD = standardized mean difference.
+
+:::
+
+### Percent Deficient and Percent with Baseline Disease Status
+
+In our main analysis, we classify studies as being in deficient (or  non-deficient) populations based strictly on the mean value of the baseline micro-nutrient level. However, since this is a population level distinction and there would be many people without deficiency (respectively, with deficiency) in the deficient (respectively, non-deficient) populations. Thus, we wanted to assess treatment effects if we tried to better account for the real population percentages.
+
+To do so, we assume a log-Gaussian distribution to calculate the percentages of deficient and non-deficient participants in each study based on the reported mean and standard deviation of baseline micro-nutrient levels. We do the same for the percentage of participants with baseline depression or anxiety symptoms based on the reported mean and standard deviation of baseline symptom severity.
+
+Some studies didn't report enough information to calculate these percentages, so their values were imputed using a simple truncated Gaussian model with only an intercept and a term for year of publication.
+
+We should note that the probabilities from the log-Gaussian distribution, if underestimated, would expect the results to be biased away from the null; if overestimated, the results would be biased toward the null. Thus, the results of this analysis should be interpreted with caution as they are based on assumptions about the distribution of micro-nutrient levels and symptom severity in the included studies.
+
+#### Results for Depression Outcomes
+
+For vitamin D, there is some evidence that higher percentages of participants with baseline vitamin D deficiency were associated with larger treatment effects. There also appears to be an interaction with depression status. The results for vitamin D are presented graphically in @fig-deficiency-dep-D. Most interventions only had one study for estimation so that most terms in the model would not be identifiable. We present results for interventions with more than one study contributing to the estimates in @tbl-deficiency-response-dep. 
+
+::: {#fig-deficiency-dep-D}
+
+![](../depression/pdf/percentage_plot_approximation.pdf)
+
+Forest plots for the effect of vitamin D on depression based on models broken down by percentage of participants with baseline vitamin D deficiency and depression in low bias data. Estimates presented here are for hypothetical populations with values set to either 0 or 100% for the listed covariates. SMD = standardized mean difference.
+
+:::
+
+```{r}
+#| label: tbl-deficiency-response-dep
+#| tbl-cap: "Deficiency response estimates for depression outcomes in low bias data. The table shows the estimated treatment effect in standardized mean differences (SMD) for each intervention based on the percentage of participants with baseline micro-nutrient deficiency and depression. The table is ordered alphabetically by intervention. Values are based on models with using estimated percentages of depression and deficiency status as covariates."
+
+deficiency_tab_dep <- here::here("outputs", "depression","tables","ft",
+                              glue::glue("nma_depression_pct_table_low_bias.rds")) %>% 
+  readRDS()
+
+deficiency_tab_dep %>% knitr::knit_print()
+```
+
+#### Results for Anxiety Outcomes
+
+We also targeted anxiety outcomes in our analysis of the effect of micro-nutrient supplementation adjusting for the percent of individuals in the study with anxiety and deficiency. The results for vitamin D are presented graphically in @fig-deficiency-anx-D. Most interventions only had one study for estimation so that most terms in the model would not be identifiable. We present results for interventions with more than one study contributing to the estimates in @tbl-deficiency-response-anx. No vitamins had credible intervals that excluded the null.
+
+::: {#fig-deficiency-anx-D}
+
+![](../anxiety/pdf/percentage_plot_approximation.pdf)
+
+Forest plots for the effect of vitamin D on anxiety based on models broken down by percentage of participants with baseline vitamin D deficiency and depression in low bias data. Estimates presented here are for hypothetical populations with values set to either 0 or 100% for the listed covariates. SMD = standardized mean difference.
+
+:::
+
+```{r}
+#| label: tbl-deficiency-response-anx
+#| tbl-cap: "Deficiency response estimates for anxiety outcomes in low bias data with a model utilizing percentages of anxious and deficient individuals. The table shows the estimated treatment effect in standardized mean differences (SMD) for each intervention based on populations with different baseline micro-nutrient deficiency and anxiety status The table is ordered alphabetically by intervention. Values are based on models with using estimated percentages of depression and deficiency status as covariates."
+
+deficiency_tab_anx <- here::here("outputs", "anxiety","tables","ft",
+                              glue::glue("nma_anxiety_pct_table_low_bias.rds")) %>% 
+  readRDS()
+
+deficiency_tab_dep %>% knitr::knit_print()
+```
+
+## Confidence in Network Meta-Analysis Ratings {#app-cinema .appendix}
+Our judgments below are based on the Confidence in Network Meta-Analysis (CINeMA) framework of Nikolakopoulou et al. (2018). 
+
+### Reasons for downgrading  {.appendix}
+
+<span class="custom-paragraph-header">1. Within-study bias</span>
+
+We assessed within-study bias using the Risk of Bias 1 (ROB) tool (Higgins et al., 2011). Studies were evaluated among the seven domains of bias: random sequence generation, allocation concealment, blinding of participants and personnel, blinding of outcome assessment, incomplete outcome data, selective outcome reporting, and other sources of bias. Each domain was rated as low risk, unclear risk, or high risk of bias. 
+<!-- The table below summarizes the overall rating of the studies coded via the table below, @tbl-rob-rules.  -->
+Only studies with an overall rating of "low risk" were included in our primary analyses. Bias was assessed by two authors with a third member breaking any ties. 
+
+
+
+<!-- | Global Rating            | Items with unclear risk | Items with high risk | -->
+<!-- |--------------------------|-------------------------|----------------------| -->
+<!-- | Low risk of bias         | $\leq 3$                | $0$                  | -->
+<!-- | Unclear risk of bias     | $> 3$                   | $0$                  | -->
+<!-- | Unclear risk of bias     | $\geq 0$                | $1$                  | -->
+<!-- | High risk of bias        | $\geq 0$                | $> 1$                | -->
+
+<!-- : Risk of bias classification rules {#tbl-rob-rules} -->
+
+The rating for the overall risk of bias for a comparison was measured as the average bias of all studies contributing to the comparison as weighted by the contribution matrix.
+
+Bias assessments for all studies are presented in @fig-traffic-1 and @fig-traffic-2. The most common sources of bias were `r most_common_bias %>% stringr::str_to_lower()`.
+
+<span class="custom-paragraph-header">2. Reporting bias</span>
+
+Our search included over 3000 studies from Ovid MEDLINE, Embase.com, Web of Science Core Collection, the Cochrane Central Register of Controlled Trials, ClinicalTrials.gov, and APA PsycINFO databases. Given this, we think it is unlikely that there are many large studies that were missed in our search. However, we cannot rule out the possibility of some smaller studies being missed, particularly those published in non-English languages or those published in less accessible journals. Thus, any other evidence of missing studies would likely be do to publication bias. 
+
+To assess for publication bias, we examined funnel plots for our primary outcome of depression scales and anxiety scales. Then, if there was evidence of publication bias, we examined funnel plots for each intervention separately. If there were more than 10 studies in a comparison, we would examine the funnel plot for that comparison. If there was evidence of publication bias at the intervention level, then reporting bias was downgraded by one level. For comparisons with 10 or fewer studies, reporting bias was downgraded one level if the global assessment found evidence of reporting bias.
+
+We also conducted meta-regression analyses to examine whether the country in which a study was conducted, the year of publication, the duration of treatment, the baseline severity of symptoms, or the age of participants explained some of the heterogeneity between studies.
+
+<span class="custom-paragraph-header">3. Indirectness</span>
+
+To assess indirectness, we evaluated the assumption of transitivity by examining the distribution of potential effect modifiers across comparisons in the network. Substantial imbalances in these modifiers would raise concerns about transitivity.
+
+Because our objective was to estimate the effect of micro-nutrient supplementation on depression and anxiety symptoms across populations broadly, we had no strong a priori reason to expect violations of transitivity. However, given the small number of studies informing some comparisons, we prespecified baseline symptom severity and baseline micro-nutrient deficiency status as key potential effect modifiers.
+
+We examined the distribution of these variables across treatment comparisons. If meaningful differences were observed, we considered this evidence of potential intransitivity and downgraded the certainty of evidence for indirectness by one level.
+
+<span class="custom-paragraph-header">4. Imprecision</span>
+
+We examined the credible intervals for each comparison in the network meta-analysis to assess for imprecision. If the credible interval for a comparison included the null value (SMD of 0), then we downgraded for imprecision by one level. If the credible interval was wide and included both clinically meaningful benefits and harms, then we downgraded for imprecision by two levels. We considered an standardized mean difference of 0.5 to be the threshold for clinical significance (Jakobsen, 2020). Thus, if the credible interval for a comparison included both an SMD of -0.5 and an standardized mean difference of 0.5, then we considered this to be a wide credible interval that included both clinically meaningful benefits and harms and downgraded for imprecision by two levels.
+
+<span class="custom-paragraph-header">5. Heterogeneity</span>
+
+Heterogeneity was assessed similar to imprecision. We calculated prediction intervals for each comparison, calculated by adding a random effect from a new hypothetical study to the mean estimate from the network meta analysis and calculating the 95% credible intervals. If the prediction interval crossed the null value, then we downgraded for heterogeneity by one level. If the prediction interval was wide and included both clinically meaningful benefits and harms, then we downgraded for heterogeneity by two levels. We again considered an standardized mean difference of 0.5 to be the threshold for clinical significance (Jakobsen, 2020). 
+
+<span class="custom-paragraph-header">6. Incoherence</span>
+
+To assess incoherence, we examined the consistency of direct and indirect evidence for each comparison in the network meta-analysis using the Separate Indirect from Direct Evidence (SIDE) approach (Gerta Rücker, Guido Schwarzer, Ulrike Krahn, Jochem König, Orestis Efthimiou. netmeta: Network Meta-Analysis using Frequentist Methods 2018). If there was a significant inconsistency between direct and indirect evidence for a comparison, then we downgraded for incoherence by one level. 
+
+We also assessed the fit of unrelated mean effects (design by treatment interaction) as compared to consistency models to examine for incoherence in the network. If the fit of the unrelated mean effects model was substantially better than the consistency model, then we downgraded for incoherence by one level. If the fit of the unrelated mean effects model was substantially better than the consistency model and there were concerns about the transitivity of the network, then we downgraded for incoherence by two levels. We assessed fit by using the expected predictive log density (EPLD) and from a leave one out cross validation. If the EPLD was higher for the unrelated mean effects model than the consistency model, then we downgraded for incoherence by one level.
+
+### Assessment of overall confidence  {.appendix}
+We downgraded overall confidence in the evidence by one level for any category marked as "some concerns" and by two levels for any category marked as "high risk of bias" or "Major concerns". We treated indirectness and incoherence as correlated categories representing transitivity and imprecision and heterogeneity as correlated categories for variability. Inside these categories, we reduced the global ranking by one level if any category therein was "Some concerns" and two levels if any category had "Major concerns".
+
+::: {.landscape}
+### CINeMA ratings for interventions  {.appendix}
+
+```{r}
+#| label: load cinema
+cinema_low_dep <- readRDS(here::here("outputs","depression","tables",
+                                     "ft",
+                                     "cinema_table_low_bias_placebo.rds"))
+cinema_low_dep_def <- readRDS(here::here("outputs",
+                                         "depression","tables",
+                                         "ft",
+                                         "cinema_table_deficiency_low_bias_placebo.rds"))
+cinema_low_anx <- readRDS(here::here("outputs","anxiety","tables",
+                                     "ft","cinema_table_low_bias_placebo.rds"))
+cinema_low_anx_def <- readRDS(here::here("outputs","anxiety","tables",
+                                     "ft","cinema_table_deficiency_low_bias_placebo.rds"))
+```
+
+```{r}
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies compared to placebo for depression scales."
+cinema_low_dep %>% knitr::knit_print()
+```
+
+```{r}
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies compared to placebo for depression scales. Estimates broken out by depression status and vitamin deficiency status."
+cinema_low_dep_def %>% knitr::knit_print()
+```
+
+```{r}
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies compared to placebo for anxiety scales."
+cinema_low_anx %>%  knitr::knit_print()
+```
+
+```{r}
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies compared to placebo for anxiety scales. Estimates broken out by depression status and vitamin deficiency status."
+cinema_low_anx_def %>% knitr::knit_print()
+```
+
+:::
+
+
+
+
+## Data/code availability {.appendix}
+All code used for data extraction, analysis, and figure generation is available at [https://github.com/ericdunipace/vitamin_meta](https://github.com/ericdunipace/vitamin_meta). The data used in the analyses are also available at this repository.
+
