@@ -30,6 +30,13 @@ box::use(rstan)
 box::use(purrr)
 box::use(matrixStats)
 box::use(cli)
+box::use(rprojroot)
+
+rootcrit <- rprojroot::as_root_criterion(
+  rprojroot::has_file("vitamin_meta.Rproj")
+)
+root <- rprojroot::find_root(rootcrit)
+here::i_am("R/vit.r")
 
 mom_log_normal <- function(mu, sigma) {
   m = log(mu) - 0.5 * log(1 + (sigma^2 / mu^2))
@@ -7020,41 +7027,23 @@ cinema <- function(fit, mcid = 0.5,
   
 }
 
-cinema_table <- function(x, evidence = c("all","mixed", "indirect"), ...) {
+cinema_table <- function(x, evidence = c("all","mixed", "indirect"), 
+                         format = c("gt","flextable"),
+                         ...) {
   stopifnot(inherits(x, "vit_cinema"))
   
-  gt_cinema_colors <- function(gt_tbl,
-                               cols,
-                               palette = c(
-                                 "High"      = "#1a9850",
-                                 "Moderate"  = "#4575b4",
-                                 "Low"       = "#fdae61",
-                                 "Very low"  = "#d73027",
-                                 "No concerns"    = "#1a9850",
-                                 "Some concerns"  = "#fdae61",
-                                 "Major concerns" = "#d73027",
-                                 "Low risk"  = "#1a9850",
-                                 "High risk" = "#d73027"
-                               )) {
-    
-    # apply one tab_style per level, across all requested columns
-    for (col in cols) {
-      col_sym <- rlang::sym(col)
-      
-      for (lvl in names(palette)) {
-        gt_tbl <- gt_tbl %>%
-          gt::tab_style(
-            style = gt::cell_fill(color = palette[[lvl]]),
-            locations = gt::cells_body(
-              columns = gt::all_of(col),
-              rows = !!rlang::expr(!!col_sym == !!lvl)
-            )
-          )
-      }
-    }
-    
-    gt_tbl
-  }
+  
+  cinema_palette <- c(
+    "High"      = "#1a9850",
+    "Moderate"  = "#4575b4",
+    "Low"       = "#fdae61",
+    "Very low"  = "#d73027",
+    "No concerns"    = "#1a9850",
+    "Some concerns"  = "#fdae61",
+    "Major concerns" = "#d73027",
+    "Low risk"  = "#1a9850",
+    "High risk" = "#d73027" 
+  )
   
   cinema_cols <- c(
     "within_study_bias", "reporting_bias", "indirectness",
@@ -7065,83 +7054,132 @@ cinema_table <- function(x, evidence = c("all","mixed", "indirect"), ...) {
   evidence <- match.arg(evidence)
   if(evidence == "all") evidence <- c("mixed","indirect")
   
-  x %>%
+  temp_output <- x %>%
     select(-c(trt1, trt2, 
               # Estimate, `q2.5%`, `q97.5%`, `prediction_q2.5%`, `prediction_q97.5%`
-              )) %>%
+    )) %>%
     mutate(comparison = stringr::str_replace_all(as.character(comparison), "\\] vs\\. \\[", " vs. ") %>% 
              stringr::str_replace_all("\\[|\\]", "")) %>% 
     mutate(comparison = comparison %>%  factor(levels = unique(comparison))) %>%
     mutate(evidence = ifelse(!is.na(n_study) & n_study > 0, "mixed", "indirect")) %>%
     filter(evidence %in% !!evidence) %>%
     mutate(evidence = factor(evidence, levels = c("mixed", "indirect"), 
-                             labels = c("Mixed Estimates", "Indirect Estimates"))) %>%
-    gt::gt(groupname_col = "evidence") %>%
-    gt::fmt_number() %>% 
-    gt::fmt_number(columns = n_study, decimals = 0) %>% 
-    gt::cols_merge(
-      columns = c(Estimate, `q2.5%`, `q97.5%`),
-      pattern = "{1} ({2}, {3})"
-    ) %>%
-    gt::cols_merge(
-      columns = c(`prediction_q2.5%`, `prediction_q97.5%`),
-      pattern = "({1}, {2})"
-    ) %>%
-    gt::tab_header(title = "Confidence in Network Meta-Analysis (CINeMA)") %>%
-    gt_cinema_colors(cols = cinema_cols) %>% 
-    gt::cols_label(
-      evidence = "Evidence",
-      comparison = "Comparison",
-      n_study = "No.of Studies",
-      Estimate = "Effect (95% CrI)",
-      `prediction_q2.5%` = "95% PI",
-      within_study_bias = "Within-study bias",
-      reporting_bias = "Reporting bias",
-      indirectness = "Indirectness",
-      imprecision = "Imprecision",
-      heterogeneity = "Heterogeneity",
-      incoherence = "Incoherence",
-      overall_confidence = "Overall confidence",
-      reasons = "Reasons for downgrading"
-    ) %>% 
-    gt::sub_missing()
+                             labels = c("Mixed Estimates", "Indirect Estimates")))
   
-  # x %>%
-  #   gt() %>%
-  #   tab_header(
-  #     title = "Confidence in Network Meta-Analysis (CINeMA)"
-  #   ) %>%
-  #   fmt_markdown(columns = everything()) %>%
-  #   tab_style(
-  #     style = cell_fill(color = "#d73027"),
-  #     locations = cells_body(
-  #       rows = within_study_bias == "Very low"
-  #     )
-  #   ) %>%
-  #   tab_style(
-  #     style = cell_fill(color = "#d73027"),
-  #     locations = cells_body(
-  #       rows = overall_confidence == "Very low"
-  #     )
-  #   ) %>% 
-  #   tab_style(
-  #     style = cell_fill(color = "#fdae61"),
-  #     locations = cells_body(
-  #       rows = overall_confidence == "Low"
-  #     )
-  #   ) %>% 
-  #   tab_style(
-  #     style = cell_fill(color = "#fdae61"),
-  #     locations = cells_body(
-  #       rows = overall_confidence == "Moderate"
-  #     )
-  #   ) %>% 
-  #   tab_style(
-  #     style = cell_fill(color = "#1a9850"),
-  #     locations = cells_body(
-  #       rows = overall_confidence == "High"
-  #     )
-  #   )
+  out <- if(format == "gt") {
+    gt_cinema_colors <- function(gt_tbl,
+                                 cols,
+                                 palette = cinema_palette) {
+      
+      # apply one tab_style per level, across all requested columns
+      for (col in cols) {
+        col_sym <- rlang::sym(col)
+        
+        for (lvl in names(palette)) {
+          gt_tbl <- gt_tbl %>%
+            gt::tab_style(
+              style = gt::cell_fill(color = palette[[lvl]]),
+              locations = gt::cells_body(
+                columns = gt::all_of(col),
+                rows = !!rlang::expr(!!col_sym == !!lvl)
+              )
+            )
+        }
+      }
+      
+      gt_tbl
+    }
+    temp_output %>% 
+      gt::gt(groupname_col = "evidence") %>%
+      gt::fmt_number() %>% 
+      gt::fmt_number(columns = n_study, decimals = 0) %>% 
+      gt::cols_merge(
+        columns = c(Estimate, `q2.5%`, `q97.5%`),
+        pattern = "{1} ({2}, {3})"
+      ) %>%
+      gt::cols_merge(
+        columns = c(`prediction_q2.5%`, `prediction_q97.5%`),
+        pattern = "({1}, {2})"
+      ) %>%
+      gt::tab_header(title = "Confidence in Network Meta-Analysis (CINeMA)") %>%
+      gt_cinema_colors(cols = cinema_cols) %>% 
+      gt::cols_label(
+        evidence = "Evidence",
+        comparison = "Comparison",
+        n_study = "No.of Studies",
+        Estimate = "Effect (95% CrI)",
+        `prediction_q2.5%` = "95% PI",
+        within_study_bias = "Within-study bias",
+        reporting_bias = "Reporting bias",
+        indirectness = "Indirectness",
+        imprecision = "Imprecision",
+        heterogeneity = "Heterogeneity",
+        incoherence = "Incoherence",
+        overall_confidence = "Overall confidence",
+        reasons = "Reasons for downgrading"
+      ) %>% 
+      gt::sub_missing()
+  } else if (format == "flextable") {
+    flextable_cinema_colors <- function(ft,
+                                        cols,
+                                        palette = cinema_palette) {
+      data <- ft$body$dataset
+      for (col in cols) {
+        for (lvl in names(palette)) {
+          rows_i <- which(!is.na(data[[col]]) & data[[col]] == lvl)
+          
+          if (length(rows_i) > 0) {
+            ft <- flextable::bg(
+              ft,
+              i = rows_i,
+              j = col,
+              bg = palette[[lvl]],
+              part = "body"
+            )
+          }
+        }
+      }
+      
+      ft
+    }
+   temp_output %>% 
+      mutate(Estimate = sprintf("%.2f (%.2f, %.2f)", Estimate, `q2.5%`, `q97.5%`),
+             `95% PI` = sprintf("(%.2f, %.2f)", `prediction_q2.5%`, `prediction_q97.5%`)) %>%
+     select(evidence, comparison,
+            n_study,
+            Estimate,
+            `95% PI`,
+            within_study_bias,
+            reporting_bias,
+            indirectness,
+            imprecision,
+            heterogeneity,
+            incoherence,
+            overall_confidence,
+            reasons) %>% 
+      flextable::as_grouped_data(groups = 'evidence') %>% 
+      flextable::flextable() %>% 
+      flextable::theme_vanilla() %>% 
+      flextable_cinema_colors(cols = cinema_cols) %>% 
+      flextable::set_header_labels(
+        evidence = "Evidence",
+        comparison = "Comparison",
+        n_study = "No.of Studies",
+        Estimate = "Effect (95% CrI)",
+        `95% PI` = "95% PI",
+        within_study_bias = "Within-study bias",
+        reporting_bias = "Reporting bias",
+        indirectness = "Indirectness",
+        imprecision = "Imprecision",
+        heterogeneity = "Heterogeneity",
+        incoherence = "Incoherence",
+        overall_confidence = "Overall confidence",
+        reasons = "Reasons for downgrading"
+      ) 
+  }
+    
+  
+  return(out)
 }
 
 dodge_pointinterval_layers <- function(p, width = 0.6) {

@@ -1,0 +1,29 @@
+project:
+  type: book
+  
+book:
+  title: "Micronutrient Supplementation for Depressive and Anxiety Symptoms in Adults: A Systematic Review and Bayesian Network Meta-Analysis of Randomized Controlled Trials"
+  chapters:
+    - index.qmd
+    - Methods.qmd
+    - Results.qmd
+    - Appendix.qmd
+  
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    html-math-method: katex
+    include-after-body: appendix-numbering.html
+  docx:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+execute:
+  echo: false
+  
+tbl-cap-location: bottom
+filters:
+  - appendix.lua
+

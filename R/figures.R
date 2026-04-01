@@ -875,14 +875,14 @@ for(outcome in outcomes) {
                             "_all_data.rds"))
     )
     
-    if(outcome == "depression") {
+    # if(outcome == "depression") {
       fit_ssri_dep <- readRDS(here::here("outputs", "saved_models", "depression", 
                                          glue::glue("model_", 
                                                     "depression",
                                                     "_low_bias_ssri_data.rds")
       )
       )
-    }
+    # }
     
     fit_some_only <- readRDS(
       here::here("outputs", "saved_models", outcome,
@@ -1176,7 +1176,7 @@ for(outcome in outcomes) {
         strip.clip = "off"
       )
     
-    if(outcome == "depression") {
+    # if(outcome == "depression") {
      fit_ssri_dep %>% 
         vit$summary_brms_nma(keep = ".trt") %>%
         filter(.observed) %>% select(-.observed) %>% 
@@ -1186,7 +1186,7 @@ for(outcome in outcomes) {
                     filename = "relative_effects_low_bias_ssri_only",
                     height = 5,
                     width = 7)
-    }
+    # }
     
     figure_save(low_bias_plot,
                 outdir = "outputs",
@@ -2934,14 +2934,14 @@ newdata$.study <- fit_adv$data$.study[1]
 newdata$.obs_re <- as.factor(newdata$.obs_re)
 adverse_summ <- vit$summary_brms_nma(fit_adv, newdata = newdata)
 
-plot(adverse_summ %>% 
+(plot(adverse_summ %>% 
        filter(.observed) %>% 
        select(-.observed) %>% 
        mutate(value = value)) + 
   theme(plot.margin = margin(5,10,5,5)) + xlab("Odds Ratio") + 
   scale_x_continuous(
     breaks = log(10^(-3:3)),
-    labels = scales::trans_format("exp", scales::math_format(.x))) %>% 
+    labels = scales::trans_format("exp", scales::math_format(.x)))) %>% 
   figure_save(
     outdir = "outputs",
     outcome = "overall",
@@ -2956,14 +2956,15 @@ newdata_low$.obs_re <- as.factor(newdata_low$.obs_re)
 adverse_summ_low <- vit$summary_brms_nma(fit_adv_low, newdata = newdata_low)
 
 
-plot(adverse_summ_low %>% 
+(plot(adverse_summ_low %>% 
        filter(.observed) %>% 
        select(-.observed) %>% 
        mutate(value = value)) + 
   theme(plot.margin = margin(5,10,5,5)) + xlab("Odds Ratio") + 
   scale_x_continuous(
     breaks = log(10^(-3:3)),
-    labels = scales::trans_format("exp", scales::math_format(.x))) %>% 
+    labels = scales::trans_format("exp", scales::math_format(.x)))
+  ) %>% 
   figure_save(
     outdir = "outputs",
     outcome = "overall",
@@ -2979,14 +2980,14 @@ newdata_ssri$.obs_re <- as.factor(newdata_ssri$.obs_re)
 adverse_summ_ssri <- vit$summary_brms_nma(fit_adv_low_ssri, newdata = newdata_ssri)
 
 
-plot(adverse_summ_ssri %>% 
+(plot(adverse_summ_ssri %>% 
        filter(.observed) %>% 
        select(-.observed) %>% 
        mutate(value = value)) + 
   theme(plot.margin = margin(5,10,5,5)) + xlab("Odds Ratio") + 
   scale_x_continuous(
     breaks = log(10^(-3:3)),
-    labels = scales::trans_format("exp", scales::math_format(.x))) %>% 
+    labels = scales::trans_format("exp", scales::math_format(.x))) )%>% 
   figure_save(
     outdir = "outputs",
     outcome = "overall",

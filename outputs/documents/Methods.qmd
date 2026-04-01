@@ -1,0 +1,21 @@
+---
+title: "Methods"
+---
+
+## Outcome Measures
+The primary outcome assessed was change in depression or anxiety symptom severity measured with a validated rating scale (e.g., Beck Depression Inventory, Hamilton Depression Rating Scale, Hospital Anxiety and Depression Scale). Secondary outcomes included pre–post changes in serum micronutrient concentrations and adverse events. Studies that did not report sufficient quantitative outcome data were excluded.
+
+Given that different scales were used across trials, outcomes were standardized using standardized mean differences (SMDs). When multiple scales were reported for the same condition within a study, the most commonly used scale across studies was selected. A complete list of scales and their frequency of use is provided in the appendix.
+
+## Statistical Analysis
+
+Analysis was conducted using a Bayesian network meta-analysis that combined direct and indirect comparisons under a hierarchical random-effects model with study-level random effects. Models were fit using the `brms` package in R, which implements Markov chain Monte Carlo (MCMC) sampling via Stan to estimate posterior distributions of treatment effects. Additional model details are provided in the Appendix (Appendix ##).
+
+The assumption of transitivity may be threatened by uneven distributions of baseline vitamin deficiency and baseline depression or anxiety status across interventions. We therefore evaluated transitivity by examining whether key potential effect modifiers were similarly distributed across treatment comparisons. Specifically, we assessed sex distribution, baseline micronutrient deficiency, and baseline symptom severity, each of which may plausibly influence treatment response. Study- and comparison-level characteristics were visually inspected to identify systematic imbalances across the network. In addition, prespecified network meta-regression models were used to formally evaluate effect modification by these study-level characteristics, and subgroup-specific estimates are reported.
+
+A common between-study heterogeneity parameter (τ) was assumed across interventions within each outcome network. Heterogeneity was interpreted by comparing τ to the scale of observed treatment effects and by examining prediction intervals. Coherence (consistency) was assessed using node-splitting models and a design-by-treatment interaction model. Residual heterogeneity and inconsistency were further explored using prespecified meta-regression models evaluating potential sources of variability, including risk of bias, baseline symptom severity, baseline micronutrient levels, year and country of study, standard error, and duration of follow-up (Appendix ##). Contour-enhanced funnel plots were used to assess potential small-study effects.
+
+Certainty of evidence was evaluated using the Confidence in Network Meta-Analysis (CINeMA) framework, which assesses six domains: within-study bias, across-studies bias, indirectness, imprecision, heterogeneity, and incoherence (Nikolakopoulou, 2020). Confidence ratings were generated for all interventions relative to placebo and for all contrasts present in the network (Appendix ##).
+
+
+

@@ -1,0 +1,16 @@
+---
+title: "Abstract"
+---
+
+## Objective:
+To evaluate the efficacy of micronutrient supplementation for depressive and anxiety symptoms in adults.
+
+## Methods:
+MEDLINE, Embase, Web of Science Core Collection, Cochrane CENTRAL, ClinicalTrials.gov, and PsycINFO were searched from database inception through July 22, 2024, in accordance with PRISMA 2020 guidelines. Eligible studies were randomized controlled trials in adults evaluating B vitamins, vitamins C or D, zinc, magnesium, selenium, or iron versus placebo, standard care, or no active supplementation. Risk of bias was assessed using the Cochrane Risk of Bias 1 tool. Primary outcomes were changes in validated depression or anxiety symptom scores, analyzed as standardized mean differences (SMDs). A Bayesian network meta-analysis estimated effects and 95% credible intervals (CrIs). Of 101 included studies (37,932 participants), 50 low-risk-of-bias studies were included in the primary analysis.
+
+## Results:
+Vitamin D showed the only credible evidence of benefit versus placebo for depressive symptoms (SMD=-0.32, 95% CrI=-0.51 to -0.13). Selenium also showed a credible estimate (SMD=-0.99, 95% CrI=-1.90 to -0.11), but this finding was based on 2 studies and should be interpreted cautiously. No micronutrient showed credible benefit for anxiety symptoms. Study-level subgroup analyses suggested larger vitamin D effects in trials enrolling participants with baseline deficiency and depressive symptoms.
+
+##Conclusions:
+Among the micronutrients evaluated, vitamin D had the most consistent evidence of benefit for depressive symptoms. Evidence for anxiety outcomes and for other micronutrients remained limited or inconclusive. Future trials should focus on well-characterized, deficient populations and incorporate biomarker assessment before and after treatment.
+

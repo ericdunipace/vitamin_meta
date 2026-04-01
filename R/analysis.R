@@ -217,7 +217,7 @@ for (outcome in outcomes) {
                                  "_high_data")
     )) 
   
-  if (outcome == "depression") { # no such studies for anxiety
+  # if (outcome == "depression") { # no such studies for anxiety
     fit_ssri_low <- vit$prep_brms_nma(data = data %>%
                                         filter(bias == "low") %>% 
                                         filter(control == "z.antidepressant")

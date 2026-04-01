@@ -354,6 +354,73 @@ data <- vit$get_vitamin_data(outcome = NULL, simple_analysis = FALSE,
     
   }
   
+  save_cm_mult_formats <- function(x, outdir, file.name, group = NULL) {
+    
+    # save raw data
+    if(!dir.exists(here::here(outdir, "raw")) ) {
+      dir.create(here::here(outdir, "raw"), recursive = TRUE)
+    }
+    saveRDS(x, here::here(outdir, "raw", paste0(file.name, ".rds")))
+    
+    # save gt
+    ggt <- x %>% gt(groupname_col = group) %>% 
+      gt::fmt_number(decimals = 2)
+    
+    # raw gt
+    if(!dir.exists(here::here(outdir, "gt")) ) {
+      dir.create(here::here(outdir, "gt"), recursive = TRUE)
+    }
+    saveRDS(ggt, here::here(outdir, "gt", paste0(file.name, ".rds")))
+    
+    # gen flextable 
+    ft <- x %>% 
+      flextable::flextable() 
+    
+    num_cols <- names(x)[sapply(x, is.numeric)]
+    
+    ft <- flextable::colformat_double(
+      ft,
+      j = num_cols,
+      digits = 2,       # adjust as needed
+      big.mark = ",",   # thousands separator
+      decimal.mark = "."
+    )
+    
+    # save flextable
+    if(!dir.exists(here::here(outdir, "ft")) ) {
+      dir.create(here::here(outdir, "ft"), recursive = TRUE)
+    }
+    saveRDS(ft, here::here(outdir,  "ft", paste0(file.name, ".rds")))
+    
+    # save flextable word
+    if(!dir.exists(here::here(outdir, "docx")) ) {
+      dir.create(here::here(outdir, "docx"), recursive = TRUE)
+    }
+    ft %>% flextable::save_as_docx(path = here::here(outdir, "docx", paste0(file.name, ".docx")))
+    
+  }
+  
+  save_cinema_mult_formats <- function(x, outdir, file.name) {
+    x %>% 
+      vit$cinema_table(format = "gt") %>% 
+      saveRDS(here::here(outdir,
+                         "gt",
+                         glue::glue("{file.name}.rds")))
+    
+    ft <- x %>% 
+      vit$cinema_table(format = "flextable") 
+    
+    ft %>% 
+      saveRDS(here::here(outdir,
+                         "ft",
+                         glue::glue("{file.name}.rds")))
+    
+    ft %>% 
+      flextable::save_as_docx(path = here::here(outdir,
+                                         "docx",
+                                         glue::glue("{file.name}.docx")))
+  }
+  
   count_vars <- function(x, total) {
     r <- as.integer(round(x))
     pct_calc <- r/total
@@ -1593,6 +1660,7 @@ newdata$.obs_re <- as.factor(newdata$.obs_re)
 adverse_summ <- vit$summary_brms_nma(fit_adv, newdata = newdata)
 
 adverse_summ %>% 
+  mutate(value = exp(value)) %>% 
   summary() %>% 
   filter(.observed) %>% 
   select(-.observed) %>% 
@@ -1607,6 +1675,7 @@ newdata_low$.obs_re <- as.factor(newdata_low$.obs_re)
 adverse_summ_low <- vit$summary_brms_nma(fit_adv_low, newdata = newdata_low)
 
 adverse_summ_low %>% 
+  mutate(value = exp(value)) %>% 
   summary() %>% 
   filter(.observed) %>% 
   select(-.observed) %>% 
@@ -1622,6 +1691,7 @@ newdata_ssri$.obs_re <- as.factor(newdata_ssri$.obs_re)
 adverse_summ_ssri <- vit$summary_brms_nma(fit_adv_low_ssri, newdata = newdata_ssri)
 
 adverse_summ_ssri %>% 
+  mutate(value = exp(value)) %>% 
   summary() %>% 
   filter(.observed) %>% 
   select(-.observed) %>% 
@@ -2337,18 +2407,10 @@ for (outcome in outcomes) {
                          names_from = comparison,
                          values_from = contribution) %>% 
       rename(Study = study) %>% 
-      gt() %>%  
-      fmt_number()  %>% 
-      # gtsave(
-      #   filename = here::here(output_dir,
-      #                         glue::glue("contribution_matrix_low_bias.tex"))
-      # )
-      save_gt_mult_formats(
-         here::here(output_dir,
-                    glue::glue("contribution_matrix_low_bias"))
-       )
+      save_cm_mult_formats(outdir = output_dir,
+                           file.name = glue::glue("contribution_matrix_low_bias"))
        
-       cm_low_approx %>% 
+    cm_low_approx %>% 
          filter(trt2 == "Placebo") %>%  
          arrange(trt1) %>% 
          mutate(contribution = contribution * 100) %>% 
@@ -2356,12 +2418,8 @@ for (outcome in outcomes) {
                             names_from = comparison,
                             values_from = contribution) %>% 
          rename(Study = study) %>% 
-         gt() %>% 
-         fmt_number() %>% 
-         save_gt_mult_formats(
-           here::here(output_dir,
-                      glue::glue("approx_contribution_matrix_low_bias"))
-         )
+      save_cm_mult_formats(outdir = output_dir,
+                           file.name = glue::glue("approx_contribution_matrix_low_bias"))
     
        cm_high %>% 
          filter(trt2 == "Placebo") %>%  
@@ -2384,16 +2442,8 @@ for (outcome in outcomes) {
                                          "high"),
                               ordered = TRUE)) %>%
          rename(Bias = bias, Study = study) %>% 
-         gt() %>% 
-         fmt_number() %>% 
-      # gtsave(
-      #   filename = here::here(output_dir,
-      #                         glue::glue("contribution_matrix_all_data.tex"))
-      # )
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("contribution_matrix_all_data"))
-      )
+         save_cm_mult_formats(outdir = output_dir,
+                        file.name = glue::glue("contribution_matrix_all_data"))
       
       cm_high_approx %>% 
         filter(trt2 == "Placebo") %>%  
@@ -2416,16 +2466,9 @@ for (outcome in outcomes) {
                                         "high"),
                              ordered = TRUE)) %>%
         rename(Bias = bias, Study = study) %>% 
-        gt() %>% 
-        fmt_number() %>% 
-      # gtsave(
-      #   filename = here::here(output_dir,
-      #                         glue::glue("contribution_matrix_all_data.tex"))
-      # )
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("approx_contribution_matrix_all_data"))
-      )
+        save_cm_mult_formats(outdir = output_dir,
+                          file.name = glue::glue("approx_contribution_matrix_all_data"))
+      
   }
   
   cat("  Creating cinema tables for", outcome, "...\n")
@@ -2552,97 +2595,47 @@ for (outcome in outcomes) {
     
     # save gt tables
     cin_low %>% cinema_filter() %>% 
-      vit$cinema_table() %>% 
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("cinema_table_low_bias"))
-      )
-    
+      save_cinema_mult_formats(outdir = output_dir, file.name ="cinema_table_low_bias")
+
     cin_low %>% 
       filter(trt2 == "Placebo") %>% 
-      vit$cinema_table() %>% 
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("cinema_table_low_bias_placebo"))
-      )
+      save_cinema_mult_formats(outdir = output_dir, file.name ="cinema_table_low_bias_placebo")
     
     cin_some %>% cinema_filter() %>% 
-      vit$cinema_table() %>% 
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("cinema_table_some_and_low_bias"))
-      )
+      save_cinema_mult_formats(outdir = output_dir, file.name ="cinema_table_some_and_low_bias")
     
     cin_some %>% 
       filter(trt2 == "Placebo") %>% 
-      vit$cinema_table() %>% 
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("cinema_table_some_and_low_bias_placebo"))
-      )
+      save_cinema_mult_formats(outdir = output_dir, file.name ="cinema_table_some_and_low_bias_placebo")
     
     cin_high %>% cinema_filter() %>% 
-      vit$cinema_table() %>% 
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("cinema_table_all_data"))
-      )
+      save_cinema_mult_formats(outdir = output_dir, file.name ="cinema_table_all_data")
     
     cin_high %>% 
       filter(trt2 == "Placebo") %>% 
-      vit$cinema_table() %>% 
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("cinema_table_all_data"))
-      )
+      save_cinema_mult_formats(outdir = output_dir, file.name ="cinema_table_all_data")
     
     cin_low_def %>% 
       cinema_filter() %>% 
-      vit$cinema_table() %>% 
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("cinema_table_deficiency_low_bias"))
-      )
+      save_cinema_mult_formats(outdir = output_dir, 
+                               file.name ="cinema_table_deficiency_low_bias")
     
     cin_low_def %>% 
       filter(trt2 == "Placebo") %>% 
-      vit$cinema_table() %>% 
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("cinema_table_deficiency_low_bias_placebo"))
-      )
+      save_cinema_mult_formats(outdir = output_dir, file.name ="cinema_table_deficiency_low_bias_placebo")
     
     cin_low_def_no_iran %>% 
       filter(trt2 == "Placebo") %>% 
-      vit$cinema_table() %>% 
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("cinema_table_deficiency_low_bias_no_iran_placebo"))
-      )
+      save_cinema_mult_formats(outdir = output_dir, file.name ="cinema_table_deficiency_low_bias_no_iran_placebo")
     
     cin_def %>% 
       cinema_filter() %>% 
-      vit$cinema_table()  %>% 
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("cinema_table_deficiency_all_data"))
-      )
+      save_cinema_mult_formats(outdir = output_dir, file.name = "cinema_table_deficiency_all_data")
     
     cin_def %>% 
       filter(trt2 == "Placebo") %>% 
-      vit$cinema_table() %>% 
-      save_gt_mult_formats(
-        here::here(output_dir,
-                   glue::glue("cinema_table_deficiency_all_data_placebo"))
-      )
+      save_cinema_mult_formats(outdir = output_dir, file.name ="cinema_table_deficiency_all_data_placebo")
     
-    # cin_def_no_bias %>% 
-    #   filter(trt2 == "Placebo") %>% 
-    #   vit$cinema_table()  %>% 
-    #   saveRDS(
-    #     here::here(output_dir,
-    #                glue::glue("cinema_table_deficiency_all_data_no_bias_placebo.rds"))
-    #   )
     
   }
   
