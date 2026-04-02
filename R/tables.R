@@ -307,7 +307,9 @@ data <- vit$get_vitamin_data(outcome = NULL, simple_analysis = FALSE,
         est_ci = "Effect Size (95% Credible Interval)"
       ) %>%
       flextable::autofit() %>% 
-      flextable::hline(border = officer::fp_border(color = "gray70", width = 0.5), part = "body")
+      flextable::hline(border = officer::fp_border(color = "gray70", 
+                                                   width = 0.5), 
+                       part = "body")
     
   }
   
@@ -1582,6 +1584,9 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
     flextable::colformat_double(digits = 1) %>% 
     flextable::colformat_char(na_str = "—") %>%
     flextable::autofit() %>% 
+    flextable::fit_to_width(max_width = 6.5) %>%    # because margins will be smaller
+    flextable::fontsize(size = 6, part = "all") %>% 
+    flextable::hline(border = officer::fp_border(color = "gray70", width = 0.5), part = "body") %>%
     saveRDS(
       here::here("outputs","overall","tables", "ft",
                  "study_level_demo_table.rds")
@@ -1593,8 +1598,8 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
     flextable::colformat_double(digits = 1) %>% 
     flextable::colformat_char(na_str = "—") %>%
     flextable::autofit() %>% 
-    flextable::fit_to_width(max_width = 7.5) %>%    # because margins will be smaller
-    flextable::fontsize(size = 8, part = "all") %>% 
+    flextable::fit_to_width(max_width = 6.5) %>%    # because margins will be smaller
+    flextable::fontsize(size = 6, part = "all") %>% 
     flextable::hline(border = officer::fp_border(color = "gray70", width = 0.5), part = "body") %>% 
     flextable::save_as_docx(
       path = here::here("outputs","overall","tables", "docx",
@@ -1645,6 +1650,8 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
     flextable::merge_v(j = c("Study", "Intervention")) %>%
     flextable::colformat_double(digits = 0) %>% 
     flextable::colformat_char(na_str = "—") %>%
+    flextable::autofit() %>% 
+    flextable::fit_to_width(max_width = 7.5) %>%
     saveRDS(
       here::here("outputs","overall","tables", "ft",
                  "study_level_demo_table_low.rds")
@@ -2158,6 +2165,9 @@ for (outcome in outcomes) {
         `unclear/low` = ifelse(is.na(`unclear/low`), NA_character_, sprintf("%.3f (%.3f)", `unclear/low`, `unclear/lowse`)),
         `high/unclear/low` = ifelse(is.na(`high/unclear/low`), NA_character_, sprintf("%.3f (%.3f)", `high/unclear/low`, `high/unclear/lowse`))
       ) %>%
+      select(-any_of(c("se_diff_low",
+                       "se_diff_some",
+                       "se_diff_high"))) %>%
       flextable::flextable() %>% 
       flextable::set_header_labels(
         Likelihood = "Likelihood",
@@ -2241,6 +2251,9 @@ for (outcome in outcomes) {
         elpd_diff_some = ifelse(is.na(elpd_diff_some), NA_character_, sprintf("%.3f (%.3f)", elpd_diff_some, se_diff_some)),
         elpd_diff_high = ifelse(is.na(elpd_diff_high), NA_character_, sprintf("%.3f (%.3f)", elpd_diff_high, se_diff_high))
       ) %>%
+      select(-any_of(c("se_diff_low",
+                       "se_diff_some",
+                       "se_diff_high"))) %>%
       flextable() %>% 
       flextable::set_header_labels(
         Model = "Model",

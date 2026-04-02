@@ -1,5 +1,7 @@
 project:
   type: book
+  post-render:
+    - "python3 scripts/patch_appendix_docx.py"
   
 book:
   title: "Micronutrient Supplementation for Depressive and Anxiety Symptoms in Adults: A Systematic Review and Bayesian Network Meta-Analysis of Randomized Controlled Trials"
@@ -20,10 +22,11 @@ format:
     toc: true
     toc-depth: 3
     number-sections: true
+    reference-doc: reference/custom-reference.docx
 execute:
   echo: false
   
 tbl-cap-location: bottom
 filters:
   - appendix.lua
-
+  - filters/appendix-boundary.lua
