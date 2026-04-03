@@ -1,0 +1,18 @@
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const appendix = document.querySelector("#appendix");
+  if (!appendix) return;
+
+  const sections = appendix.querySelectorAll("h2");
+
+  sections.forEach((sec, i) => {
+    const letter = String.fromCharCode(65 + i); // A, B, C
+    sec.innerHTML = letter + ". " + sec.innerHTML;
+
+    let subsections = sec.parentElement.querySelectorAll("h3");
+    subsections.forEach((sub, j) => {
+      sub.innerHTML = letter + "." + (j + 1) + " " + sub.innerHTML;
+    });
+  });
+});
+</script>

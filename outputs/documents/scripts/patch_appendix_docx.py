@@ -176,13 +176,14 @@ def _patch_document_xml(xml_bytes: bytes, debug: bool = False) -> tuple[bytes, i
             t.text = remaining
 
     appendix_style_ids = set(MARKER_TO_STYLE.values())
-    appendix_heading1_id = MARKER_TO_STYLE.get("APPENDIX_H2")
 
     in_appendix = False
     appendix_letter = None
     appendix_index = 0
+    lvl2 = lvl3 = lvl4 = 0
     caption_counters = {"Table": 0, "Figure": 0}
     caption_map = {"Table": {}, "Figure": {}}
+    section_label_map = {}
 
     caption_re = re.compile(r"^(Table|Figure)[\u00A0 ]+(\d+(?:\.\d+)*)")
 
@@ -230,7 +231,30 @@ def _patch_document_xml(xml_bytes: bytes, debug: bool = False) -> tuple[bytes, i
         patched += 1
 
     # Second pass: update appendix caption numbering + in-text references
-    for p in root.findall(".//w:p", NS):
+    # and build a map of appendix section bookmarks -> appendix-style labels.
+    body = root.find("w:body", NS)
+    pending_bookmarks = []
+
+    def capture_bookmarks(elem: ET.Element) -> None:
+        if elem.tag == f"{{{NS['w']}}}bookmarkStart":
+            name = elem.get(f"{{{NS['w']}}}name")
+            if name:
+                pending_bookmarks.append(name)
+            return
+        for b in elem.findall("w:bookmarkStart", NS):
+            name = b.get(f"{{{NS['w']}}}name")
+            if name:
+                pending_bookmarks.append(name)
+
+    if body is None:
+        return ET.tostring(root, encoding="utf-8", xml_declaration=True), patched
+
+    for node in list(body):
+        capture_bookmarks(node)
+        if node.tag != f"{{{NS['w']}}}p":
+            continue
+
+        p = node
         ppr = p.find("w:pPr", NS)
         pstyle = ppr.find("w:pStyle", NS) if ppr is not None else None
         style_id = pstyle.get(f"{{{NS['w']}}}val") if pstyle is not None else None
@@ -244,6 +268,7 @@ def _patch_document_xml(xml_bytes: bytes, debug: bool = False) -> tuple[bytes, i
             in_appendix = True
             appendix_letter = None
             appendix_index = 0
+            lvl2 = lvl3 = lvl4 = 0
             caption_counters = {"Table": 0, "Figure": 0}
             caption_map = {"Table": {}, "Figure": {}}
             continue
@@ -255,11 +280,35 @@ def _patch_document_xml(xml_bytes: bytes, debug: bool = False) -> tuple[bytes, i
         if style_id == "AppendixHeading1":
             appendix_index += 1
             appendix_letter = chr(ord("A") + appendix_index - 1)
+            lvl2 = lvl3 = lvl4 = 0
             caption_counters = {"Table": 0, "Figure": 0}
             caption_map = {"Table": {}, "Figure": {}}
 
         if not appendix_letter:
             continue
+
+        # Build section label for appendix headings
+        section_label = None
+        if style_id == "AppendixHeading1":
+            section_label = f"{appendix_letter}"
+        elif style_id == "AppendixHeading2":
+            lvl2 += 1
+            lvl3 = lvl4 = 0
+            section_label = f"{appendix_letter}.{lvl2}"
+        elif style_id == "AppendixHeading3":
+            lvl3 += 1
+            lvl4 = 0
+            section_label = f"{appendix_letter}.{lvl2}.{lvl3}"
+        elif style_id == "AppendixHeading4":
+            lvl4 += 1
+            section_label = f"{appendix_letter}.{lvl2}.{lvl3}.{lvl4}"
+
+        if section_label:
+            # capture any bookmarks on this paragraph, plus any pending ones
+            local_bookmarks = [b.get(f"{{{NS['w']}}}name") for b in p.findall("w:bookmarkStart", NS)]
+            for name in pending_bookmarks + [b for b in local_bookmarks if b]:
+                section_label_map[name] = section_label
+            pending_bookmarks = []
 
         new_text = text
 
@@ -292,6 +341,61 @@ def _patch_document_xml(xml_bytes: bytes, debug: bool = False) -> tuple[bytes, i
         if new_text != text:
             set_paragraph_text(p, new_text)
             caption_patched += 1
+
+    # Third pass: update section crossref hyperlink text in appendix
+    for h in root.findall(".//w:hyperlink", NS):
+        anchor = h.get(f"{{{NS['w']}}}anchor")
+        if not anchor or anchor not in section_label_map:
+            continue
+        label = section_label_map[anchor]
+        current = "".join(t.text for t in h.findall(".//w:t", NS) if t.text)
+        if not current:
+            continue
+        if "section" in current.lower():
+            new_text = f"Section {label}"
+        else:
+            new_text = label
+        # replace hyperlink text runs
+        runs = h.findall(".//w:r", NS)
+        if not runs:
+            continue
+        first = True
+        for r in runs:
+            t = r.find("w:t", NS)
+            if t is None:
+                continue
+            if first:
+                t.text = new_text
+                first = False
+            else:
+                t.text = ""
+
+    # Fallback: update any remaining section references that point to known anchors
+    for h in root.findall(".//w:hyperlink", NS):
+        anchor = h.get(f"{{{NS['w']}}}anchor")
+        if not anchor or anchor not in section_label_map:
+            continue
+        label = section_label_map[anchor]
+        current = "".join(t.text for t in h.findall(".//w:t", NS) if t.text)
+        if not current:
+            continue
+        if "section" not in current.lower():
+            continue
+        # ensure the numeric part is replaced even if runs are split oddly
+        new_text = f"Section {label}"
+        runs = h.findall(".//w:r", NS)
+        if not runs:
+            continue
+        first = True
+        for r in runs:
+            t = r.find("w:t", NS)
+            if t is None:
+                continue
+            if first:
+                t.text = new_text
+                first = False
+            else:
+                t.text = ""
 
     if debug:
         eprint(f"Caption paragraphs updated: {caption_patched}")

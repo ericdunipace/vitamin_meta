@@ -1190,7 +1190,7 @@ psych_dx_cutoffs <- data.frame(
     8,
     8
   ),
-  direction = ">=",
+  direction = "greater than",
   diagnosis = c(
     "depression",
     "depression",
@@ -1239,7 +1239,14 @@ psych_dx_cutoffs %>%
   arrange(diagnosis, scale) %>% 
   # gt::gt(groupname_col = "diagnosis") %>%
   as_grouped_data(groups = "diagnosis") %>% 
+  mutate(cutoff = ifelse(direction == "greater than", paste0("greater than ", cutoff), paste0("less than ", cutoff))) %>%
+  select(Diagnosis = diagnosis, Scale = scale, Cutoff = cutoff) %>%
+  mutate(is_new_group = 1:n() %in% (which(Diagnosis == "depression")-1)) %>% 
   flextable::flextable() %>% 
+  flextable::autofit() %>% 
+  flextable::fit_to_width(max_width = 6.5) %>%    # because margins will be smaller
+   flextable::hline(i = ~ is_new_group == TRUE, border = officer::fp_border(color = "gray70", width = 0.5), part = "body")  %>% 
+  flextable::delete_columns(j = "is_new_group") %>% 
 knitr::knit_print()
 ```
 
