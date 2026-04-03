@@ -14,7 +14,7 @@ renv::restore()
 # Load other required packages
 suppressPackageStartupMessages({
 library(here)
-library(rmarkdown)
+library(quarto)
 library(dplyr)
 library(rlang)
 library(cli)
@@ -82,10 +82,9 @@ run_function <- function() {
       source(here("R","figures.R"))
       # cli::cli(cli::cli_h2("Generating sensitivity analysis markdown"))
       cli::cli(cli::cli_h2("Generating main document results text"))
-      rmarkdown::render(
-        input = here::here("outputs","documents","Results.qmd"),
-        output_dir = here::here("outputs","documents"),
-        output_format = "word_document"
+      quarto::quarto_render(
+        input =  here::here("outputs","documents","Results.qmd"),
+        output_format = "all"
       )
     }, value = FALSE)
 }
