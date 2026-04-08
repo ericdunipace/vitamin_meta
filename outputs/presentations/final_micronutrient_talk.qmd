@@ -1,11 +1,9 @@
 ---
-title: "Do Vitamins Actually Help Depression and Anxiety?"
-subtitle: "What the Best Evidence Shows"
-author: "Eric Dunipace, MD, PhD"
-date: today
+pagetitle: "Do Vitamins Actually Help Depression and Anxiety?"
 format:
   revealjs:
     theme: [default, ucla.scss]
+    title-slide: false
     transition: slide
     slide-number: true
     progress: false
@@ -17,8 +15,9 @@ format:
     margin: 0.08
     auto-animate-easing: ease-in-out
     auto-animate-duration: 0.8
-    embed-resources: true
+    embed-resources: false
     self-contained-math: true
+    chalkboard: true
 ---
 
 ```{r}
@@ -237,6 +236,10 @@ The clinical motivation is real. I'd guess most of you have fielded questions li
 </div>
 </div>
 
+::: {.fragment style="margin-top: 10px; font-size: 0.72em; color: #6a7787; text-align: right;" data-fragment-index="4"}
+Also allowed treatment as usual if present.
+:::
+
 ::: notes
 We screened over 5,000 records. 101 RCTs made it in, but the primary analysis was restricted to the 50 studies rated low risk of bias. The PRISMA here shows the full flow. Notice we were quite selective — we weren't counting everything with "vitamin" in the title.
 :::
@@ -245,67 +248,239 @@ We screened over 5,000 records. 101 RCTs made it in, but the primary analysis wa
 
 ## What the included studies looked like
 
+```{=html}
+<style>
+#included-studies-look .study-row {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 420ms ease, transform 420ms ease;
+}
+
+#included-studies-look .study-row.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#included-studies-look .study-track {
+  flex: 1;
+  height: 18px;
+  background: #f0f3f7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+#included-studies-look .study-fill {
+  width: var(--fill-width);
+  height: 100%;
+  background: var(--fill-color);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 1380ms cubic-bezier(0.18, 0.82, 0.2, 1);
+  transition-delay: 220ms;
+}
+
+#included-studies-look .study-row.visible .study-fill {
+  transform: scaleX(1);
+}
+
+#included-studies-look .study-label {
+  width: 126px;
+  font-size: 0.92em;
+  font-weight: 700;
+  color: #42586f;
+  line-height: 1.02;
+}
+
+#included-studies-look .study-count {
+  width: 56px;
+  text-align: right;
+  font-weight: 800;
+  color: #42586f;
+}
+
+#included-studies-look .study-bullets li {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 360ms ease, transform 360ms ease;
+}
+
+#included-studies-look .study-bullets li.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+<div id="included-studies-look">
+```
+
 ::: {.columns}
 ::: {.column width="52%"}
-| Micronutrient | Number of studies | Number of People |
-|:---:|:---:|---:|
-| Vitamin D |  **32** | **`r sample.size["D"]`**  |
-| B vitamins |12 | `r sample.size["B"]` |
-| Zinc | 3 | `r sample.size["zinc"]`  |
-| Magnesium | 3 | `r sample.size["magnesium"]` |
-| Iron | 2 | `r sample.size["iron"]` |
-| Selenium |  2 | `r sample.size["selenium"]` |
-| Vitamin C |  1 | `r sample.size["C"]` |
-: {tbl-colwidths="[55,23,22]"}
+::: {style="margin-top: 8px;"}
+```{=html}
+<div style="padding: 16px 18px; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%); border: 1px solid #d9e6f5; border-radius: 14px;">
+  <div style="font-size: 0.82em; font-weight: 800; color: #5f7897; letter-spacing: 0.06em; text-transform: uppercase;">Evidence concentration</div>
+  <div style="margin-top: 6px; font-size: 2.4em; font-weight: 800; line-height: 0.95; color: #003B5C;">32 of 50</div>
+  <div style="margin-top: 4px; font-size: 0.98em; color: #35506f;">low-risk-of-bias trials studied <strong>vitamin D</strong></div>
+
+  <div style="margin-top: 18px; display: grid; gap: 10px;">
+    <div class="study-row" style="display:flex; align-items:center; gap:14px; --fill-width:64%; --fill-color:linear-gradient(90deg, #2774AE 0%, #5f95d4 100%);">
+      <div class="study-label" style="font-size:0.94em; color:#003B5C;">Vitamin D</div>
+      <div class="study-track" style="height:20px; background:#e8f0fb;">
+        <div class="study-fill"></div>
+      </div>
+      <div class="study-count" style="color:#003B5C;">32</div>
+    </div>
+
+    <div class="study-row" style="display:flex; align-items:center; gap:14px; --fill-width:24%; --fill-color:#94a8bf;">
+      <div class="study-label">B vitamins</div>
+      <div class="study-track">
+        <div class="study-fill"></div>
+      </div>
+      <div class="study-count">12</div>
+    </div>
+
+    <div class="study-row" style="display:flex; align-items:center; gap:14px; --fill-width:6%; --fill-color:#b4bfcb;">
+      <div class="study-label">Zinc</div>
+      <div class="study-track">
+        <div class="study-fill"></div>
+      </div>
+      <div class="study-count">3</div>
+    </div>
+
+    <div class="study-row" style="display:flex; align-items:center; gap:14px; --fill-width:6%; --fill-color:#b4bfcb;">
+      <div class="study-label">Magnesium</div>
+      <div class="study-track">
+        <div class="study-fill"></div>
+      </div>
+      <div class="study-count">3</div>
+    </div>
+
+    <div class="study-row" style="display:flex; align-items:center; gap:14px; --fill-width:4%; --fill-color:#c4ccd6;">
+      <div class="study-label">Iron</div>
+      <div class="study-track">
+        <div class="study-fill"></div>
+      </div>
+      <div class="study-count">2</div>
+    </div>
+
+    <div class="study-row" style="display:flex; align-items:center; gap:14px; --fill-width:4%; --fill-color:#c4ccd6;">
+      <div class="study-label">Selenium</div>
+      <div class="study-track">
+        <div class="study-fill"></div>
+      </div>
+      <div class="study-count">2</div>
+    </div>
+
+    <div class="study-row" style="display:flex; align-items:center; gap:14px; --fill-width:2%; --fill-color:#d4dbe3;">
+      <div class="study-label">Vitamin C</div>
+      <div class="study-track">
+        <div class="study-fill"></div>
+      </div>
+      <div class="study-count">1</div>
+    </div>
+  </div>
+
+</div>
+```
+
+::: {class="fragment" data-fragment-index="13" style="margin-top: 14px; font-size: 0.78em; color: #5c6d80;"}
+Vitamin D also contributed the largest participant pool: **`r sample.size["D"]`** people.
+:::
+:::
 :::
 
 ::: {.column width="48%"}
 ::: {style="font-size: 0.88em; line-height: 2.2;"}
 
-- **33,640 ** total participants
-- Published **1973–2024**
-- Median follow-up: **12 weeks**
-- Depression outcomes: **94 studies**
-- Anxiety outcomes: **32 studies**
+<ul class="study-bullets" style="margin: 0; padding-left: 1.2rem;">
+<li class="fragment" data-fragment-index="8"><strong>33,640</strong> total participants</li>
+<li class="fragment" data-fragment-index="9">Published <strong>1973–2024</strong></li>
+<li class="fragment" data-fragment-index="10">Median follow-up: <strong>12 weeks</strong></li>
+<li class="fragment" data-fragment-index="11">Depression outcomes: <strong>50 studies</strong></li>
+<li class="fragment" data-fragment-index="12">Anxiety outcomes: <strong>18 studies</strong></li>
+</ul>
 
-::: {.fragment style="margin-top: 16px; padding: 14px; background: #fff8e1; border-left: 4px solid #FFD100; border-radius: 4px;"}
-⚠️ Only **78%** of studies measured
-baseline nutrient levels
-*(This matters — more shortly)*
+<div class="fragment" data-fragment-index="13" style="margin-top: 16px; padding: 14px; background: #fff8e1; border-left: 4px solid #FFD100; border-radius: 4px;">
+<strong>22%</strong> of studies did not measure baseline nutrient levels
+<div style="font-size: 0.92em; font-style: italic;"></div>
+</div>
 :::
 :::
 :::
-:::
+
+```{=html}
+</div>
+```
+
+```{=html}
+<script>
+(() => {
+  if (window.__includedStudiesAutoAnimated) return;
+  window.__includedStudiesAutoAnimated = true;
+
+  const container = document.getElementById("included-studies-look");
+  if (!container) return;
+  const slide = container.closest("section");
+  const rows = Array.from(container.querySelectorAll(".study-row"));
+  let timers = [];
+
+  const clearTimers = () => {
+    while (timers.length) window.clearTimeout(timers.pop());
+  };
+
+  const resetRows = () => {
+    clearTimers();
+    rows.forEach((row) => row.classList.remove("visible"));
+  };
+
+  const playRows = () => {
+    resetRows();
+    rows.forEach((row, index) => {
+      const delay = 180 + index * 620;
+      timers.push(window.setTimeout(() => {
+        row.classList.add("visible");
+      }, delay));
+    });
+  };
+
+  const sync = () => {
+    if (slide && slide.classList.contains("present")) {
+      playRows();
+    } else {
+      resetRows();
+    }
+  };
+
+  const bindReveal = () => {
+    if (typeof Reveal === "undefined" || typeof Reveal.on !== "function") return false;
+    if (container.dataset.autoBound === "true") return true;
+    Reveal.on("slidechanged", sync);
+    Reveal.on("ready", sync);
+    container.dataset.autoBound = "true";
+    sync();
+    return true;
+  };
+
+  const waitForReveal = () => {
+    if (bindReveal()) return;
+    const timer = window.setInterval(() => {
+      if (bindReveal()) window.clearInterval(timer);
+    }, 120);
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", waitForReveal, { once: true });
+  } else {
+    waitForReveal();
+  }
+})();
+</script>
+```
 
 ::: notes
 Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety was studied far less than depression. Flag the 78% — most studies didn't confirm whether participants were actually deficient before supplementing them. That becomes really important for the subgroup analyses.
 :::
 
----
-
-## What we did: a quick methods primer
-
-::: {.incremental}
-
-- How are effect sizes measured?
-- What's a network-meta analysis?
-- How do we estimate effects?
-
-:::
-
----
-
-## How are effect sizes measured?
-
-::: {.incremental}
-- A variety of depression and anxiety surveys used 
-- Different scales have different ranges and interpretations, making it hard to compare results across studies
-- We used the **standardized mean difference (SMD)** to put everything on the same scale
-:::
-
----
-
-## What is a standardized mean difference?
+## How to compare across studies?
 
 <!-- hidden fragments: each press of “next” advances one stage -->
 <div id="smd-frag-1" class="fragment" data-fragment-index="1" style="height:0; margin:0; padding:0;"></div>
@@ -325,12 +500,12 @@ Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety
   if (!stageEl) return;
 
   const width = 980;
-  const height = 520;
-  const margin = { top: 78, right: 40, bottom: 72, left: 74 };
+  const height = 544;
+  const margin = { top: 72, right: 40, bottom: 92, left: 74 };
   const muControl = 58;
   const muTreat = 50;
-  const sdControl = 10;
-  const sdTreat = 10;
+  const sdControl = 9;
+  const sdTreat = 11;
   const pooledSD = Math.sqrt((sdControl ** 2 + sdTreat ** 2) / 2);
   const rawDiff = muTreat - muControl;
   const smd = rawDiff / pooledSD;
@@ -340,8 +515,8 @@ Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety
   let hasAnimatedMeanArrow = false;
   const controlColor = "#5B8FD1";
   const treatmentColor = "#E15759";
-  const summaryYControl = 238;
-  const summaryYTreat = 310;
+  const summaryYControl = 218;
+  const summaryYTreat = 286;
 
   const normalPdf = (x, mu, sd) =>
     (1 / (sd * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * ((x - mu) / sd) ** 2);
@@ -377,7 +552,7 @@ Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety
     const xLo = scaleX(mean - sd);
     const xMean = scaleX(mean);
     const xHi = scaleX(mean + sd);
-    const labelY = stage >= 2 ? y + 34 : y + 28;
+    const labelY = stage >= 3 ? y + 26 : stage >= 2 ? y + 26 : y + 22;
     group.appendChild(make("line", { x1: xLo, x2: xHi, y1: y, y2: y, stroke: color, "stroke-width": "4" }));
     group.appendChild(make("line", { x1: xLo, x2: xLo, y1: y - 10, y2: y + 10, stroke: color, "stroke-width": "3" }));
     group.appendChild(make("line", { x1: xHi, x2: xHi, y1: y - 10, y2: y + 10, stroke: color, "stroke-width": "3" }));
@@ -446,7 +621,7 @@ Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety
     [20, 40, 60, 80].forEach((tick) => {
       const x = scaleX(tick);
       svg.appendChild(make("line", { x1: x, x2: x, y1: plotBottom, y2: plotBottom + 7, stroke: "#7e96b4", "stroke-width": "1.5" }));
-      addText(svg, x, plotBottom + 24, String(tick), {
+      addText(svg, x, plotBottom + 20, String(tick), {
         "text-anchor": "middle",
         "font-size": "16",
         fill: "#4a4a4a"
@@ -465,7 +640,7 @@ Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety
       });
     }
 
-    addText(svg, width / 2, height - 18, "Outcome scale", {
+    addText(svg, width / 2, height - 26, "Outcome scale", {
       "text-anchor": "middle",
       "font-size": "20",
       fill: "#222"
@@ -515,17 +690,23 @@ Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety
         "stroke-width": "4"
       }));
 
-      addText(curveGroup, scaleX(72), scaleY(yMax * 0.98), "Control distribution", {
+      addText(curveGroup, scaleX(89), plotTop + 14, "Control distribution", {
         "text-anchor": "end",
         "font-size": "17",
         "font-weight": "500",
-        fill: controlColor
+        fill: controlColor,
+        stroke: "#ffffff",
+        "stroke-width": "4",
+        "paint-order": "stroke"
       });
-      addText(curveGroup, scaleX(73), scaleY(yMax * 0.84), "Treatment distribution", {
+      addText(curveGroup, scaleX(88), plotTop + 62, "Treatment distribution", {
         "text-anchor": "end",
         "font-size": "17",
         "font-weight": "500",
-        fill: treatmentColor
+        fill: treatmentColor,
+        stroke: "#ffffff",
+        "stroke-width": "4",
+        "paint-order": "stroke"
       });
     }
 
@@ -535,13 +716,13 @@ Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety
       summaryGroup.appendChild(make("line", {
         x1: margin.left,
         x2: width - margin.right,
-        y1: 282,
-        y2: 282,
+        y1: 258,
+        y2: 258,
         stroke: "#d7e3f3",
         "stroke-width": "1.5",
         "stroke-dasharray": "5,5"
       }));
-      addText(summaryGroup, margin.left + 10, 170, "Summary estimates", {
+      addText(summaryGroup, margin.left + 10, 156, "Summary estimates", {
         "text-anchor": "start",
         "font-size": "16",
         "font-weight": "600",
@@ -568,7 +749,7 @@ Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety
     }
 
     if (stage >= 2) {
-      const arrowY = 194;
+      const arrowY = 180;
       const xStart = scaleX(muControl - 0.7);
       const xEnd = scaleX(muTreat + 0.7);
       const arrow = make("path", {
@@ -618,56 +799,68 @@ Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety
       const treatLo = scaleX(muTreat - sdTreat);
       const treatHi = scaleX(muTreat + sdTreat);
       const pooledCenter = (scaleX(muControl) + scaleX(muTreat)) / 2;
-      const pooledHalf = (scaleX(muControl + pooledSD) - scaleX(muControl));
+      const pooledHalf = (scaleX(muControl + pooledSD) - scaleX(muControl)) / 2;
       const pooledLo = pooledCenter - pooledHalf;
       const pooledHi = pooledCenter + pooledHalf;
-      const topY = 350;
-      const pooledY = 430;
+      const controlSdY = 338;
+      const treatSdY = 370;
+      const pooledY = 404;
+      const controlSdLo = scaleX(muControl);
+      const controlSdHi = scaleX(muControl + sdControl);
+      const treatSdLo = scaleX(muTreat - sdTreat);
+      const treatSdHi = scaleX(muTreat);
 
       pooledGroup.appendChild(make("line", {
-        x1: controlLo, x2: controlHi, y1: topY, y2: topY,
+        x1: controlSdLo, x2: controlSdHi, y1: controlSdY, y2: controlSdY,
         stroke: controlColor, "stroke-width": "3", opacity: "0.45"
       }));
       pooledGroup.appendChild(make("line", {
-        x1: treatLo, x2: treatHi, y1: topY + 20, y2: topY + 20,
+        x1: treatSdLo, x2: treatSdHi, y1: treatSdY, y2: treatSdY,
         stroke: treatmentColor, "stroke-width": "3", opacity: "0.45"
       }));
-      addText(pooledGroup, (controlLo + controlHi) / 2, topY - 10, "Control SD", {
-        "text-anchor": "middle",
+      addText(pooledGroup, controlSdLo + 8, controlSdY - 12, "Control SD", {
+        "text-anchor": "start",
         "font-size": "14",
         "font-weight": "600",
         fill: controlColor
       });
-      addText(pooledGroup, (treatLo + treatHi) / 2, topY + 44, "Treatment SD", {
-        "text-anchor": "middle",
+      addText(pooledGroup, treatSdHi - 8, treatSdY - 12, "Treatment SD", {
+        "text-anchor": "end",
         "font-size": "14",
         "font-weight": "600",
         fill: treatmentColor
       });
 
       pooledGroup.appendChild(make("line", {
-        x1: (controlLo + controlHi) / 2, x2: pooledCenter - 26,
-        y1: topY + 4, y2: pooledY - 18,
+        x1: (controlSdLo + controlSdHi) / 2, x2: pooledCenter - 22,
+        y1: controlSdY + 4, y2: pooledY - 18,
         stroke: "#9aa8b7", "stroke-width": "2.5", "stroke-dasharray": "5,5"
       }));
       pooledGroup.appendChild(make("line", {
-        x1: (treatLo + treatHi) / 2, x2: pooledCenter + 26,
-        y1: topY + 20, y2: pooledY - 18,
+        x1: (treatSdLo + treatSdHi) / 2, x2: pooledCenter + 22,
+        y1: treatSdY, y2: pooledY - 18,
         stroke: "#9aa8b7", "stroke-width": "2.5", "stroke-dasharray": "5,5"
       }));
 
-      pooledGroup.appendChild(make("line", { x1: pooledLo, x2: pooledHi, y1: pooledY, y2: pooledY, stroke: "#444", "stroke-width": "4" }));
-      pooledGroup.appendChild(make("line", { x1: pooledLo, x2: pooledLo, y1: pooledY - 11, y2: pooledY + 11, stroke: "#444", "stroke-width": "4" }));
-      pooledGroup.appendChild(make("line", { x1: pooledHi, x2: pooledHi, y1: pooledY - 11, y2: pooledY + 11, stroke: "#444", "stroke-width": "4" }));
-      addText(pooledGroup, pooledCenter, pooledY - 16, `Pooled SD = ${pooledSD.toFixed(1)}`, {
+      pooledGroup.appendChild(make("line", {
+        x1: pooledLo, x2: pooledHi, y1: pooledY, y2: pooledY,
+        stroke: "#444", "stroke-width": "3.5", "stroke-linecap": "round", opacity: "0.95"
+      }));
+      addText(pooledGroup, pooledCenter, pooledY + 28, `Pooled SD = ${pooledSD.toFixed(1)}`, {
         "text-anchor": "middle",
-        "font-size": "17",
+        "font-size": "16",
         "font-weight": "600",
         fill: "#222"
       });
-      addText(pooledGroup, pooledCenter, pooledY + 34, "A shared average spread across both groups", {
-        "text-anchor": "middle",
-        "font-size": "15",
+      addText(pooledGroup, pooledHi + 14, pooledY - 8, "shared average spread", {
+        "text-anchor": "start",
+        "font-size": "12",
+        "font-weight": "500",
+        fill: "#5f7897"
+      });
+      addText(pooledGroup, pooledHi + 14, pooledY + 6, "across both groups", {
+        "text-anchor": "start",
+        "font-size": "12",
         "font-weight": "500",
         fill: "#5f7897"
       });
@@ -675,35 +868,35 @@ Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety
     }
 
     if (stage >= 4) {
-      const boxX = width - 286;
-      const boxY = 104;
-      const boxW = 228;
-      const boxH = 88;
+      const boxW = 274;
+      const boxH = 100;
+      const boxX = width - boxW - 42;
+      const boxY = 96;
       svg.appendChild(make("rect", {
         x: boxX, y: boxY, width: boxW, height: boxH, rx: "14", ry: "14",
         fill: "#f7f7f7", stroke: "#cfcfcf"
       }));
-      addText(svg, boxX + boxW / 2, boxY + 30, "Standardized mean difference", {
+      addText(svg, boxX + boxW / 2, boxY + 28, "Standardized mean difference", {
         "text-anchor": "middle",
-        "font-size": "16",
+        "font-size": "14",
         "font-weight": "600",
         fill: "#222"
       });
-      addText(svg, boxX + boxW / 2, boxY + 58, `SMD = ${rawDiff.toFixed(1)} / ${pooledSD.toFixed(1)}`, {
+      addText(svg, boxX + boxW / 2, boxY + 54, `SMD = ${rawDiff.toFixed(1)} / ${pooledSD.toFixed(1)}`, {
         "text-anchor": "middle",
-        "font-size": "16",
+        "font-size": "15",
         "font-weight": "500",
         fill: "#222"
       });
       addText(svg, boxX + boxW / 2, boxY + 82, `${Math.abs(smd).toFixed(2)} SD lower`, {
         "text-anchor": "middle",
-        "font-size": "22",
+        "font-size": "21",
         "font-weight": "700",
         fill: "#111"
       });
     }
 
-    addText(svg, width - 30, height - 18, `Step ${stage + 1} of 5`, {
+    addText(svg, width - 30, height - 26, `Step ${stage + 1} of 5`, {
       "text-anchor": "end",
       "font-size": "16",
       fill: "#777"
@@ -764,411 +957,245 @@ Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety
 
 ## What's a network meta-analysis?
 
+<div id="combined-model-frag-1" class="fragment" data-fragment-index="3" style="height:0; margin:0; padding:0;"></div>
+<div id="combined-model-frag-2" class="fragment" data-fragment-index="4" style="height:0; margin:0; padding:0;"></div>
+<div id="combined-model-frag-3" class="fragment" data-fragment-index="5" style="height:0; margin:0; padding:0;"></div>
+<div id="combined-model-frag-4" class="fragment" data-fragment-index="6" style="height:0; margin:0; padding:0;"></div>
+<div id="combined-model-frag-5" class="fragment" data-fragment-index="7" style="height:0; margin:0; padding:0;"></div>
+<div id="combined-model-frag-6" class="fragment" data-fragment-index="8" style="height:0; margin:0; padding:0;"></div>
+<div id="combined-model-frag-7" class="fragment" data-fragment-index="9" style="height:0; margin:0; padding:0;"></div>
+<div id="combined-model-frag-8" class="fragment" data-fragment-index="10" style="height:0; margin:0; padding:0;"></div>
+
 ::: {.columns}
-::: {.column width="48%"}
-<ul>
-<div class="fragment" data-fragment-index="1"><strong>Standard meta-analysis</strong></div>
-<li class="fragment" data-fragment-index="2">Each nutrient analyzed separately vs. placebo</li>
-<li class="fragment" data-fragment-index="3">Answers questions like: "Does vitamin D work?"</li>
-<li class="fragment" data-fragment-index="4">Misses indirect comparisons between nutrients</li>
-</ul>
-:::
+::: {.column width="49%"}
+::: {.fragment data-fragment-index="1" style="padding: 16px 18px; background: linear-gradient(180deg, #fbfdff 0%, #f3f7fc 100%); border: 1px solid #d8e4f0; border-radius: 14px; min-height: 438px;"}
+<div style="font-size:0.72em; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#6a809a; margin-bottom:6px;">Network meta-analysis</div>
+<div style="font-size:1.02em; font-weight:750; color:#003B5C; margin-bottom:10px;">One model compares all nutrients together</div>
 
-::: {.column width="4%"}
-:::
-
-::: {.column width="48%"}
-<ul>
-<div class="fragment" data-fragment-index="6"><strong>Network meta-analysis</strong></div>
-<li class="fragment" data-fragment-index="7">All nutrients analyzed together in one model</li>
-<li class="fragment" data-fragment-index="8">Uses both direct and indirect comparisons</li>
-<li class="fragment" data-fragment-index="9">Can estimate vitamin D vs. B6 even without a head-to-head trial</li>
-</ul>
-:::
-:::
+- Lets us estimate comparisons even without head-to-head trials
 
 ```{=html}
-<div style="position: relative; margin-top: 20px; height: 255px;">
-```
-
-::: {.fragment data-fragment-index="5" style="position: absolute; inset: 0;"}
-```{=html}
-<svg viewBox="0 0 980 250" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto;">
-  <text x="94" y="34" style="font-size:21px;font-weight:700;fill:#003B5C;">Pairwise meta-analysis</text>
-  <circle cx="150" cy="128" r="40" fill="#DAEBFE" stroke="#2774AE" stroke-width="3.5"></circle>
-  <circle cx="318" cy="128" r="40" fill="#DAEBFE" stroke="#2774AE" stroke-width="3.5"></circle>
-  <line x1="190" y1="128" x2="278" y2="128" stroke="#2774AE" stroke-width="6.5" stroke-linecap="round"></line>
-  <text x="150" y="135" text-anchor="middle" style="font-size:16px;font-weight:700;fill:#003B5C;">Placebo</text>
-  <text x="318" y="135" text-anchor="middle" style="font-size:16px;font-weight:700;fill:#003B5C;">Vit D</text>
+<svg viewBox="0 0 420 210" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto; margin-top:18px;">
+  <line x1="208" y1="58" x2="142" y2="114" stroke="#2774AE" stroke-width="6.5" stroke-linecap="round"></line>
+  <line x1="208" y1="58" x2="274" y2="114" stroke="#2774AE" stroke-width="6.5" stroke-linecap="round"></line>
+  <line x1="208" y1="58" x2="208" y2="154" stroke="#2774AE" stroke-width="6.5" stroke-linecap="round"></line>
+  <circle cx="208" cy="48" r="31" fill="#DAEBFE" stroke="#2774AE" stroke-width="4"></circle>
+  <circle cx="132" cy="122" r="27" fill="#eef4fb" stroke="#5B8FD1" stroke-width="4"></circle>
+  <circle cx="284" cy="122" r="27" fill="#eef4fb" stroke="#5B8FD1" stroke-width="4"></circle>
+  <circle cx="208" cy="168" r="27" fill="#eef4fb" stroke="#5B8FD1" stroke-width="4"></circle>
+  <text x="208" y="54" text-anchor="middle" style="font-size:14px; font-weight:700; fill:#003B5C;">Placebo</text>
+  <text x="132" y="128" text-anchor="middle" style="font-size:14px; font-weight:700; fill:#003B5C;">Vit D</text>
+  <text x="284" y="128" text-anchor="middle" style="font-size:14px; font-weight:700; fill:#003B5C;">Mg</text>
+  <text x="208" y="174" text-anchor="middle" style="font-size:14px; font-weight:700; fill:#003B5C;">B6</text>
 </svg>
 ```
 :::
-
-::: {.fragment data-fragment-index="10" style="position: absolute; inset: 0;"}
-```{=html}
-<svg viewBox="0 0 980 250" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto;">
-  <line x1="420" y1="24" x2="420" y2="218" stroke="#D7E3F3" stroke-width="3"></line>
-  <text x="528" y="34" style="font-size:21px;font-weight:700;fill:#003B5C;">Network meta-analysis</text>
-  <circle cx="690" cy="72" r="34" fill="#DAEBFE" stroke="#2774AE" stroke-width="3.5"></circle>
-  <circle cx="578" cy="158" r="34" fill="#EEF4FB" stroke="#5B8FD1" stroke-width="3.5"></circle>
-  <circle cx="802" cy="158" r="34" fill="#EEF4FB" stroke="#5B8FD1" stroke-width="3.5"></circle>
-  <circle cx="690" cy="214" r="34" fill="#EEF4FB" stroke="#5B8FD1" stroke-width="3.5"></circle>
-  <line x1="663" y1="98" x2="603" y2="143" stroke="#2774AE" stroke-width="5.5" stroke-linecap="round"></line>
-  <line x1="690" y1="106" x2="690" y2="180" stroke="#2774AE" stroke-width="5.5" stroke-linecap="round"></line>
-  <line x1="770" y1="184" x2="721" y2="201" stroke="#8BB8E8" stroke-width="3.5" stroke-linecap="round"></line>
-  <text x="690" y="78" text-anchor="middle" style="font-size:15px;font-weight:700;fill:#003B5C;">Placebo</text>
-  <text x="578" y="164" text-anchor="middle" style="font-size:15px;font-weight:700;fill:#003B5C;">Vit D</text>
-  <text x="802" y="164" text-anchor="middle" style="font-size:15px;font-weight:700;fill:#003B5C;">Mg</text>
-  <text x="690" y="220" text-anchor="middle" style="font-size:15px;font-weight:700;fill:#003B5C;">B6</text>
-</svg>
-```
 :::
 
-```{=html}
-</div>
-```
+::: {.column width="49%"}
+::: {.fragment data-fragment-index="2" style="padding: 16px 18px; background: linear-gradient(180deg, #fbfdff 0%, #f3f7fc 100%); border: 1px solid #d8e4f0; border-radius: 14px; min-height: 438px;"}
+<div style="font-size:0.72em; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#6a809a; margin-bottom:6px;">Bayesian random-effects model</div>
+<div style="font-size:1.02em; font-weight:750; color:#003B5C; margin-bottom:10px;">The model estimates the average effect and the disagreement between studies</div>
 
-::: {.fragment style="margin-top: 30px; padding: 16px; background: #fff8e1; border-left: 4px solid #FFD100; border-radius: 4px;"}
-**Bayesian** = full uncertainty distribution rather than a binary p-value.
-**Primary analysis restricted to low risk-of-bias trials only.**
-:::
-
-::: notes
-A network meta-analysis lets us compare treatments that were never tested head-to-head, by linking them through a shared comparator — in our case, placebo. The Bayesian piece means instead of a yes/no p-value, we get a probability distribution over possible effects. We restricted the primary analysis to the 50 highest-quality trials.
-:::
-
----
-
-## How do we estimate effects? {#sec-meta-build-clinical .meta-bayes-slide}
-
-::: {.columns}
-::: {.column width="34%"}
-
-### The process
-
-<ul class="meta-build-list">
-<li class="fragment" data-fragment-index="1">Each study gives an estimate of the treatment effect, with some uncertainty.</li>
-<li class="fragment" data-fragment-index="2"><strong><span class="mu-accent">μ</span></strong> = the overall average treatment effect.</li>
-<li class="fragment" data-fragment-index="3"><strong><span class="tau-accent">τ</span></strong> = how much the true effect varies across studies.</li>
-<li class="fragment" data-fragment-index="4">As studies accumulate, the posterior for <strong><span class="mu-accent">μ</span></strong> shifts and usually tightens.</li>
-<li class="fragment" data-fragment-index="5">At the same time, the posterior for <strong><span class="tau-accent">τ</span></strong> tells you whether studies are genuinely disagreeing.</li>
-</ul>
-
+- <strong><span class="mu-accent">μ</span></strong> = the pooled average treatment effect
+- <strong><span class="tau-accent">τ</span></strong> = how much true effects vary across studies
 
 ```{=html}
-<div id="meta-fragments" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;">
-  <span class="fragment" data-fragment-index="7"></span>
-  <span class="fragment" data-fragment-index="8"></span>
-  <span class="fragment" data-fragment-index="9"></span>
-  <span class="fragment" data-fragment-index="10"></span>
-  <span class="fragment" data-fragment-index="11"></span>
-  <span class="fragment" data-fragment-index="12"></span>
-  <span class="fragment" data-fragment-index="13"></span>
-</div>
-```
-
-:::
-::: {.column width="66%"}
-
-::: {.fragment data-fragment-index="6"}
-```{=html}
-<div id="meta-bayes-root"></div>
+<div id="mini-mu-build" style="margin-top: 14px;"></div>
 <script>
 (() => {
-  if (window.__metaBayesInitialized) return;
-  window.__metaBayesInitialized = true;
+  if (window.__miniMuBuildInitialized) return;
+  window.__miniMuBuildInitialized = true;
 
-  const root = document.getElementById("meta-bayes-root");
+  const root = document.getElementById("mini-mu-build");
   if (!root) return;
   const NS = "http://www.w3.org/2000/svg";
-
   const studies = [
-    {study: "Study 1", yi: -0.42, sei: 0.18},
-    {study: "Study 2", yi: -0.15, sei: 0.12},
-    {study: "Study 3", yi: -0.63, sei: 0.22},
-    {study: "Study 4", yi: -0.05, sei: 0.10},
-    {study: "Study 5", yi: -0.36, sei: 0.16},
-    {study: "Study 6", yi:  0.08, sei: 0.14},
-    {study: "Study 7", yi: -0.27, sei: 0.11},
-    {study: "Study 8", yi: -0.54, sei: 0.20}
+    { yi: -0.42, lo: -0.77, hi: -0.07 },
+    { yi: -0.15, lo: -0.39, hi: 0.09 },
+    { yi: -0.63, lo: -1.06, hi: -0.20 },
+    { yi: -0.05, lo: -0.25, hi: 0.15 },
+    { yi: -0.36, lo: -0.67, hi: -0.05 },
+    { yi:  0.08, lo: -0.19, hi: 0.35 },
+    { yi: -0.27, lo: -0.49, hi: -0.05 },
+    { yi: -0.54, lo: -0.93, hi: -0.15 }
+  ];
+  const history = [
+    { k: 1, muMean: -0.3637, muLo: -0.9945, muHi:  0.3452 },
+    { k: 2, muMean: -0.2497, muLo: -0.7397, muHi:  0.2301 },
+    { k: 3, muMean: -0.3433, muLo: -0.7644, muHi:  0.0575 },
+    { k: 4, muMean: -0.2532, muLo: -0.6164, muHi:  0.0575 },
+    { k: 5, muMean: -0.2676, muLo: -0.5507, muHi: -0.0247 },
+    { k: 6, muMean: -0.2110, muLo: -0.4767, muHi:  0.0164 },
+    { k: 7, muMean: -0.2167, muLo: -0.4274, muHi: -0.0329 },
+    { k: 8, muMean: -0.2480, muLo: -0.4521, muHi: -0.0740 }
   ];
 
-  const beats = [
-    {
-      headline: "Start with one study: the posterior is still mostly prior + one likelihood",
-      body: "With a single study, μ is very uncertain and τ is barely identified at all."
-    },
-    {
-      headline: "Add another study: pooled effect updates quickly",
-      body: "μ moves toward the accumulated evidence while uncertainty narrows."
-    },
-    {
-      headline: "Consistent evidence stabilizes the pooled effect",
-      body: "When studies point in the same direction, μ becomes more credible without forcing τ upward."
-    },
-    {
-      headline: "More studies tighten inference, but only to a point",
-      body: "Credible intervals shrink as evidence accumulates, though heterogeneity still matters."
-    },
-    {
-      headline: "Conflicting evidence mainly shows up in τ",
-      body: "When one study disagrees, τ rises faster than μ moves. That is the random-effects logic."
-    },
-    {
-      headline: "By the end, you have learned about μ and τ separately",
-      body: "The final answer is not just an average effect. It is an average plus honest uncertainty about between-study variation."
-    }
-  ];
+  const width = 420;
+  const height = 236;
+  const margin = { top: 24, right: 22, bottom: 34, left: 42 };
+  const plotLeft = margin.left;
+  const plotRight = width - margin.right;
+  const plotTop = margin.top + 28;
+  const plotBottom = height - margin.bottom;
+  const xMin = -1.1;
+  const xMax = 0.4;
+  const rowGap = 15;
+  const posteriorY = plotTop + studies.length * rowGap + 16;
+  const x = (v) => plotLeft + ((v - xMin) / (xMax - xMin)) * (plotRight - plotLeft);
+  const yForRow = (i) => plotTop + i * rowGap;
 
-  const muColor = "#2774AE";
-  const muColorSoft = "#8BB8E8";
-  const tauColor = "#59A14F";
-  const tauColorSoft = "rgba(89, 161, 79, 0.18)";
-  const studyColor = "#7C8798";
-
-  const sum = arr => arr.reduce((a, b) => a + b, 0);
-  const seq = (start, end, n) => Array.from({length: n}, (_, i) => start + i * (end - start) / (n - 1));
-  const fmt = x => `${x < 0 ? "−" : ""}${Math.abs(x).toFixed(2)}`;
-  const fmt3 = x => `${x < 0 ? "−" : ""}${Math.abs(x).toFixed(3)}`;
-  const linearScale = (d0, d1, r0, r1) => x => r0 + ((x - d0) / (d1 - d0)) * (r1 - r0);
-
-  const niceTicks = (min, max, count = 5) => {
-    const span = max - min;
-    if (span <= 0) return [min];
-    const raw = span / Math.max(1, count);
-    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
-    const norm = raw / mag;
-    const step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag;
-    const start = Math.ceil(min / step) * step;
-    const out = [];
-    for (let v = start; v <= max + 0.5 * step; v += step) out.push(+v.toFixed(10));
-    return out;
+  const make = (tag, attrs = {}, text) => {
+    const el = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+    if (text != null) el.textContent = text;
+    return el;
   };
 
-  const quantileFromGrid = (x, w, p) => {
-    const total = sum(w);
-    let cum = 0;
-    for (let i = 0; i < x.length; i++) {
-      cum += w[i];
-      if (cum / total >= p) return x[i];
-    }
-    return x[x.length - 1];
-  };
+  const fmt = (v) => `${v < 0 ? "−" : ""}${Math.abs(v).toFixed(1)}`;
 
-  const normalize = arr => {
-    const s = sum(arr);
-    return arr.map(v => v / s);
-  };
+  const draw = (step, animate = false) => {
+    root.innerHTML = "";
+    const svg = make("svg", {
+      viewBox: `0 0 ${width} ${height}`,
+      style: "display:block;width:100%;height:auto;"
+    });
 
-  const logNormalPdf = (x, m, s) =>
-    -0.5 * Math.log(2 * Math.PI * s * s) - 0.5 * ((x - m) / s) ** 2;
+    svg.appendChild(make("line", {
+      x1: x(0), x2: x(0), y1: plotTop - 10, y2: posteriorY + 10,
+      stroke: "#b6c2d0", "stroke-width": "2", "stroke-dasharray": "4,5"
+    }));
 
-  const logHalfNormalPdf = (x, s) => {
-    if (x < 0) return -Infinity;
-    return Math.log(Math.sqrt(2 / Math.PI) / s) - 0.5 * (x / s) ** 2;
-  };
+    const frame = make("rect", {
+      x: 16, y: 16, width: width - 32, height: height - 44,
+      rx: "14", fill: "#ffffff", stroke: "#d8e4f0", "stroke-width": "1.5"
+    });
+    svg.appendChild(frame);
 
-  const bayesMetaGrid = (dat, {
-    muMin = -1.2,
-    muMax = 0.6,
-    nMu = 220,
-    tauMin = 0.0001,
-    tauMax = 0.8,
-    nTau = 180,
-    muPriorSd = 1.0,
-    tauPriorSd = 0.5
-  } = {}) => {
-    const muGrid = seq(muMin, muMax, nMu);
-    const tauGrid = seq(tauMin, tauMax, nTau);
-    const logPost = [];
-    let maxLogPost = -Infinity;
+    svg.appendChild(make("text", {
+      x: 32, y: 34, "font-size": "13", "font-weight": "700", fill: "#5f7897"
+    }, "Study estimates + posterior μ"));
 
-    for (let j = 0; j < tauGrid.length; j++) {
-      const tau = tauGrid[j];
-      for (let i = 0; i < muGrid.length; i++) {
-        const mu = muGrid[i];
-        let lp = logNormalPdf(mu, 0, muPriorSd) + logHalfNormalPdf(tau, tauPriorSd);
-        for (const d of dat) {
-          const v = d.sei * d.sei + tau * tau;
-          lp += -0.5 * Math.log(2 * Math.PI * v) - 0.5 * ((d.yi - mu) ** 2) / v;
-        }
-        logPost.push(lp);
-        if (lp > maxLogPost) maxLogPost = lp;
+    const visibleRows = Math.max(0, Math.min(studies.length, step));
+    for (let i = 0; i < visibleRows; i++) {
+      const row = studies[i];
+      const y = yForRow(i);
+      const animateRow = animate && i === visibleRows - 1;
+      const g = make("g", { opacity: "1" });
+      const line = make("line", {
+        x1: x(row.lo), x2: x(row.hi), y1: y, y2: y,
+        stroke: "#7C8798", "stroke-width": "2.5", "stroke-linecap": "round"
+      });
+      const leftCap = make("line", {
+        x1: x(row.lo), x2: x(row.lo), y1: y - 4, y2: y + 4,
+        stroke: "#7C8798", "stroke-width": "2"
+      });
+      const rightCap = make("line", {
+        x1: x(row.hi), x2: x(row.hi), y1: y - 4, y2: y + 4,
+        stroke: "#7C8798", "stroke-width": "2"
+      });
+      const point = make("rect", {
+        x: x(row.yi) - 4.5, y: y - 4.5, width: 9, height: 9,
+        fill: "#7C8798"
+      });
+      g.append(line, leftCap, rightCap, point);
+      svg.appendChild(g);
+      if (animateRow) {
+        const totalLength = Math.max(1, x(row.hi) - x(row.lo));
+        line.style.opacity = "0";
+        line.style.strokeDasharray = `${totalLength} ${totalLength}`;
+        line.style.strokeDashoffset = totalLength;
+        line.style.transition = "opacity 1ms linear 20ms, stroke-dashoffset 380ms ease 20ms";
+        leftCap.style.opacity = "0";
+        rightCap.style.opacity = "0";
+        point.style.transformOrigin = `${x(row.yi)}px ${y}px`;
+        point.style.transform = "scale(0.72)";
+        leftCap.style.transition = "opacity 140ms ease 220ms";
+        rightCap.style.transition = "opacity 140ms ease 220ms";
+        point.style.transition = "transform 220ms ease";
+        requestAnimationFrame(() => {
+          line.style.opacity = "1";
+          line.style.strokeDashoffset = "0";
+          leftCap.style.opacity = "1";
+          rightCap.style.opacity = "1";
+          point.style.transform = "scale(1)";
+        });
       }
     }
 
-    const post = normalize(logPost.map(v => Math.exp(v - maxLogPost)));
-    const muMarg = muGrid.map((_, i) => sum(tauGrid.map((__, j) => post[j * muGrid.length + i])));
-    const tauMarg = tauGrid.map((_, j) => sum(muGrid.map((__, i) => post[j * muGrid.length + i])));
-
-    return {
-      muMean: sum(muGrid.map((x, i) => x * muMarg[i])),
-      tauMean: sum(tauGrid.map((x, i) => x * tauMarg[i])),
-      muQ025: quantileFromGrid(muGrid, muMarg, 0.025),
-      muQ975: quantileFromGrid(muGrid, muMarg, 0.975),
-      tauQ025: quantileFromGrid(tauGrid, tauMarg, 0.025),
-      tauQ975: quantileFromGrid(tauGrid, tauMarg, 0.975)
-    };
-  };
-
-  const history = Array.from({length: studies.length}, (_, i) => {
-    const fit = bayesMetaGrid(studies.slice(0, i + 1));
-    return {
-      k: i + 1,
-      muMean: fit.muMean,
-      muLo: fit.muQ025,
-      muHi: fit.muQ975,
-      tauMean: fit.tauMean,
-      tauLo: fit.tauQ025,
-      tauHi: fit.tauQ975
-    };
-  });
-
-  const makeSvg = (width, height, label) => {
-    const svg = document.createElementNS(NS, "svg");
-    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-    svg.setAttribute("aria-label", label);
-    return svg;
-  };
-
-  const svgNode = (tag, attrs = {}, text) => {
-    const node = document.createElementNS(NS, tag);
-    for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
-    if (text != null) node.textContent = text;
-    return node;
-  };
-
-  const appendText = (svg, x, y, text, attrs = {}) => {
-    svg.appendChild(svgNode("text", {x, y, ...attrs}, text));
-  };
-
-  const pathFromPoints = (points) =>
-    points.map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`).join(" ");
-
-  const areaPath = (upper, lower) => {
-    const top = upper.map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`).join(" ");
-    const bottom = lower.slice().reverse().map(p => `L${p[0]},${p[1]}`).join(" ");
-    return `${top}${bottom}Z`;
-  };
-
-  const forestChart = (dat, fit) => {
-    const width = 880;
-    const height = 300;
-    const margin = {top: 32, right: 118, bottom: 38, left: 145};
-    const rows = dat.map((d, i) => ({...d, row: i + 1, lo: d.yi - 1.96 * d.sei, hi: d.yi + 1.96 * d.sei}));
-    const xVals = rows.flatMap(d => [d.lo, d.hi]).concat([fit.muQ025, fit.muQ975, 0]);
-    const xmin = Math.min(-1.05, ...xVals) - 0.02;
-    const xmax = Math.max(0.45, ...xVals) + 0.02;
-    const x = linearScale(xmin, xmax, margin.left, width - margin.right);
-    const y = linearScale(0, rows.length + 2.0, margin.top, height - margin.bottom);
-    const ticks = niceTicks(xmin, xmax, 6);
-
-    const svg = makeSvg(width, height, "Forest plot");
-    appendText(svg, margin.left, 18, "Study estimates and posterior pooled effect", {"font-size": "18", "font-weight": "700"});
-    svg.appendChild(svgNode("line", {x1: x(0), x2: x(0), y1: y(0.5), y2: y(rows.length + 1.5), stroke: "#9aa0a6", "stroke-dasharray": "4,4"}));
-
-    rows.forEach(d => {
-      svg.appendChild(svgNode("line", {x1: x(d.lo), x2: x(d.hi), y1: y(d.row), y2: y(d.row), stroke: studyColor, "stroke-width": "2"}));
-      svg.appendChild(svgNode("line", {x1: x(d.lo), x2: x(d.lo), y1: y(d.row) - 5, y2: y(d.row) + 5, stroke: studyColor}));
-      svg.appendChild(svgNode("line", {x1: x(d.hi), x2: x(d.hi), y1: y(d.row) - 5, y2: y(d.row) + 5, stroke: studyColor}));
-      svg.appendChild(svgNode("rect", {x: x(d.yi) - 5.5, y: y(d.row) - 5.5, width: 11, height: 11, fill: studyColor}));
-      appendText(svg, margin.left - 10, y(d.row) + 4, d.study, {"font-size": "14", "text-anchor": "end"});
-      appendText(svg, width - margin.right + 8, y(d.row) + 4, `${fmt(d.yi)} [${fmt(d.lo)}, ${fmt(d.hi)}]`, {"font-size": "16"});
-    });
-
-    svg.appendChild(svgNode("line", {x1: x(fit.muQ025), x2: x(fit.muQ975), y1: y(rows.length + 1.1), y2: y(rows.length + 1.1), stroke: muColor, "stroke-width": "3"}));
-    svg.appendChild(svgNode("circle", {cx: x(fit.muMean), cy: y(rows.length + 1.1), r: 6, fill: muColor}));
-    appendText(svg, margin.left - 10, y(rows.length + 1.1) + 4, "Posterior for μ", {"font-size": "16", "text-anchor": "end", "font-weight": "700"});
-    appendText(svg, width - margin.right + 8, y(rows.length + 1.1) + 4, `${fmt(fit.muMean)} [${fmt(fit.muQ025)}, ${fmt(fit.muQ975)}]`, {"font-size": "16"});
-
-    svg.appendChild(svgNode("line", {x1: margin.left, x2: width - margin.right, y1: height - margin.bottom, y2: height - margin.bottom, stroke: "#555"}));
-    ticks.forEach(t => {
-      svg.appendChild(svgNode("line", {x1: x(t), x2: x(t), y1: height - margin.bottom, y2: height - margin.bottom + 6, stroke: "#555"}));
-      appendText(svg, x(t), height - margin.bottom + 20, fmt(t), {"text-anchor": "middle", "font-size": "16"});
-    });
-    appendText(svg, (margin.left + width - margin.right) / 2, height - 6, "Effect size", {"text-anchor": "middle", "font-size": "16", "font-weight": "600"});
-    return svg;
-  };
-
-  const historyChart = (historyRows, currentK, key, label, color, yMin = null) => {
-    const width = 430;
-    const height = 186;
-    const margin = {top: 28, right: 16, bottom: 34, left: 44};
-    const xs = historyRows.map(d => d.k);
-    const los = historyRows.map(d => d[`${key}Lo`]);
-    const his = historyRows.map(d => d[`${key}Hi`]);
-    const ymin = yMin === null ? Math.min(...los) - 0.03 : yMin;
-    const ymax = Math.max(...his) + 0.03;
-    const x = linearScale(1, historyRows.length, margin.left, width - margin.right);
-    const y = linearScale(ymin, ymax, height - margin.bottom, margin.top);
-    const ticks = niceTicks(ymin, ymax, 4);
-    const partialRows = historyRows.slice(0, currentK);
-    const areaUpper = partialRows.map(d => [x(d.k), y(d[`${key}Hi`])]);
-    const areaLower = partialRows.map(d => [x(d.k), y(d[`${key}Lo`])]);
-    const linePts = partialRows.map(d => [x(d.k), y(d[`${key}Mean`])]);
-    const current = partialRows[partialRows.length - 1];
-    const svg = makeSvg(width, height, label);
-
-    appendText(svg, margin.left, 16, label, {"font-size": "16", "font-weight": "700"});
-    ticks.forEach(t => {
-      svg.appendChild(svgNode("line", {x1: margin.left, x2: width - margin.right, y1: y(t), y2: y(t), stroke: "#eceff1"}));
-      appendText(svg, margin.left - 8, y(t) + 4, fmt(t), {"text-anchor": "end", "font-size": "16"});
-    });
-
-    if (partialRows.length > 1) {
-      svg.appendChild(svgNode("path", {d: areaPath(areaUpper, areaLower), fill: color, opacity: "0.18"}));
-      svg.appendChild(svgNode("path", {d: pathFromPoints(linePts), fill: "none", stroke: color, "stroke-width": "2.5"}));
+    if (visibleRows > 0) {
+      const fit = history[Math.max(0, visibleRows - 1)];
+      const pg = make("g", { opacity: "1" });
+      const pLine = make("line", {
+        x1: x(fit.muLo), x2: x(fit.muHi), y1: posteriorY, y2: posteriorY,
+        stroke: "#2774AE", "stroke-width": "3.5", "stroke-linecap": "round"
+      });
+      const pPoint = make("circle", {
+        cx: x(fit.muMean), cy: posteriorY, r: 6.5, fill: "#2774AE"
+      });
+      const pLabel = make("text", {
+        x: 28, y: posteriorY + 4, "font-size": "10.5", "font-weight": "700", fill: "#003B5C"
+      }, "μ");
+      pg.append(pLabel, pLine, pPoint);
+      svg.appendChild(pg);
+      if (animate) {
+        const prevFit = history[Math.max(0, visibleRows - 2)];
+        if (prevFit) {
+          pLine.setAttribute("x1", x(prevFit.muLo));
+          pLine.setAttribute("x2", x(prevFit.muHi));
+          pPoint.setAttribute("cx", x(prevFit.muMean));
+          pLine.style.transition = "x1 260ms ease, x2 260ms ease";
+          pPoint.style.transition = "cx 260ms ease";
+          requestAnimationFrame(() => {
+            pLine.setAttribute("x1", x(fit.muLo));
+            pLine.setAttribute("x2", x(fit.muHi));
+            pPoint.setAttribute("cx", x(fit.muMean));
+          });
+        }
+      }
     }
-    svg.appendChild(svgNode("line", {x1: x(currentK), x2: x(currentK), y1: margin.top, y2: height - margin.bottom, stroke: "#666", "stroke-dasharray": "4,4"}));
-    svg.appendChild(svgNode("circle", {cx: x(currentK), cy: y(current[`${key}Mean`]), r: 4.5, fill: color}));
-    svg.appendChild(svgNode("line", {x1: margin.left, x2: width - margin.right, y1: height - margin.bottom, y2: height - margin.bottom, stroke: "#555"}));
-    xs.forEach(v => {
-      svg.appendChild(svgNode("line", {x1: x(v), x2: x(v), y1: height - margin.bottom, y2: height - margin.bottom + 5, stroke: "#555"}));
-      appendText(svg, x(v), height - margin.bottom + 17, String(v), {"text-anchor": "middle", "font-size": "16"});
+
+    svg.appendChild(make("line", {
+      x1: plotLeft, x2: plotRight, y1: plotBottom, y2: plotBottom,
+      stroke: "#647990", "stroke-width": "2"
+    }));
+    [-1.0, -0.5, 0.0].forEach((tick) => {
+      const tx = x(tick);
+      svg.appendChild(make("line", {
+        x1: tx, x2: tx, y1: plotBottom, y2: plotBottom + 5,
+        stroke: "#647990", "stroke-width": "1.5"
+      }));
+      svg.appendChild(make("text", {
+        x: tx, y: plotBottom + 18, "text-anchor": "middle",
+        "font-size": "10.5", "font-weight": "600", fill: "#5f7897"
+      }, fmt(tick)));
     });
-    return svg;
+    return root.appendChild(svg);
   };
 
-  const render = (step) => {
-    const current = studies.slice(0, step);
-    const fit = bayesMetaGrid(current);
-    const beat = beats[Math.min(step - 1, beats.length - 1)];
-
-    root.innerHTML = "";
-    const wrap = document.createElement("div");
-    wrap.className = "chart-stack";
-
-    const stageText = document.createElement("div");
-    stageText.className = "meta-stage";
-    stageText.innerHTML = `
-      <div class="meta-stage-kicker">Study ${step} of ${studies.length}</div>
-      <div class="meta-stage-headline">${beat.headline}</div>
-      <div class="meta-stage-body">${beat.body}</div>
-    `;
-
-    const mini = document.createElement("div");
-    mini.className = "mini-grid";
-    mini.appendChild(historyChart(history, step, "mu", "Posterior pooled effect μ as studies accumulate", muColor));
-    mini.appendChild(historyChart(history, step, "tau", "Posterior heterogeneity τ as studies accumulate", tauColor, 0));
-
-    wrap.append(stageText, forestChart(current, fit), mini);
-    root.appendChild(wrap);
-  };
-
-  const resolveStep = () => {
+  const resolve = () => {
     const slide = root.closest("section");
     if (!slide || !slide.classList.contains("present")) return;
-    const n = slide.querySelectorAll("#meta-fragments .fragment.visible").length;
-    render(Math.max(1, Math.min(studies.length, n + 1)));
+    const panel = root.closest(".fragment");
+    if (panel && !panel.classList.contains("visible")) {
+      draw(0, false);
+      return;
+    }
+    let visibleRows = 0;
+    for (let i = 1; i <= studies.length; i++) {
+      if (slide.querySelector(`#combined-model-frag-${i}.visible`)) visibleRows = i;
+    }
+    const previous = Number(root.dataset.step || "0");
+    const animate = visibleRows > previous;
+    root.dataset.step = String(visibleRows);
+    draw(visibleRows, animate);
   };
 
   const onFragment = (event) => {
     const slide = root.closest("section");
-    if (slide && slide.contains(event.fragment)) resolveStep();
+    if (slide && slide.contains(event.fragment)) resolve();
   };
-
-  const onSlideChanged = () => resolveStep();
-
+  const onSlideChanged = () => resolve();
   const bindReveal = () => {
     if (typeof Reveal === "undefined" || typeof Reveal.on !== "function") return false;
     if (root.dataset.revealBound === "true") return true;
@@ -1176,18 +1203,16 @@ A network meta-analysis lets us compare treatments that were never tested head-t
     Reveal.on("fragmenthidden", onFragment);
     Reveal.on("slidechanged", onSlideChanged);
     root.dataset.revealBound = "true";
-    resolveStep();
+    resolve();
     return true;
   };
-
   const waitForReveal = () => {
     if (bindReveal()) return;
     const timer = window.setInterval(() => {
       if (bindReveal()) window.clearInterval(timer);
     }, 120);
   };
-
-  render(1);
+  draw(0, false);
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", waitForReveal, { once: true });
   } else {
@@ -1197,139 +1222,789 @@ A network meta-analysis lets us compare treatments that were never tested head-t
 </script>
 ```
 :::
-
 :::
 :::
 
 
 ---
 
-## {auto-animate=true}
+## {data-background-color="#0f2238" .results-intro}
 
-::: {data-id="depress-forest"}
-::: {style="transform: scale(2.5); transform-origin: center 35%; margin-top: 40px;"}
-![](img/forest_depression_full.jpeg){width="100%"}
-:::
+::: {style="display:flex; align-items:center; justify-content:center; min-height: 78vh; padding: 1.5rem 2rem;"}
+<div class="results-card">
+  <div class="results-title">Let’s get to the results</div>
+</div>
 :::
 
-::: notes
-Let's zoom in on the most important part of the depression forest plot — the Vitamin D row. The x-axis is standardized mean difference. Zero is the dashed null line. Left of zero means the supplement reduced symptoms. Vitamin D's credible interval sits entirely to the left — it doesn't touch zero.
-:::
 
 ---
 
-## Vitamin D: the main finding {auto-animate=true}
+## Depression: the main signals {.auto-animate}
 
-::: {data-id="depress-forest"}
-::: {style="transform: scale(2.5); transform-origin: center 35%; margin-top: 10px;"}
-![](img/forest_depression_full.jpeg){width="100%"}
-:::
-:::
-
-::: {style="margin-top: 18px; font-size: 0.85em;"}
-::: {.columns}
-::: {.column width="50%"}
-**SMD −0.32** (95% CrI: −0.51 to −0.13)
-→ ~2–3 BDI points in plain terms
-→ Credible interval **excludes zero** ✓
-:::
-::: {.column width="50%"}
-Confidence: **Low** (CINeMA)
-32 studies, largest evidence base
-Modest but the most consistent signal
-:::
-:::
+::: {style="margin-top: 10px;"}
+<div id="depress-forest-sequence" style="width:100%;"></div>
+<div id="depress-forest-fragments" style="display:none;">
+<span id="depress-frag-1" class="fragment"></span>
+<span id="depress-frag-2" class="fragment"></span>
+</div>
 :::
 
 ::: notes
-The posterior mean effect is −0.32 standard deviations relative to placebo. Using a typical BDI standard deviation of about 9 points, that's roughly 2–3 points on the scale. Modest — not a cure — but consistent across the high-quality trials. CINeMA confidence is low, but this is the strongest signal in the whole dataset.
+Vitamin D is the most stable signal because its interval excludes zero with more support. Selenium also excludes zero, but the evidence base is much sparser, so it is intriguing rather than practice-informing. 2 studies with only 122 people. Also τ = 0.45, 95% CrI: 0.29 to 0.63, so there is large heterogeneity across studies.
+
+Selenium may affect depression symptoms through multiple mechanisms, including antioxidant activity via selenoenzymes, modulation of neurotransmitter systems, anti-inflammatory effects, and regulation of neuronal signaling pathways
+
+Vitamin B6 affects depression symptoms primarily through its role as a cofactor in neurotransmitter synthesis, particularly as pyridoxal 5'-phosphate (PLP), the active coenzyme form that is essential for producing serotonin, dopamine, norepinephrine, and GABA.
+
+The primary mechanism involves vitamin D receptor signaling in the central nervous system. VDR is widely expressed in brain regions critical for mood regulation, including the hippocampus, hypothalamus, and prefrontal cortex.
 :::
+
+```{=html}
+<script>
+(() => {
+  const mount = document.getElementById("depress-forest-sequence");
+  if (!mount || mount.dataset.ready === "true") return;
+  mount.dataset.ready = "true";
+
+  const slide = mount.closest("section");
+  const NS = "http://www.w3.org/2000/svg";
+  let timers = [];
+  let currentStage = 0;
+
+  const rows = [
+    {label: "B1", estimate: -0.60, lo: -1.68, hi: 0.51},
+    {label: "B12, B6, B9", estimate: 0.13, lo: -0.50, hi: 0.77},
+    {label: "B12, B9", estimate: -0.11, lo: -0.76, hi: 0.53},
+    {label: "B12, B9, D", estimate: -0.15, lo: -1.04, hi: 0.73},
+    {label: "B6", estimate: -0.92, lo: -2.27, hi: 0.41},
+    {label: "B9", estimate: -0.09, lo: -1.01, hi: 0.84},
+    {label: "B9, Iron", estimate: 0.03, lo: -1.23, hi: 1.33},
+    {label: "C", estimate: -0.12, lo: -1.14, hi: 0.90},
+    {label: "D", estimate: -0.32, lo: -0.51, hi: -0.13},
+    {label: "D, Iron", estimate: -0.58, lo: -1.65, hi: 0.51},
+    {label: "Magnesium", estimate: -0.23, lo: -0.94, hi: 0.51},
+    {label: "Magnesium, Zinc", estimate: -0.30, lo: -1.22, hi: 0.67},
+    {label: "Selenium", estimate: -0.99, lo: -1.90, hi: -0.11},
+    {label: "Zinc", estimate: -0.22, lo: -0.98, hi: 0.55}
+  ];
+
+  const stageConfigs = {
+    1: { visible: new Set(["D"]), dim: new Set(), focus: ["D"], zoom: 1.82, tx: 46, ty: -2, duration: 1220, valueScreenX: 820 },
+    2: { visible: new Set(["D", "Selenium"]), dim: new Set(["D"]), focus: ["D", "Selenium"], zoom: 1.46, tx: 34, ty: 0, duration: 1280, valueScreenX: 900 },
+    3: { visible: new Set(rows.map((r) => r.label)), dim: new Set(), focus: ["D", "Selenium"], zoom: 1.0, tx: 0, ty: 0, duration: 1120, valueScreenX: 900 }
+  };
+
+  const width = 1100;
+  const height = 500;
+  const xMin = -2.5;
+  const xMax = 1.5;
+  const margin = { top: 28, right: 230, bottom: 70, left: 210 };
+  const plotLeft = margin.left;
+  const plotRight = width - margin.right;
+  const plotTop = 88;
+  const plotBottom = height - 88;
+  const rowStep = 24;
+  const rowsTop = 90;
+  const centerX = 505;
+  const centerY = 198;
+  const focusLabelScreenX = 96;
+  const focusValueScreenX = 900;
+
+  const fmt = (x) => (x < 0 ? "−" : "") + Math.abs(x).toFixed(2);
+  const scaleLinear = (min, max, lo, hi) => (value) => lo + ((value - min) / (max - min)) * (hi - lo);
+  const x = scaleLinear(xMin, xMax, plotLeft, plotRight);
+  const rowY = (i) => rowsTop + i * rowStep;
+  const make = (tag, attrs = {}, text) => {
+    const el = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+    if (text != null) el.textContent = text;
+    return el;
+  };
+
+  const svg = make("svg", {
+    viewBox: `0 0 ${width} ${height}`,
+    style: "display:block;width:100%;height:auto;overflow:visible;font-family:Inter,system-ui,sans-serif;"
+  });
+  svg.appendChild(make("rect", { x: 0, y: 0, width, height, fill: "#fff" }));
+  const defs = make("defs");
+  const zeroClip = make("clipPath", { id: "depress-zero-clip" });
+  zeroClip.appendChild(make("rect", {
+    x: plotLeft - 4, y: plotTop - 8,
+    width: plotRight - plotLeft + 8, height: plotBottom - plotTop + 16
+  }));
+  defs.appendChild(zeroClip);
+  svg.appendChild(defs);
+
+  svg.appendChild(make("text", {
+    x: plotLeft, y: 24, "font-size": "16", "font-weight": "700", fill: "#111"
+  }, "Intervention"));
+  svg.appendChild(make("text", {
+    x: plotRight - 8, y: 24, "text-anchor": "end", "font-size": "16", "font-weight": "700", fill: "#111"
+  }, "Effect Size (95% CrI)"));
+  svg.appendChild(make("line", {
+    x1: plotLeft, x2: plotRight, y1: 34, y2: 34, stroke: "#111", "stroke-width": "1.6"
+  }));
+
+  const axisGroup = make("g");
+  const axisRefs = [];
+  const ticks = [-2, -1, 0, 1];
+  ticks.forEach((tick) => {
+    const xx = x(tick);
+    const tickLine = make("line", {
+      x1: xx, x2: xx, y1: height - 58, y2: height - 52,
+      stroke: "#5e6b78", "stroke-width": "1.5"
+    });
+    const tickText = make("text", {
+      x: xx, y: height - 36, "text-anchor": "middle", "font-size": "15", fill: "#47515b"
+    }, fmt(tick));
+    axisGroup.appendChild(tickLine);
+    axisGroup.appendChild(tickText);
+    axisRefs.push({ type: "tickLine", tick, el: tickLine }, { type: "tickText", tick, el: tickText });
+  });
+  const axisBaseLine = make("line", {
+    x1: plotLeft, x2: plotRight, y1: height - 58, y2: height - 58,
+    stroke: "#5e6b78", "stroke-width": "1.5"
+  });
+  axisGroup.appendChild(axisBaseLine);
+  axisRefs.push({ type: "base", el: axisBaseLine });
+  svg.appendChild(axisGroup);
+  const leftDir = make("text", {
+    x: plotLeft, y: height - 18, "text-anchor": "start", "font-size": "13", fill: "#5f7897", "font-weight": "600",
+    opacity: "0"
+  }, "← Favors supplement");
+  const rightDir = make("text", {
+    x: plotRight, y: height - 18, "text-anchor": "end", "font-size": "13", fill: "#5f7897", "font-weight": "600",
+    opacity: "0"
+  }, "Favors placebo →");
+  svg.appendChild(leftDir);
+  svg.appendChild(rightDir);
+
+  const plotGroup = make("g");
+  const rowsGroup = make("g");
+  const rowRefs = new Map();
+  rows.forEach((row, i) => {
+    const y = rowY(i);
+    const isD = row.label === "D";
+    const isS = row.label === "Selenium";
+    const accent = isD ? "#5b8fd1" : isS ? "#6d57b5" : "#9aa0a6";
+
+    const group = make("g", {
+      opacity: "0",
+      style: "transform: translateY(8px); transform-box: fill-box; transform-origin: left center;"
+    });
+    const bg = make("rect", {
+      x: plotLeft - 18, y: y - 12, width: plotRight - plotLeft + 36, height: 20,
+      fill: isD ? "#eef4fb" : isS ? "#f2ecfb" : "#fbfcfd", opacity: "1"
+    });
+    const label = make("text", {
+      x: plotLeft - 8, y: y + 4, "text-anchor": "end",
+      "font-size": "16", "font-weight": (isD || isS) ? "700" : "500",
+      fill: (isD || isS) ? accent : "#2f3f4f", opacity: "1"
+    }, row.label);
+
+    const lineLen = Math.max(1, x(row.hi) - x(row.lo));
+    const line = make("line", {
+      x1: x(row.lo), x2: x(row.hi), y1: y, y2: y,
+      stroke: accent, "stroke-width": (isD || isS) ? "4" : "3",
+      "stroke-linecap": "round",
+      "stroke-dasharray": `${lineLen} ${lineLen}`,
+      "stroke-dashoffset": `${lineLen}`
+    });
+    const capLo = make("line", {
+      x1: x(row.lo), x2: x(row.lo), y1: y - 6, y2: y + 6,
+      stroke: accent, "stroke-width": (isD || isS) ? "3" : "2", opacity: "0"
+    });
+    const capHi = make("line", {
+      x1: x(row.hi), x2: x(row.hi), y1: y - 6, y2: y + 6,
+      stroke: accent, "stroke-width": (isD || isS) ? "3" : "2", opacity: "0"
+    });
+    const point = make("circle", {
+      cx: x(row.estimate), cy: y, r: "0.1",
+      fill: accent, opacity: "0"
+    });
+    const valueText = `${fmt(row.estimate)} (${fmt(row.lo)}, ${fmt(row.hi)})`;
+    const valueBg = make("rect", {
+      x: plotRight - 12, y: y - 12, width: "10", height: "22",
+      rx: "4", fill: "#ffffff", opacity: "0.94"
+    });
+    const value = make("text", {
+      x: plotRight - 12, y: y + 4, "text-anchor": "end", "font-size": "16",
+      "font-weight": (isD || isS) ? "700" : "500",
+      fill: (isD || isS) ? "#111" : "#4a4a4a", opacity: "1"
+    }, valueText);
+
+    group.appendChild(bg);
+    group.appendChild(label);
+    group.appendChild(line);
+    group.appendChild(capLo);
+    group.appendChild(capHi);
+    group.appendChild(point);
+    group.appendChild(valueBg);
+    group.appendChild(value);
+    rowsGroup.appendChild(group);
+    rowRefs.set(row.label, { group, bg, label, line, capLo, capHi, point, valueBg, value, valueText, accent, isD, isS, row });
+  });
+  const zeroLine = make("line", {
+    x1: x(0), x2: x(0), y1: plotTop - 8, y2: plotBottom,
+    stroke: "#9aa0a6", "stroke-width": "2", "stroke-dasharray": "5,5",
+    "clip-path": "url(#depress-zero-clip)"
+  });
+  plotGroup.appendChild(rowsGroup);
+  svg.appendChild(plotGroup);
+  svg.appendChild(zeroLine);
+
+  mount.replaceChildren(svg);
+
+  const clearTimers = () => {
+    timers.forEach((t) => window.clearTimeout(t));
+    timers = [];
+  };
+
+  const stageTransform = (stage) => {
+    const cfg = stageConfigs[stage];
+    if (stage === 3) return { zoom: 1, tx: 0, ty: 0 };
+    const focusRows = cfg.focus.map((label) => rows.find((r) => r.label === label)).filter(Boolean);
+    const avgX = focusRows.reduce((sum, r) => sum + x(r.estimate), 0) / focusRows.length;
+    const avgY = focusRows.reduce((sum, r) => sum + rowY(rows.findIndex((d) => d.label === r.label)), 0) / focusRows.length;
+    const tx = centerX - cfg.zoom * avgX + cfg.tx;
+    const ty = centerY - cfg.zoom * avgY + cfg.ty;
+    return { zoom: cfg.zoom, tx, ty };
+  };
+
+  const transformForStage = (stage) => {
+    const t = stageTransform(stage);
+    return stage === 3 ? "" : `translate(${t.tx.toFixed(2)} ${t.ty.toFixed(2)}) scale(${t.zoom.toFixed(4)})`;
+  };
+
+  const resetGeometry = () => {
+    rows.forEach((row) => {
+      const ref = rowRefs.get(row.label);
+      const len = Math.max(1, x(row.hi) - x(row.lo));
+      ref.line.style.transition = "none";
+      ref.line.style.strokeDashoffset = String(len);
+      ref.capLo.style.transition = "none";
+      ref.capHi.style.transition = "none";
+      ref.point.style.transition = "none";
+      ref.capLo.style.opacity = "0";
+      ref.capHi.style.opacity = "0";
+      ref.point.style.opacity = "0";
+      ref.point.setAttribute("r", "0.1");
+    });
+  };
+
+  const applyStage = (stage, animateRows = true, animateTransform = true) => {
+    const cfg = stageConfigs[stage];
+    const t = stageTransform(stage);
+    plotGroup.style.transition = animateTransform ? `transform ${Math.round(cfg.duration * 1.18)}ms cubic-bezier(0.16, 0.78, 0.18, 1)` : "none";
+    plotGroup.setAttribute("transform", transformForStage(stage));
+    zeroLine.style.transition = animateTransform ? `x1 ${Math.round(cfg.duration * 1.18)}ms cubic-bezier(0.16, 0.78, 0.18, 1), x2 ${Math.round(cfg.duration * 1.18)}ms cubic-bezier(0.16, 0.78, 0.18, 1)` : "none";
+    const zeroX = t.tx + t.zoom * x(0);
+    zeroLine.setAttribute("x1", zeroX.toFixed(2));
+    zeroLine.setAttribute("x2", zeroX.toFixed(2));
+    const axisLeft = t.tx + t.zoom * plotLeft;
+    const axisRight = t.tx + t.zoom * plotRight;
+    axisRefs.forEach((ref) => {
+      ref.el.style.transition = animateTransform
+        ? `${ref.type === "base" ? "x1" : "x1"} ${Math.round(cfg.duration * 1.18)}ms cubic-bezier(0.16, 0.78, 0.18, 1), ${ref.type === "base" ? "x2" : "x2"} ${Math.round(cfg.duration * 1.18)}ms cubic-bezier(0.16, 0.78, 0.18, 1), opacity 260ms ease`
+        : "none";
+      ref.el.setAttribute("opacity", "1");
+      if (ref.type === "base") {
+        ref.el.setAttribute("x1", axisLeft.toFixed(2));
+        ref.el.setAttribute("x2", axisRight.toFixed(2));
+      } else if (ref.type === "tickLine") {
+        const xx = t.tx + t.zoom * x(ref.tick);
+        ref.el.setAttribute("x1", xx.toFixed(2));
+        ref.el.setAttribute("x2", xx.toFixed(2));
+      } else if (ref.type === "tickText") {
+        const xx = t.tx + t.zoom * x(ref.tick);
+        ref.el.setAttribute("x", xx.toFixed(2));
+      }
+    });
+    leftDir.style.transition = "opacity 340ms ease";
+    rightDir.style.transition = "opacity 340ms ease";
+    leftDir.style.opacity = stage === 3 ? "1" : "0";
+    rightDir.style.opacity = stage === 3 ? "1" : "0";
+
+    rows.forEach((row) => {
+      const ref = rowRefs.get(row.label);
+      const visible = cfg.visible.has(row.label);
+      const dim = cfg.dim.has(row.label);
+      const opacity = !visible ? 0 : dim ? 0.38 : 1;
+      const focusLabel = stage < 3 && visible && (ref.isD || ref.isS);
+      const valueWidth = Math.max(78, ref.valueText.length * 8.7 + 18);
+      const localFocusLabelX = (focusLabel ? (focusLabelScreenX - t.tx) / t.zoom : plotLeft - 8);
+      const localFocusValueX = stage < 3 ? (((cfg.valueScreenX || focusValueScreenX) - t.tx) / t.zoom) : plotRight + 18;
+      const valueX = localFocusValueX;
+      const valueAnchor = stage < 3 ? "start" : "start";
+      const bgX = valueX - 8;
+      ref.group.style.transition = animateRows ? "opacity 620ms ease, transform 980ms cubic-bezier(0.16, 0.78, 0.18, 1)" : "none";
+      ref.group.style.opacity = String(opacity);
+      ref.group.style.transform = visible ? "translateY(0px)" : "translateY(8px)";
+      ref.bg.setAttribute("opacity", visible ? (dim ? "0.55" : "1") : "0");
+      ref.label.style.transition = animateRows ? "opacity 520ms ease, x 980ms cubic-bezier(0.16, 0.78, 0.18, 1)" : "none";
+      ref.label.setAttribute("x", String(localFocusLabelX));
+      ref.label.setAttribute("text-anchor", focusLabel ? "start" : "end");
+      ref.label.setAttribute("opacity", visible ? String(opacity) : "0");
+      ref.valueBg.style.transition = animateRows ? "opacity 520ms ease, x 980ms cubic-bezier(0.16, 0.78, 0.18, 1)" : "none";
+      ref.valueBg.setAttribute("x", String(bgX));
+      ref.valueBg.setAttribute("width", String(valueWidth + 16));
+      ref.valueBg.setAttribute("opacity", visible ? String(Math.min(0.96, opacity === 1 ? 0.96 : 0.82)) : "0");
+      ref.value.style.transition = animateRows ? "opacity 520ms ease, x 980ms cubic-bezier(0.16, 0.78, 0.18, 1)" : "none";
+      ref.value.setAttribute("x", String(valueX));
+      ref.value.setAttribute("text-anchor", valueAnchor);
+      ref.value.setAttribute("opacity", visible ? String(opacity) : "0");
+      ref.line.setAttribute("opacity", visible ? String(opacity) : "0");
+      ref.capLo.setAttribute("opacity", visible && ref.capLo.style.opacity !== "0" ? String(opacity) : ref.capLo.style.opacity);
+      ref.capHi.setAttribute("opacity", visible && ref.capHi.style.opacity !== "0" ? String(opacity) : ref.capHi.style.opacity);
+      ref.point.setAttribute("opacity", visible && ref.point.style.opacity !== "0" ? String(opacity) : ref.point.style.opacity);
+    });
+  };
+
+  const revealRow = (label, delay = 0) => {
+    const ref = rowRefs.get(label);
+    if (!ref) return;
+    const show = () => {
+      const row = rows.find((r) => r.label === label);
+      const len = Math.max(1, x(row.hi) - x(row.lo));
+      ref.line.style.transition = "stroke-dashoffset 760ms ease, opacity 320ms ease";
+      ref.line.style.strokeDashoffset = "0";
+      const t1 = window.setTimeout(() => {
+        ref.capLo.style.transition = "opacity 220ms ease";
+        ref.capHi.style.transition = "opacity 220ms ease";
+        ref.capLo.style.opacity = ref.group.style.opacity || "1";
+        ref.capHi.style.opacity = ref.group.style.opacity || "1";
+        ref.point.style.transition = "opacity 260ms ease, r 460ms cubic-bezier(0.2, 0.8, 0.2, 1)";
+        ref.point.style.opacity = ref.group.style.opacity || "1";
+        ref.point.setAttribute("r", (ref.isD || ref.isS) ? "6.5" : "5");
+      }, 280);
+      timers.push(t1);
+    };
+    const t0 = window.setTimeout(show, delay);
+    timers.push(t0);
+  };
+
+  const materializeUpToStage = (stage) => {
+    clearTimers();
+    resetGeometry();
+    applyStage(stage, false, false);
+    const visibleRows = stage === 1
+      ? ["D"]
+      : stage === 2
+        ? ["D", "Selenium"]
+        : rows.map((r) => r.label);
+    visibleRows.forEach((label) => {
+      const ref = rowRefs.get(label);
+      const row = rows.find((r) => r.label === label);
+      const len = Math.max(1, x(row.hi) - x(row.lo));
+      ref.line.style.strokeDashoffset = "0";
+      const opacity = ref.group.style.opacity || "1";
+      ref.capLo.style.opacity = opacity;
+      ref.capHi.style.opacity = opacity;
+      ref.point.style.opacity = opacity;
+      ref.point.setAttribute("r", (ref.isD || ref.isS) ? "6.5" : "5");
+      ref.line.setAttribute("opacity", opacity);
+    });
+  };
+
+  const advanceToStage = (stage) => {
+    clearTimers();
+    if (stage <= currentStage) {
+      currentStage = stage;
+      materializeUpToStage(stage);
+      return;
+    }
+
+    if (currentStage === 0 && stage === 1) {
+      applyStage(1, false, true);
+      revealRow("D", 120);
+      currentStage = 1;
+      return;
+    }
+
+    if (currentStage <= 1 && stage === 2) {
+      if (currentStage === 0) materializeUpToStage(1);
+      applyStage(2, true, true);
+      revealRow("Selenium", 260);
+      currentStage = 2;
+      return;
+    }
+
+    if (stage === 3) {
+      if (currentStage === 0) materializeUpToStage(2);
+      if (currentStage === 1) materializeUpToStage(2);
+      applyStage(3, true, true);
+      rows.filter((r) => !["D", "Selenium"].includes(r.label)).forEach((row, idx) => {
+        revealRow(row.label, 180 + idx * 70);
+      });
+      currentStage = 3;
+    }
+  };
+
+  const resolveStage = () => {
+    if (!slide || !slide.classList.contains("present")) return;
+    let stage = 1;
+    if (slide.querySelector("#depress-frag-1.visible")) stage = 2;
+    if (slide.querySelector("#depress-frag-2.visible")) stage = 3;
+    advanceToStage(stage);
+  };
+
+  const renderInactive = () => {
+    currentStage = 0;
+    materializeUpToStage(3);
+  };
+
+  const bindReveal = () => {
+    const onFragment = (event) => {
+      if (slide && slide.contains(event.fragment)) resolveStage();
+    };
+    const onSlideChanged = () => {
+      if (slide?.classList.contains("present")) {
+        currentStage = 0;
+        resetGeometry();
+        resolveStage();
+      } else {
+        renderInactive();
+      }
+    };
+    window.Reveal.on("ready", onSlideChanged);
+    window.Reveal.on("fragmentshown", onFragment);
+    window.Reveal.on("fragmenthidden", onFragment);
+    window.Reveal.on("slidechanged", onSlideChanged);
+    if (slide?.classList.contains("present")) {
+      currentStage = 0;
+      resetGeometry();
+      resolveStage();
+    } else {
+      renderInactive();
+    }
+  };
+
+  const waitForReveal = () => {
+    if (window.Reveal && typeof window.Reveal.on === "function") {
+      bindReveal();
+    } else {
+      timers.push(window.setTimeout(waitForReveal, 120));
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", waitForReveal, { once: true });
+  } else {
+    waitForReveal();
+  }
+})();
+</script>
+```
 
 ---
 
-## Selenium: intriguing, but... {auto-animate=true}
+## Does baseline deficiency change the picture for vitamin D?
 
-::: {data-id="depress-forest"}
-::: {style="transform: scale(2.5); transform-origin: center 3%; margin-top: 10px;"}
-![](img/forest_depression_full.jpeg){width="100%"}
-:::
-:::
+::: {style="margin-top: 0;"}
+<div id="vitd-deficiency-forest" style="width:100%;"></div>
 
-::: {style="margin-top: 18px; font-size: 0.85em;"}
-::: {.columns}
-::: {.column width="50%"}
-**SMD −0.99** (95% CrI: −1.90 to −0.11)
-→ Larger point estimate than vitamin D
-→ But: only **2 studies, N = 122**
-:::
-::: {.column width="50%"}
-Mechanism: antioxidant defense, thyroid
-metabolism, neuroendocrine pathways
-**Verdict: hypothesis-generating only**
-:::
-:::
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const mount = document.getElementById("vitd-deficiency-forest");
+  if (!mount) return;
+  const slide = mount.closest("section");
+  let timers = [];
+
+  const data = [
+    { depressed: "No", deficiency: "Unknown", defKey: "unknown", estimate: -0.01, lo: -0.86, hi: 0.76 },
+    { depressed: "No", deficiency: "Not deficient", defKey: "no", estimate: -0.13, lo: -0.49, hi: 0.23 },
+    { depressed: "No", deficiency: "Deficient", defKey: "yes", estimate: 0.03, lo: -0.37, hi: 0.44 },
+    { depressed: "Yes", deficiency: "Unknown", defKey: "unknown", estimate: -1.03, lo: -1.91, hi: -0.16 },
+    { depressed: "Yes", deficiency: "Not deficient", defKey: "no", estimate: -0.50, lo: -1.11, hi: 0.09 },
+    { depressed: "Yes", deficiency: "Deficient", defKey: "yes", estimate: -0.49, lo: -0.74, hi: -0.25 }
+  ];
+
+  const defColors = {
+    unknown: "#9aa0a6",
+    no: "#4f7fc4",
+    yes: "#5d4aa6"
+  };
+
+  const width = 1040;
+  const height = 414;
+  const plotTop = 84;
+  const rowStep = 42;
+  const groupGap = 18;
+  const xMin = -2.15;
+  const xMax = 0.95;
+  const depressionX = 28;
+  const rowLabelX = 178;
+  const plotX0 = 352;
+  const plotX1 = 970;
+  const axisY = 326;
+  const renderDelay = 260;
+
+  const make = (tag, attrs = {}, text) => {
+    const el = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+    if (text != null) el.textContent = text;
+    return el;
+  };
+
+  const xScale = (x) => plotX0 + ((x - xMin) / (xMax - xMin)) * (plotX1 - plotX0);
+  const rowY = (index) => plotTop + index * rowStep;
+  const clearTimers = () => {
+    timers.forEach((id) => window.clearTimeout(id));
+    timers = [];
+  };
+  const fmt = (x) => (x < 0 ? "−" : "") + Math.abs(x).toFixed(2);
+
+  const render = (animate = false) => {
+    clearTimers();
+    const svg = make("svg", {
+      viewBox: `0 0 ${width} ${height}`,
+      style: "display:block;width:100%;height:auto;overflow:visible;font-family:Inter,system-ui,sans-serif;"
+    });
+    svg.appendChild(make("rect", { x: 0, y: 0, width, height, fill: "#fff" }));
+    const tooltip = make("g", { opacity: "0", style: "pointer-events:none;" });
+    const tooltipBg = make("rect", {
+      x: 0, y: 0, width: "120", height: "42", rx: "7",
+      fill: "#ffffff", stroke: "#cfd8e3", "stroke-width": "1.1",
+      opacity: "0.98"
+    });
+    const tooltipText = make("text", {
+      x: 10, y: 18, "font-size": "13", "font-weight": "600", fill: "#223446"
+    });
+    const tooltipText2 = make("text", {
+      x: 10, y: 33, "font-size": "12", fill: "#4b5d70"
+    });
+    tooltip.appendChild(tooltipBg);
+    tooltip.appendChild(tooltipText);
+    tooltip.appendChild(tooltipText2);
+
+    svg.appendChild(make("line", {
+      x1: plotX0, x2: plotX1, y1: axisY, y2: axisY,
+      stroke: "#d7dee7", "stroke-width": "1.2"
+    }));
+    svg.appendChild(make("line", {
+      x1: xScale(0), x2: xScale(0), y1: plotTop - 10, y2: axisY,
+      stroke: "#6f7d8c", "stroke-width": "1.6", "stroke-dasharray": "4,4"
+    }));
+
+    [-2, -1, 0, 1].forEach((tick) => {
+      const x = xScale(tick);
+      svg.appendChild(make("line", {
+        x1: x, x2: x, y1: axisY, y2: axisY + 6,
+        stroke: "#64707c", "stroke-width": "1.2"
+      }));
+      svg.appendChild(make("text", {
+        x, y: axisY + 24, "text-anchor": "middle",
+        "font-size": "14", fill: "#4a5560"
+      }, String(tick)));
+    });
+
+    svg.appendChild(make("text", {
+      x: (plotX0 + plotX1) / 2, y: axisY + 46, "text-anchor": "middle",
+      "font-size": "14", "font-weight": "600", fill: "#222"
+    }, "SMD"));
+
+    const rowAnimations = [];
+    let pinnedTooltip = null;
+    const showTooltip = (row, xMean, yMid) => {
+      const text1 = `${fmt(row.estimate)} (${fmt(row.lo)}, ${fmt(row.hi)})`;
+      const text2 = `${row.depressed === "Yes" ? "Depressed" : "Not depressed"} • ${row.deficiency}`;
+      tooltipText.textContent = text1;
+      tooltipText2.textContent = text2;
+      const boxWidth = Math.max(178, text1.length * 7.9 + 24, text2.length * 6.4 + 24);
+      const desiredX = Math.min(width - boxWidth - 8, Math.max(plotX0 + 12, xMean + 18));
+      const desiredY = Math.max(18, yMid - 34);
+      tooltipBg.setAttribute("width", String(boxWidth));
+      tooltip.setAttribute("transform", `translate(${desiredX} ${desiredY})`);
+      tooltip.setAttribute("opacity", "1");
+    };
+    const hideTooltip = () => {
+      if (pinnedTooltip) return;
+      tooltip.setAttribute("opacity", "0");
+    };
+    const defOrder = ["Unknown", "Not deficient", "Deficient"];
+    const groupMeta = [
+      { label: "Depressed: No", color: "#5f79a4", start: 0, offset: 0 },
+      { label: "Depressed: Yes", color: "#d96862", start: 3, offset: groupGap }
+    ];
+
+    groupMeta.forEach((group) => {
+      svg.appendChild(make("text", {
+        x: depressionX, y: rowY(group.start) - 12 + group.offset, "text-anchor": "start",
+        "font-size": "17", "font-weight": "700", fill: group.color
+      }, group.label));
+
+      defOrder.forEach((defLabel, i) => {
+        const row = data[group.start + i];
+        const y = rowY(group.start + i) + group.offset;
+        const g = make("g", {
+          style: `opacity:${animate ? 0 : 1};transition:opacity 360ms ease;`
+        });
+
+        const yMid = y + 8;
+        const color = defColors[row.defKey];
+        const xLo = xScale(row.lo);
+        const xHi = xScale(row.hi);
+        const xMean = xScale(row.estimate);
+        const lineLen = Math.max(1, xHi - xLo);
+        g.appendChild(make("text", {
+          x: rowLabelX, y: y + 4, "text-anchor": "start",
+          "font-size": "15", "font-weight": "600",
+          fill: row.defKey === "yes" ? "#5d4aa6" : row.defKey === "no" ? "#4f7fc4" : "#7c838b"
+        }, defLabel));
+        const line = make("line", {
+          x1: xLo, x2: xHi, y1: yMid, y2: yMid,
+          stroke: color, "stroke-width": "3", "stroke-linecap": "round",
+          "stroke-dasharray": `${lineLen} ${lineLen}`,
+          "stroke-dashoffset": animate ? `${lineLen}` : "0"
+        });
+        const capLo = make("line", {
+          x1: xLo, x2: xLo, y1: yMid - 5.5, y2: yMid + 5.5,
+          stroke: color, "stroke-width": "1.6", opacity: animate ? "0" : "1"
+        });
+        const capHi = make("line", {
+          x1: xHi, x2: xHi, y1: yMid - 5.5, y2: yMid + 5.5,
+          stroke: color, "stroke-width": "1.6", opacity: animate ? "0" : "1"
+        });
+        const pointRadius = row.defKey === "yes" ? 6.2 : 5.1;
+        const point = make("circle", {
+          cx: xMean, cy: yMid, r: animate ? "0.1" : String(pointRadius),
+          fill: color, stroke: "#fff", "stroke-width": "1.1",
+          opacity: animate ? "0" : "1"
+        });
+        g.appendChild(line);
+        g.appendChild(capLo);
+        g.appendChild(capHi);
+        g.appendChild(point);
+        g.style.cursor = "pointer";
+        const hot = make("rect", {
+          x: plotX0 - 12, y: yMid - 14, width: plotX1 - plotX0 + 24, height: 28,
+          fill: "#ffffff", opacity: "0.001"
+        });
+        hot.addEventListener("mouseenter", () => showTooltip(row, xMean, yMid));
+        hot.addEventListener("mouseleave", hideTooltip);
+        hot.addEventListener("click", () => {
+          if (pinnedTooltip === row) {
+            pinnedTooltip = null;
+            tooltip.setAttribute("opacity", "0");
+          } else {
+            pinnedTooltip = row;
+            showTooltip(row, xMean, yMid);
+          }
+        });
+        g.appendChild(hot);
+        svg.appendChild(g);
+        rowAnimations.push({
+          g, line, capLo, capHi, point, pointRadius,
+          delay: group.start === 0 ? i * 340 : 1400 + i * 340
+        });
+      });
+    });
+
+    svg.appendChild(make("text", {
+      x: plotX0, y: axisY + 40, "text-anchor": "start",
+      "font-size": "13", fill: "#5b6570"
+    }, "← favors vitamin D / supplement"));
+    svg.appendChild(make("text", {
+      x: plotX1, y: axisY + 40, "text-anchor": "end",
+      "font-size": "13", fill: "#5b6570"
+    }, "favors placebo →"));
+    svg.appendChild(tooltip);
+
+    mount.replaceChildren(svg);
+
+    if (!animate) return;
+
+    requestAnimationFrame(() => {
+      rowAnimations.forEach((part, i) => {
+        const showId = window.setTimeout(() => {
+          part.g.style.opacity = "1";
+          part.line.style.transition = "stroke-dashoffset 880ms ease";
+          part.line.style.strokeDashoffset = "0";
+          const finishId = window.setTimeout(() => {
+            part.capLo.style.transition = "opacity 220ms ease";
+            part.capHi.style.transition = "opacity 220ms ease";
+            part.capLo.style.opacity = "1";
+            part.capHi.style.opacity = "1";
+            part.point.style.transition = "r 620ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 320ms ease";
+            part.point.setAttribute("r", String(part.pointRadius));
+            part.point.setAttribute("opacity", "1");
+          }, 420);
+          timers.push(finishId);
+        }, renderDelay + part.delay + i * 20);
+        timers.push(showId);
+      });
+    });
+  };
+
+  const activate = () => {
+    if (slide && !slide.classList.contains("present")) {
+      render(false);
+      return;
+    }
+    render(true);
+  };
+
+  const bindReveal = () => {
+    if (typeof Reveal === "undefined" || typeof Reveal.on !== "function") return false;
+    Reveal.on("ready", activate);
+    if (!window.__vitdDeficiencyForestBound) {
+      Reveal.on("slidechanged", activate);
+      window.__vitdDeficiencyForestBound = true;
+    }
+    return true;
+  };
+
+  const waitForReveal = () => {
+    if (bindReveal()) return;
+    const timer = window.setInterval(() => {
+      if (bindReveal()) window.clearInterval(timer);
+    }, 120);
+    timers.push(timer);
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", waitForReveal, { once: true });
+  } else {
+    waitForReveal();
+  }
+
+  activate();
+})();
+</script>
 :::
 
 ::: notes
-Selenium also had a credible interval excluding zero — and a larger point estimate than vitamin D. But two studies with 122 total participants is a very sparse network. Large effects in sparse networks are often unstable. Biologically plausible, but not practice-informing evidence yet.
-:::
-
----
-
-## Depression: the full network {auto-animate=true}
-
-::: {data-id="depress-forest"}
-::: {style="transform: scale(1); transform-origin: center center;"}
-![](img/forest_depression_full.jpeg){width="85%"}
-:::
-:::
-
-::: {style="font-size: 0.9em; margin-top: 6px; color: #555; text-align: center;"}
-← Favors supplement · SMD = 0 (no effect) · Favors placebo →
-**Only Vitamin D and Selenium have credible intervals excluding zero**
-:::
-
-::: notes
-Zooming out to the full network. Every row is a micronutrient or combination. Most credible intervals cross the null. B vitamins, magnesium, zinc, C — point estimates often suggest possible benefit but uncertainty is too wide. Only Vitamin D and Selenium are exceptions. Wide intervals aren't definitive null effects — for many nutrients, we just don't have enough good evidence yet.
-:::
-
----
-
-## Does baseline deficiency change the picture?
-
-![](img/forest_vitd_subgroup.jpeg){width="90%"}
-
-::: notes
-This is the conceptual heart of the paper. The plot is faceted — left panel non-depressed, right panel depressed. Colors show deficiency: purple = deficient, blue = replete, gray = unknown. Look at Vitamin D in the right depressed panel. The purple deficient estimate is clearly left of zero; the blue replete interval crosses zero. In the left non-depressed panel, everything is near zero. The signal for vitamin D is concentrated in people who are both depressed AND deficient.
+"We had reported a mean drug-placebo difference of 1.80 points on the HAM-D and a standardized mean difference (SMD) of 0.32. The differences reported in the replications ranged from 1.62 to 2.56 HAM-D points, with SMD effect sizes ranging from 0.23 to 0.34. To put this into perspective, the NICE criteria for clinical significance of antidepressant-placebo differences are three points on the HAM-D or SMDs of at least 0.50, corresponding to what Cohen (17) proposed as a moderate effect size." https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2019.00407/full?trk=public_post_comment-text
 :::
 
 ---
 
 ## The deficiency-informed framework
 
+::: {style="margin-top: 6px; margin-bottom: 16px; padding: 10px 14px; background: #fff8e8; border-left: 4px solid #FFD100; border-radius: 8px; font-size: 0.82em; line-height: 1.35; color: #4a4a4a;"}
+<strong style="color:#003B5C;">Important caveat:</strong> this is <strong>study-level</strong>, not patient-level evidence. The subgroup pattern is clinically suggestive, but it does <em>not</em> prove that an individual patient will benefit simply because they are deficient.
+:::
+
 ```{=html}
 <div style="display: flex; gap: 36px; font-size: 0.88em; margin-top: 24px;">
   <div style="flex: 1; padding: 20px; background: #fff3cd; border-radius: 8px; border-top: 4px solid #FFD100;">
     <div style="font-weight: 700; font-size: 1.05em; margin-bottom: 12px; color: #003B5C;">❌ Universal supplementation</div>
-    Patient has depression<br>↓<br>
-    Add micronutrients<br>↓<br>
-    Assume benefit<br><br>
-    <em style="color: #888;">What most trials implicitly test —<br>mixing deficient + replete patients</em>
+    <div class="fragment">Patient has depression</div>
+    <div class="fragment">↓<br>Add micronutrients</div>
+    <div class="fragment">↓<br>Assume benefit</div>
+    <div class="fragment" style="margin-top: 16px;"><em style="color: #888;">What most trials implicitly test —<br>mixing deficient + replete patients</em></div>
   </div>
   <div style="flex: 1; padding: 20px; background: #e8f5e9; border-radius: 8px; border-top: 4px solid #2e7d32;">
     <div style="font-weight: 700; font-size: 1.05em; margin-bottom: 12px; color: #003B5C;">✅ Deficiency-informed model</div>
-    Patient has depression<br>↓<br>
-    <strong>Check levels first</strong><br>↓<br>
-    Deficient → Correct deficiency<br>
-    Replete → Evidence doesn't support supplementation<br><br>
-    <em style="color: #888;">What the subgroup data support</em>
+    <div class="fragment">Patient has depression</div>
+    <div class="fragment">↓<br><strong>Check levels first</strong></div>
+    <div class="fragment">↓<br>Deficient → Correct deficiency</div>
+    <div class="fragment">Replete → Evidence doesn't support supplementation</div>
+    <div class="fragment" style="margin-top: 16px;"><em style="color: #888;">What the subgroup data support</em></div>
   </div>
 </div>
 ```
-
-::: {.fragment style="margin-top: 18px; font-size: 0.9em; color: #777; font-style: italic; text-align: center;"}
-⚠️ Caveat: study-level, not patient-level data — effect modification is suggestive, not definitive
-:::
 
 ::: notes
 This is the conceptual contribution I'm most proud of. The reason the literature is hard to interpret is that most trials enroll whoever has depression — deficient and replete mixed together. When you average across those groups, you dilute the real signal from the deficient subgroup. The framework: check first, supplement if there's a biochemical reason to.
@@ -1339,46 +2014,480 @@ This is the conceptual contribution I'm most proud of. The reason the literature
 
 ## What about augmentation?
 
-::: {.columns}
-::: {.column width="55%"}
-![](img/forest_augmentation.jpeg){width="100%"}
+::: {style="margin-top: 8px;"}
+<div id="augmentation-forest-stage" style="width:100%;"></div>
+
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const mount = document.getElementById("augmentation-forest-stage");
+  if (!mount) return;
+  if (mount.dataset.ready === "true") return;
+  mount.dataset.ready = "true";
+  const slide = mount.closest("section");
+  let timers = [];
+
+  const rows = [
+    { label: "Vit D + AD", estimate: -0.28, lo: -1.08, hi: 0.49 },
+    { label: "B9 + AD", estimate: -0.55, lo: -1.23, hi: 0.19 },
+    { label: "B6/B9/B12 + AD", estimate: -0.45, lo: -1.44, hi: 0.56 }
+  ];
+
+  const fmt = (x) => (x < 0 ? "−" : "") + Math.abs(x).toFixed(2);
+  const width = 810;
+  const height = 324;
+  const margin = { top: 40, right: 18, bottom: 104, left: 180 };
+  const xMin = -1.6;
+  const xMax = 0.7;
+  const plotLeft = margin.left;
+  const plotRight = width - margin.right;
+  const plotWidth = plotRight - plotLeft;
+  const rowY = (i) => 98 + i * 56;
+  const x = (value) => plotLeft + ((value - xMin) / (xMax - xMin)) * plotWidth;
+  const make = (tag, attrs = {}, text) => {
+    const el = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+    if (text != null) el.textContent = text;
+    return el;
+  };
+  const clearTimers = () => {
+    timers.forEach((id) => window.clearTimeout(id));
+    timers = [];
+  };
+  const build = (animate = false) => {
+    clearTimers();
+
+    const svg = make("svg", {
+      viewBox: `0 0 ${width} ${height}`,
+      style: "display:block;width:100%;height:auto;overflow:visible;font-family:Inter,system-ui,sans-serif;"
+    });
+    let pinnedRow = null;
+
+    svg.appendChild(make("rect", { x: 0, y: 0, width, height, fill: "#fff" }));
+    svg.appendChild(make("text", {
+      x: plotLeft, y: 22, "font-size": "15", "font-weight": "700", fill: "#111"
+    }, "Augmentation studies"));
+    svg.appendChild(make("line", {
+      x1: plotLeft, x2: plotRight, y1: 32, y2: 32, stroke: "#111", "stroke-width": "1.2"
+    }));
+
+    const axisY = 252;
+    svg.appendChild(make("line", {
+      x1: plotLeft, x2: plotRight, y1: axisY, y2: axisY,
+      stroke: "#5f6f84", "stroke-width": "1.6"
+    }));
+    [-1.0, -0.5, 0.0, 0.5].forEach((tick) => {
+      const xx = x(tick);
+      svg.appendChild(make("line", { x1: xx, x2: xx, y1: axisY, y2: axisY + 7, stroke: "#5f6f84", "stroke-width": "1.4" }));
+      svg.appendChild(make("text", { x: xx, y: axisY + 26, "text-anchor": "middle", "font-size": "15", fill: "#37485b" }, tick.toFixed(1)));
+    });
+    svg.appendChild(make("text", {
+      x: (plotLeft + plotRight) / 2, y: height - 8, "text-anchor": "middle",
+      "font-size": "16", "font-weight": "700", fill: "#222"
+    }, "SMD"));
+    svg.appendChild(make("text", {
+      x: plotLeft, y: axisY + 56, "text-anchor": "start",
+      "font-size": "15", "font-weight": "600", fill: "#5b6570"
+    }, "← favors augmentation"));
+    svg.appendChild(make("text", {
+      x: plotRight, y: axisY + 56, "text-anchor": "end",
+      "font-size": "15", "font-weight": "600", fill: "#5b6570"
+    }, "favors placebo →"));
+
+    const tooltip = make("g", { opacity: "0", style: "pointer-events:none;" });
+    const tooltipBg = make("rect", {
+      x: 0, y: 0, width: "120", height: "40", rx: "7",
+      fill: "#ffffff", stroke: "#cfd8e3", "stroke-width": "1.1", opacity: "0.98"
+    });
+    const tooltipText = make("text", {
+      x: 10, y: 17, "font-size": "13", "font-weight": "600", fill: "#223446"
+    });
+    const tooltipText2 = make("text", {
+      x: 10, y: 31, "font-size": "12", fill: "#4b5d70"
+    });
+    tooltip.appendChild(tooltipBg);
+    tooltip.appendChild(tooltipText);
+    tooltip.appendChild(tooltipText2);
+
+    const showTooltip = (row, xMean, y) => {
+      const text1 = `${fmt(row.estimate)} (${fmt(row.lo)}, ${fmt(row.hi)})`;
+      const text2 = row.label;
+      tooltipText.textContent = text1;
+      tooltipText2.textContent = text2;
+      const boxWidth = Math.max(172, text1.length * 7.8 + 22, text2.length * 7 + 22);
+      const tx = Math.min(width - boxWidth - 8, Math.max(plotLeft + 16, xMean + 18));
+      const ty = Math.max(44, y - 38);
+      tooltipBg.setAttribute("width", String(boxWidth));
+      tooltip.setAttribute("transform", `translate(${tx} ${ty})`);
+      tooltip.setAttribute("opacity", "1");
+    };
+
+    const hideTooltip = () => {
+      if (pinnedRow) return;
+      tooltip.setAttribute("opacity", "0");
+    };
+
+    const rowRefs = [];
+    rows.forEach((row, i) => {
+      const y = rowY(i);
+      const rowFill = i % 2 === 0 ? "#fbfcfd" : "#ffffff";
+      const rowGroup = make("g", {
+        opacity: animate ? "0" : "1",
+        style: "transform: translateY(7px); transform-box: fill-box; transform-origin: left center;"
+      });
+      rowGroup.appendChild(make("rect", {
+        x: plotLeft - 10, y: y - 20, width: plotWidth + 20, height: 34,
+        fill: rowFill, opacity: "0.92"
+      }));
+      rowGroup.appendChild(make("text", {
+        x: 28, y: y + 5, "font-size": "16", "font-weight": "600", fill: "#2f3f4f"
+      }, row.label));
+
+      const xLo = x(row.lo);
+      const xHi = x(row.hi);
+      const xMean = x(row.estimate);
+      const lineLen = Math.max(1, xHi - xLo);
+      const line = make("line", {
+        x1: xLo, x2: xHi, y1: y, y2: y,
+        stroke: "#2d5c91", "stroke-width": "3", "stroke-linecap": "round",
+        "stroke-dasharray": `${lineLen} ${lineLen}`,
+        "stroke-dashoffset": animate ? `${lineLen}` : "0"
+      });
+      const capLo = make("line", {
+        x1: xLo, x2: xLo, y1: y - 6.5, y2: y + 6.5,
+        stroke: "#2d5c91", "stroke-width": "2", opacity: animate ? "0" : "1"
+      });
+      const capHi = make("line", {
+        x1: xHi, x2: xHi, y1: y - 6.5, y2: y + 6.5,
+        stroke: "#2d5c91", "stroke-width": "2", opacity: animate ? "0" : "1"
+      });
+      const point = make("circle", {
+        cx: xMean, cy: y, r: animate ? "0.1" : "5.8",
+        fill: "#2d5c91", stroke: "#fff", "stroke-width": "1.1", opacity: animate ? "0" : "1"
+      });
+      rowGroup.appendChild(line);
+      rowGroup.appendChild(capLo);
+      rowGroup.appendChild(capHi);
+      rowGroup.appendChild(point);
+      const hot = make("rect", {
+        x: plotLeft - 8, y: y - 15, width: plotWidth + 16, height: 30,
+        fill: "#ffffff", opacity: "0.001"
+      });
+      hot.style.cursor = "pointer";
+      hot.addEventListener("mouseenter", () => showTooltip(row, xMean, y));
+      hot.addEventListener("mouseleave", hideTooltip);
+      hot.addEventListener("click", () => {
+        if (pinnedRow === row.label) {
+          pinnedRow = null;
+          tooltip.setAttribute("opacity", "0");
+        } else {
+          pinnedRow = row.label;
+          showTooltip(row, xMean, y);
+        }
+      });
+      rowGroup.appendChild(hot);
+
+      svg.appendChild(rowGroup);
+      rowRefs.push({ group: rowGroup, line, capLo, capHi, point });
+    });
+
+    svg.appendChild(make("line", {
+      x1: x(0), x2: x(0), y1: 58, y2: axisY,
+      stroke: "#666", "stroke-width": "1.4", "stroke-dasharray": "5,5"
+    }));
+
+    svg.appendChild(tooltip);
+
+    mount.replaceChildren(svg);
+    if (!animate) return;
+
+    requestAnimationFrame(() => {
+      rowRefs.forEach((ref, i) => {
+        const delay = 160 + i * 170;
+        const t = window.setTimeout(() => {
+          ref.group.style.transition = "opacity 260ms ease, transform 420ms ease";
+          ref.group.style.opacity = "1";
+          ref.group.style.transform = "translateY(0px)";
+          ref.line.style.transition = "stroke-dashoffset 420ms ease";
+          ref.line.style.strokeDashoffset = "0";
+          const t2 = window.setTimeout(() => {
+            ref.capLo.style.transition = "opacity 130ms ease";
+            ref.capHi.style.transition = "opacity 130ms ease";
+            ref.capLo.style.opacity = "1";
+            ref.capHi.style.opacity = "1";
+            ref.point.style.transition = "opacity 130ms ease, r 260ms cubic-bezier(0.2, 0.8, 0.2, 1)";
+            ref.point.style.opacity = "1";
+            ref.point.setAttribute("r", "5.8");
+          }, 160);
+          timers.push(t2);
+        }, delay);
+        timers.push(t);
+      });
+    });
+  };
+
+  const activate = () => {
+    const active = !slide || slide.classList.contains("present");
+    build(active);
+  };
+
+  const bindReveal = () => {
+    if (!window.Reveal || typeof window.Reveal.on !== "function") return false;
+    window.Reveal.on("ready", activate);
+    if (!window.__augmentationForestRevealBound) {
+      window.Reveal.on("slidechanged", activate);
+      window.__augmentationForestRevealBound = true;
+    }
+    return true;
+  };
+
+  const waitForReveal = () => {
+    if (bindReveal()) return;
+    timers.push(window.setTimeout(waitForReveal, 120));
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", waitForReveal, { once: true });
+  } else {
+    waitForReveal();
+  }
+
+  activate();
+})();
+</script>
 :::
 
-::: {.column width="45%"}
-::: {style="font-size: 0.88em; line-height: 1.9;"}
-**18 studies** added micronutrients
-to existing antidepressants
-
-Modeled **separately** — disconnected
-from main placebo-controlled network
-
-| Intervention | SMD | CrI |
-|:---|:---:|:---:|
-| Vit D + AD | −0.28 | −1.08, 0.49 |
-| B9 + AD | −0.55 | −1.23, 0.19 |
-| B6/B9/B12 + AD | −0.45 | −1.44, 0.56 |
-
-: {tbl-colwidths="[52,24,24]"}
-
-::: {.fragment style="margin-top: 10px; font-size: 0.9em; font-style: italic; color: #777;"}
-Signals exist. Evidence is thin.
-:::
-:::
-:::
+::: {.fragment style="max-width: 760px; margin: 12px auto 0; padding: 12px 16px; background: linear-gradient(180deg, #fbfdff 0%, #f6f9fd 100%); border-left: 4px solid #2774AE; border-radius: 10px; font-size: 0.8em; line-height: 1.3; color: #32475f; text-align: left;"}
+<strong style="color:#003B5C;">5 augmentation studies.</strong> These were modeled separately from the placebo-controlled network, and all credible intervals still cross zero, so the signal is suggestive rather than definitive.
 :::
 
 ::: notes
-18 studies used micronutrients as augmentation on top of antidepressants. We modeled these separately — can't compare vitamin D vs. placebo with vitamin D + antidepressant vs. antidepressant alone in the same network. Point estimates are in the right direction but every credible interval crosses zero. Worth watching, not actionable yet.
+5 studies used micronutrients as augmentation on top of antidepressants. We modeled these separately — can't compare vitamin D vs. placebo with vitamin D + antidepressant vs. antidepressant alone in the same network. Point estimates are in the right direction but every credible interval crosses zero. Worth watching, not actionable yet.
 :::
 
 ---
 
-## Anxiety: the full picture {background-color="#fafafa"}
+## Anxiety: no clear signal {background-color="#fafafa"}
 
-![](img/forest_anxiety_full.jpeg){width="78%"}
+::: {style="margin-top: 4px; margin-bottom: 10px; font-size: 0.92em; text-align: center; color: #c0392b; font-weight: 700;"}
+No micronutrient reached a credible interval excluding zero
+:::
 
-::: {style="font-size: 0.9em; margin-top: 6px; text-align: center; color: #c0392b; font-weight: 600;"}
-No micronutrient reached a credible interval excluding zero · All rated **very low confidence**
+::: {style="margin-top: 10px;"}
+<div id="anxiety-forest-stage" style="width: 100%;"></div>
+
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const mount = document.getElementById("anxiety-forest-stage");
+  if (!mount) return;
+  if (mount.dataset.ready === "true") return;
+  mount.dataset.ready = "true";
+  const slide = mount.closest("section");
+  let timers = [];
+
+  const rows = [
+    { label: "B12, B6, B9", estimate: -0.22, lo: -0.97, hi: 0.53 },
+    { label: "D", estimate: -0.02, lo: -0.27, hi: 0.22, highlight: true },
+    { label: "D, Iron", estimate: 0.08, lo: -0.81, hi: 0.99 },
+    { label: "Magnesium", estimate: -0.11, lo: -1.12, hi: 0.92 },
+    { label: "Magnesium, Zinc", estimate: -0.27, lo: -1.12, hi: 0.52 },
+    { label: "Selenium", estimate: -0.24, lo: -0.79, hi: 0.48 },
+    { label: "Zinc", estimate: 0.01, lo: -1.03, hi: 1.14 }
+  ];
+
+  const fmt = (x) => (x < 0 ? "−" : "") + Math.abs(x).toFixed(2);
+  const width = 1060;
+  const height = 540;
+  const margin = { top: 18, right: 270, bottom: 92, left: 210 };
+  const xMin = -1.25;
+  const xMax = 1.25;
+  const xSpan = width - margin.left - margin.right;
+  const rowH = 52;
+  const plotTop = 78;
+  const plotBottom = plotTop + rowH * (rows.length - 1);
+  const centerY = plotTop + rowH * (rows.length - 1) / 2;
+
+  const scaleX = (x) => margin.left + ((x - xMin) / (xMax - xMin)) * xSpan;
+  const rowY = (i) => plotTop + i * rowH;
+  const make = (tag, attrs = {}, text) => {
+    const el = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+    if (text != null) el.textContent = text;
+    return el;
+  };
+  const clearTimers = () => {
+    timers.forEach((id) => window.clearTimeout(id));
+    timers = [];
+  };
+  const text = (parent, x, y, value, attrs = {}) => {
+    parent.appendChild(make("text", { x, y, ...attrs }, value));
+  };
+
+  const render = (animate = false) => {
+    clearTimers();
+    const svg = make("svg", {
+      viewBox: `0 0 ${width} ${height}`,
+      style: "display:block;width:100%;height:auto;overflow:visible;font-family:Inter,system-ui,sans-serif;"
+    });
+
+    svg.appendChild(make("rect", { x: 0, y: 0, width, height, fill: "#fafafa" }));
+
+    const axisY = plotBottom + 18;
+    svg.appendChild(make("line", { x1: margin.left, x2: width - margin.right, y1: axisY, y2: axisY, stroke: "#7588a0", "stroke-width": "1.5" }));
+    svg.appendChild(make("line", { x1: scaleX(0), x2: scaleX(0), y1: plotTop - 22, y2: plotBottom + 22, stroke: "#6e6e6e", "stroke-width": "1.5", "stroke-dasharray": "7,6" }));
+
+    const ticks = [-1.0, -0.5, 0.0, 0.5, 1.0];
+    ticks.forEach((tick) => {
+      const x = scaleX(tick);
+      svg.appendChild(make("line", { x1: x, x2: x, y1: axisY, y2: axisY + 7, stroke: "#7588a0", "stroke-width": "1.4" }));
+      text(svg, x, axisY + 25, tick.toFixed(1), {
+        "text-anchor": "middle",
+        "font-size": "15",
+        fill: "#4a4a4a"
+      });
+    });
+    text(svg, (margin.left + width - margin.right) / 2, height - 20, "SMD", {
+      "text-anchor": "middle",
+      "font-size": "17",
+      "font-weight": "600",
+      fill: "#222"
+    });
+    text(svg, margin.left - 18, height - 30, "Favors treatment", {
+      "text-anchor": "start",
+      "font-size": "14",
+      "font-weight": "600",
+      fill: "#6d7782"
+    });
+    text(svg, width - margin.right - 16, height - 30, "Favors placebo", {
+      "text-anchor": "end",
+      "font-size": "14",
+      "font-weight": "600",
+      fill: "#6d7782"
+    });
+
+    const rowRefs = [];
+    rows.forEach((row, i) => {
+      const y = rowY(i);
+      const color = row.highlight ? "#2f4f74" : "#111";
+      const weight = row.highlight ? "700" : "500";
+      const rowGroup = make("g", {
+        opacity: animate ? "0" : "1",
+        style: "transform: translateY(7px); transform-box: fill-box; transform-origin: left center;"
+      });
+      if (i % 2 === 0) {
+        rowGroup.appendChild(make("rect", {
+          x: margin.left - 12, y: y - 26, width: width - margin.left - margin.right + 24, height: rowH,
+          fill: "#ffffff", opacity: "0.32"
+        }));
+      }
+      rowGroup.appendChild(make("text", {
+        x: 40, y: y + 6, "text-anchor": "start",
+        "font-size": "18",
+        "font-weight": weight,
+        fill: color
+      }, row.label));
+
+      const xLo = scaleX(row.lo);
+      const xHi = scaleX(row.hi);
+      const xMean = scaleX(row.estimate);
+      const lineLen = Math.max(1, xHi - xLo);
+      const intervalGroup = make("g");
+      const line = make("line", {
+        x1: xLo, x2: xHi, y1: y, y2: y,
+        stroke: "#111", "stroke-width": row.highlight ? "4.5" : "3",
+        "stroke-linecap": "round",
+        "stroke-dasharray": `${lineLen} ${lineLen}`,
+        "stroke-dashoffset": animate ? `${lineLen}` : "0"
+      });
+      const capLo = make("line", {
+        x1: xLo, x2: xLo, y1: y - 8, y2: y + 8,
+        stroke: "#111", "stroke-width": row.highlight ? "3.5" : "2.2",
+        opacity: animate ? "0" : "1"
+      });
+      const capHi = make("line", {
+        x1: xHi, x2: xHi, y1: y - 8, y2: y + 8,
+        stroke: "#111", "stroke-width": row.highlight ? "3.5" : "2.2",
+        opacity: animate ? "0" : "1"
+      });
+      const point = make("circle", {
+        cx: xMean, cy: y, r: animate ? "0.1" : String(row.highlight ? 7.5 : 6.5),
+        fill: "#111", opacity: animate ? "0" : "1"
+      });
+      intervalGroup.appendChild(line);
+      intervalGroup.appendChild(capLo);
+      intervalGroup.appendChild(capHi);
+      intervalGroup.appendChild(point);
+      rowGroup.appendChild(intervalGroup);
+
+      rowGroup.appendChild(make("text", {
+        x: width - margin.right + 16, y: y + 6, "text-anchor": "start",
+        "font-size": "16",
+        "font-weight": weight,
+        fill: "#222"
+      }, `${fmt(row.estimate)} (${fmt(row.lo)}, ${fmt(row.hi)})`));
+      svg.appendChild(rowGroup);
+      rowRefs.push({ group: rowGroup, line, capLo, capHi, point, highlight: row.highlight });
+    });
+
+    mount.replaceChildren(svg);
+
+    if (!animate) return;
+
+    requestAnimationFrame(() => {
+      rowRefs.forEach((ref, idx) => {
+        const delay = 180 + idx * 320;
+        const t = window.setTimeout(() => {
+          ref.group.style.transition = "opacity 260ms ease, transform 420ms ease";
+          ref.group.style.opacity = "1";
+          ref.group.style.transform = "translateY(0px)";
+          ref.line.style.transition = "stroke-dashoffset 840ms ease";
+          ref.line.style.strokeDashoffset = "0";
+          const t2 = window.setTimeout(() => {
+            ref.capLo.style.transition = "opacity 160ms ease";
+            ref.capHi.style.transition = "opacity 160ms ease";
+            ref.capLo.style.opacity = "1";
+            ref.capHi.style.opacity = "1";
+            ref.point.style.transition = "opacity 180ms ease, r 320ms cubic-bezier(0.2, 0.8, 0.2, 1)";
+            ref.point.style.opacity = "1";
+            ref.point.setAttribute("r", String(ref.highlight ? 7.5 : 6.5));
+          }, 420);
+          timers.push(t2);
+        }, delay);
+        timers.push(t);
+      });
+    });
+  };
+
+  const activate = () => {
+    const active = !slide || slide.classList.contains("present");
+    render(active);
+  };
+
+  const bindReveal = () => {
+    if (!window.Reveal || typeof window.Reveal.on !== "function") return false;
+    window.Reveal.on("ready", activate);
+    if (!window.__anxietyForestRevealBound) {
+      window.Reveal.on("slidechanged", activate);
+      window.__anxietyForestRevealBound = true;
+    }
+    return true;
+  };
+
+  const waitForReveal = () => {
+    if (bindReveal()) return;
+    timers.push(window.setTimeout(waitForReveal, 120));
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", waitForReveal, { once: true });
+  } else {
+    waitForReveal();
+  }
+
+  activate();
+})();
+</script>
 :::
 
 ::: notes
@@ -1390,8 +2499,8 @@ For anxiety, the picture is starker. Nothing crosses the line. The forest plot i
 ## Why anxiety might have lagged
 
 ::: {.incremental style="font-size: 0.95em; line-height: 2.4;"}
-- Only **32 studies** assessed anxiety vs. **94** for depression
-- Substantial heterogeneity (τ = 0.34, 95% CrI: 0.05 to 0.68)
+- Only **18 studies** assessed anxiety vs. **50** for depression
+- Substantial heterogeneity (<strong><span class="tau-accent">τ</span></strong> = 0.34, 95% CrI: 0.05 to 0.68)
 - Vitamin D — which drove the depression signal — showed **essentially no effect** on anxiety
 - Most vitamin D trials enrolled older adults with depression, not anxiety disorders
 :::
@@ -1410,26 +2519,28 @@ The anxiety finding is less "micronutrients don't work for anxiety" and more "we
 
 ::: {.columns}
 ::: {.column width="60%"}
-::: {style="font-size: 0.95em; line-height: 2.2;"}
-✅ No micronutrient was associated with
+::: {.incremental style="font-size: 0.95em; line-height: 2.2;"}
+- No micronutrient was associated with
 a credible increase in adverse events
 
-✅ All odds ratio credible intervals
+- All odds ratio credible intervals
 included the null
 
-📋 Based on 33 of 50 low-RoB studies
+- Based on 33 of 50 low-RoB studies
 (64.7%) with available safety data
 :::
 :::
 
 ::: {.column width="40%"}
-::: {style="padding: 20px; background: #fff3cd; border-left: 4px solid #FFD100; border-radius: 4px; font-size: 0.88em;"}
-⚠️ **"Seems safe" ≠ indiscriminate**
+::: {.fragment style="padding: 20px; background: #fff3cd; border-left: 4px solid #FFD100; border-radius: 4px; font-size: 0.88em;"}
+- **"Seems safe" ≠ indiscriminate**
 
-- Vitamin D hypercalcemia at high doses
-- B6 neuropathy long-term high dose
+::: {.incremental}
+- Vitamin D: hypercalcemia at high doses
+- B6: neuropathy long-term at high dose
 - Drug-nutrient interactions
 - "Natural" ≠ harmless
+:::
 :::
 :::
 :::
@@ -1445,23 +2556,37 @@ The safety picture is reassuring — no micronutrient associated with a credible
 ::: {.columns}
 ::: {.column width="50%"}
 ::: {style="padding: 20px; background: #fff0f0; border-radius: 8px; font-size: 0.9em; border-top: 3px solid #C62828;"}
+::: {.fragment}
 ❌ "Vitamins treat depression"
+:::
 
+::: {.fragment}
 ❌ "All supplements are useless"
+:::
 
+::: {.fragment}
 ❌ "Check levels on every patient"
+:::
 
+::: {.fragment}
 ❌ "Natural means safe, try it"
+:::
 :::
 :::
 
 ::: {.column width="50%"}
 ::: {style="padding: 20px; background: #f0fff0; border-radius: 8px; font-size: 0.9em; border-top: 3px solid #2e7d32;"}
+::: {.fragment}
 ✅ Vitamin D has **modest credible evidence** for depressive symptoms, especially in deficient patients
+:::
 
+::: {.fragment}
 ✅ For most other nutrients: too weak to act on
+:::
 
+::: {.fragment}
 ✅ Targeted deficiency assessment may have a role in selected patients
+:::
 :::
 :::
 :::
@@ -1475,44 +2600,24 @@ I want to be explicit about what we can and can't conclude. The evidence doesn't
 ## Limitations
 
 ::: {.incremental style="font-size: 0.9em; line-height: 2.1;"}
-- **High heterogeneity** across all networks (τ = 0.45 for depression)
-  Prediction intervals are wide even when point estimates look promising
+- **High heterogeneity** across all networks (<strong><span class="tau-accent">τ</span></strong> = 0.45 for depression)
+  - Prediction intervals are wide even when point estimates look promising
 
 - **Baseline biomarker data** inconsistently reported in ~22% of studies
-  Limits our ability to test deficiency-modification across most nutrients
+  - Limits our ability to test deficiency-modification across most nutrients
 
 - **Study-level, not patient-level** subgroup analyses
-  More vulnerable to ecological confounding
+  - More vulnerable to ecological confounding
 
 - **Sparse evidence** for most nutrients beyond vitamin D
-  Wide credible intervals do not equal proof of no effect
+  - Wide credible intervals do not equal proof of no effect
 
 - **Low to very low confidence** for most comparisons (CINeMA)
-  This is an honest, unsettled field
+  - As always, better research needed
 :::
 
 ::: notes
-I don't want to oversell this. The heterogeneity is real. The subgroup data are study-level — a weaker form of evidence. And for most nutrients outside vitamin D, we simply don't have enough good studies to draw firm conclusions in either direction.
-:::
-
----
-
-## Conclusions
-
-::: {style="font-size: 0.95em; line-height: 2.4;"}
-::: {.incremental}
-- **Vitamin D** had the most consistent evidence for depressive symptoms — modest effect, concentrated in deficient + depressed patients
-
-- **Anxiety outcomes** inconclusive across all micronutrients evaluated
-
-- **Other micronutrients:** insufficient high-quality evidence to support or refute benefit
-
-- Current evidence supports a **targeted, deficiency-informed** approach — not broad supplementation
-:::
-:::
-
-::: notes
-To summarize: vitamin D is the one micronutrient with credible evidence, and even that is modest and context-dependent. Anxiety remains open. For everything else — B vitamins, magnesium, zinc, selenium — we genuinely don't know yet, and the evidence base isn't strong enough to act on clinically.
+I don't want to oversell this. The heterogeneity is real. The subgroup data are study-level — a weaker form of evidence. And for most nutrients outside vitamin D, we simply don't have enough good studies to draw firm conclusions in either direction. Tau did reduce accounting for baseline status, and removing Iranian studies.
 :::
 
 ---
@@ -1521,15 +2626,15 @@ To summarize: vitamin D is the one micronutrient with credible evidence, and eve
 
 ::: {style="color: white; font-size: 0.92em; line-height: 2.5; margin-top: 20px;"}
 ::: {.incremental}
-🩺 **Patient asks about supplements for depression:**
+- **Patient asks about supplements for depression:**
 → "Evidence is strongest for vitamin D — but only if you're deficient"
 
-🔬 **Consider checking vitamin D** in depressed patients at higher risk for deficiency
+- **Consider checking vitamin D** in depressed patients at higher risk for deficiency
 → Older adults, limited sun exposure, darker skin, malabsorption
 
-💊 **Don't recommend broad supplementation** — evidence isn't there yet
+- **Don't recommend broad supplementation** — evidence isn't there yet
 
-📋 **Patients already taking supplements:** counsel on dose limits; more isn't always better
+- **Patients already taking supplements:** counsel on dose limits; more isn't always better
 :::
 :::
 
@@ -1546,16 +2651,42 @@ The practical close. A framework for answering the question your patients are al
 Questions?
 :::
 
-::: {style="font-size: 0.9em; margin-top: 40px; color: #FFD100;"}
-Manuscript available on request
-Full 180-page appendix also available (yes, really)
-:::
+<!-- ::: {style="font-size: 0.9em; margin-top: 40px; color: #FFD100;"} -->
+<!-- Draft manuscript available on request -->
+<!-- ::: -->
 
 ::: {style="font-size: 0.85em; margin-top: 20px; color: #c8dff0;"}
-eric.dunipace@stanford.edu
+eadunipace@mednet.ucla.edu
 :::
 :::
 
 ::: notes
 Happy to take questions. If anyone wants to dig into the methods — the Bayesian model, node-splitting, MCMC diagnostics — I have a 180-page appendix and will absolutely talk your ear off about it.
 :::
+
+
+---
+
+## Addl slides {visibility="uncounted"}
+
+---
+
+## {data-background-color="#0f2238" .paper-credit .ambient-dark visibility="uncounted"}
+
+::: {style="display:flex; align-items:center; justify-content:center; min-height: 80vh; padding: 1.5rem 2rem;"}
+<div class="paper-card">
+  <div class="paper-kicker">Based on</div>
+  <div class="paper-title">Micronutrient Supplementation for Depressive and Anxiety Symptoms in Adults: A Systematic Review and Bayesian Network Meta-Analysis of Randomized Controlled Trials</div>
+  <div class="paper-authors paper-authors-lead">Stephanie Chien<sup>\*</sup>, Julian J. Raffoul<sup>\*</sup>, <strong>ED</strong><sup>\*</sup></div>
+  <div class="paper-authors paper-authors-rest">Artie McCarty, Snehal Bindra, Sahar Ashrafzadeh, Chesley Ekelem, Melis Lydston, Derek Pipolo, Daniel Schaefer, Jean Henry, Margaret Cinderella, Andrea DeSimone, Ana Ivkovic</div>
+  <div class="paper-note"><span>*</span> Co-first authors contributed equally.</div>
+</div>
+:::
+
+---
+
+## Iranian studies highlighted {visibility="uncounted"}
+
+![](../depression/jpeg/funnel_plot_iran_studies_highlighted.jpeg)
+
+

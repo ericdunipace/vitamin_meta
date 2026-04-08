@@ -307,8 +307,8 @@ $ucla-lightest: #DAEBFE;
 
 .ambient-dark::before {
   background:
-    radial-gradient(circle at 15% 15%, rgba(97, 132, 255, 0.18), transparent 30%),
-    radial-gradient(circle at 84% 84%, rgba(111, 174, 255, 0.16), transparent 28%),
+    radial-gradient(circle at 16% 18%, rgba(97, 132, 255, 0.18), transparent 30%),
+    radial-gradient(circle at 84% 68%, rgba(111, 174, 255, 0.16), transparent 28%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
@@ -412,6 +412,162 @@ $ucla-lightest: #DAEBFE;
   color: #d2deef;
   font-family: "Inter", "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   letter-spacing: -0.015em;
+}
+
+.reveal .slides section.results-intro {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 0;
+}
+
+.reveal .slides section.results-intro::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(96, 134, 255, 0.26), transparent 28%),
+    radial-gradient(circle at 84% 24%, rgba(111, 174, 255, 0.18), transparent 26%),
+    radial-gradient(circle at 66% 76%, rgba(142, 194, 255, 0.14), transparent 24%),
+    linear-gradient(145deg, rgba(5, 13, 27, 0.14), transparent 42%);
+}
+
+.reveal .slides section.results-intro > * {
+  position: relative;
+  z-index: 1;
+}
+
+.reveal .slides section.results-intro .results-card {
+  width: min(54rem, calc(100vw - 4rem));
+  margin: 0 auto;
+  padding: 3.1rem 3.6rem 3.2rem;
+  border-radius: 32px;
+  background:
+    linear-gradient(180deg, rgba(13, 24, 40, 0.60) 0%, rgba(10, 20, 35, 0.48) 100%);
+  border: 1px solid rgba(152, 181, 232, 0.18);
+  box-shadow:
+    0 32px 70px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.reveal .slides section.results-intro .results-eyebrow {
+  display: inline-block;
+  margin-bottom: 0.9rem;
+  padding: 0.18rem 0.68rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #d7e6ff;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.reveal .slides section.results-intro .results-title {
+  margin: 0;
+  font-size: clamp(2.6rem, 5vw, 4.1rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  color: #ffffff;
+  font-family: "Inter", "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 750;
+}
+
+.reveal .slides section.paper-credit {
+  text-align: center;
+  padding: 0;
+}
+
+.reveal .slides section.paper-credit h2 {
+  display: none;
+}
+
+.reveal .slides section.paper-credit .paper-card {
+  width: min(64rem, calc(100vw - 4rem));
+  margin: 0 auto;
+  padding: 2.7rem 3.1rem 2.4rem;
+  border-radius: 32px;
+  background:
+    linear-gradient(180deg, rgba(13, 24, 40, 0.64) 0%, rgba(10, 20, 35, 0.52) 100%);
+  border: 1px solid rgba(152, 181, 232, 0.18);
+  box-shadow:
+    0 32px 70px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.reveal .slides section.paper-credit .paper-kicker {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.18rem 0.68rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #d7e6ff;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.reveal .slides section.paper-credit .paper-title {
+  margin: 0 auto;
+  max-width: 22ch;
+  font-size: clamp(2.15rem, 4vw, 3.35rem);
+  line-height: 1.02;
+  letter-spacing: -0.055em;
+  color: #ffffff;
+  font-family: "Inter", "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 760;
+  text-wrap: balance;
+}
+
+.reveal .slides section.paper-credit .paper-authors {
+  margin-left: auto;
+  margin-right: auto;
+  font-family: "Inter", "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: #d6e4f7;
+  letter-spacing: -0.02em;
+}
+
+.reveal .slides section.paper-credit .paper-authors-lead {
+  margin-top: 1.35rem;
+  max-width: 34rem;
+  font-size: 1.02rem;
+  line-height: 1.26;
+  font-weight: 700;
+}
+
+.reveal .slides section.paper-credit .paper-authors-rest {
+  margin-top: 0.7rem;
+  max-width: 42rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #aec4df;
+  font-weight: 560;
+}
+
+.reveal .slides section.paper-credit .paper-note {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  margin-top: 1.35rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #bfd0e6;
+  font-size: 0.78rem;
+  font-family: "Inter", "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.reveal .slides section.paper-credit .paper-note span {
+  color: #ffd76a;
+  font-weight: 800;
 }
 
 .flow-row,
