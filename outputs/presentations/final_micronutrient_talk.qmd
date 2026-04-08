@@ -1,0 +1,1561 @@
+---
+title: "Do Vitamins Actually Help Depression and Anxiety?"
+subtitle: "What the Best Evidence Shows"
+author: "Eric Dunipace, MD, PhD"
+date: today
+format:
+  revealjs:
+    theme: [default, ucla.scss]
+    transition: slide
+    slide-number: true
+    progress: false
+    controls: false
+    center: true
+    fig-align: center
+    width: 1280
+    height: 720
+    margin: 0.08
+    auto-animate-easing: ease-in-out
+    auto-animate-duration: 0.8
+    embed-resources: true
+    self-contained-math: true
+---
+
+```{r}
+library(dplyr)
+library(stringr)
+box::use(../../R/vit)
+
+data <- vit$get_vitamin_data(outcome = NULL, simple_analysis = TRUE) %>% 
+  distinct(study, intervention, assigned.N, bias) %>%
+  filter(bias == "low")
+
+sample.size <- rep(NA_character_, 9)
+vits <- c("D","B","zinc","magnesium","selenium","C","iron","placebo",
+          "antidepressant")
+names(sample.size) <- vits
+
+for(v in vits) {
+  sample.size[vits == v] <- data %>% 
+    filter(str_detect(intervention, v)) %>% 
+    pull(assigned.N) %>% 
+    sum() %>% prettyNum(big.mark = ",")
+}
+  
+```
+
+## {data-background-color="#0f2238" .hero-slide .ambient-dark}
+
+<div class="title-wrap">
+<div class="eyebrow">20-minute clinical talk</div>
+<h1 class="title-headline">Do vitamins actually help<br>depression and anxiety?</h1>
+<div class="title-sub">What the best evidence shows</div>
+<div class="title-author">Eric Dunipace<span class="title-affil">UCLA Psychiatry Residency</span></div>
+<div class="title-meta">Based on a systematic review and Bayesian network meta-analysis of randomized controlled trials</div>
+</div>
+
+
+::: notes
+Welcome — today I'm going to walk you through a systematic review and Bayesian network meta-analysis we completed this year on micronutrient supplementation for depression and anxiety. I want to give you a clinically useful take on what the evidence actually supports — and just as importantly, what it doesn't.
+:::
+
+---
+
+## Your patients are <span style="color: var(--mu-color);">likely</span> already asking this {auto-animate=true auto-animate-unmatched=false data-transition="none"}
+
+<ul>
+<li class="fragment" data-fragment-index="1">"Should I take vitamin D for my mood?"</li>
+<li class="fragment" data-fragment-index="2">"I read that magnesium helps anxiety"</li>
+<li class="fragment" data-fragment-index="3">"My functional medicine doctor put me on B12"</li>
+</ul>
+
+---
+
+## The "nutritional psychiatry" literature is growing
+
+```{=html}
+<div data-id="trend-stage" style="margin-top: 14px;">
+```
+
+::: {.fragment data-fragment-index="2"}
+:::: {.columns}
+::: {.column width="50%"}
+
+```{=html}
+<div class="trend-card">
+```
+
+```{=html}
+<div class="trend-plot">
+  <div class="trend-title">Google Trends: “Nutritional Psychiatry”</div>
+  <div class="trend-y-title">Relative search volume</div>
+  <div class="trend-canvas">
+    <div class="trend-y-labels">
+      <span>100</span>
+      <span>75</span>
+      <span>50</span>
+      <span>25</span>
+      <span>0</span>
+    </div>
+    <div class="trend-bars">
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:0%;--d:0.00s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:0%;--d:0.08s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:0%;--d:0.16s;"></div><div class="trend-x">2005</div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:0%;--d:0.24s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:0%;--d:0.32s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:0%;--d:0.40s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:4%;--d:0.48s;"></div><div class="trend-x">2010</div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:5%;--d:0.56s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:0%;--d:0.64s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:2%;--d:0.72s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:0%;--d:0.80s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:7%;--d:0.88s;"></div><div class="trend-x">2015</div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:0%;--d:0.96s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:13%;--d:1.04s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:26%;--d:1.12s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:44%;--d:1.20s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:34%;--d:1.28s;"></div><div class="trend-x">2020</div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:34%;--d:1.36s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:41%;--d:1.44s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:38%;--d:1.52s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:45%;--d:1.60s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-blue" style="--h:100%;--d:1.68s;"></div><div class="trend-x">2025</div></div>
+    </div>
+  </div>
+  <div class="trend-x-title">Year</div>
+</div>
+```
+
+```{=html}
+</div>
+```
+
+:::
+::: {.column width="50%"}
+
+```{=html}
+<div class="trend-card">
+```
+
+```{=html}
+<div class="trend-plot">
+  <div class="trend-title">PubMed: diet/nutrition and depression/anxiety</div>
+  <div class="trend-y-title">Number of publications</div>
+  <div class="trend-canvas">
+    <div class="trend-y-labels">
+      <span>5000</span>
+      <span>3750</span>
+      <span>2500</span>
+      <span>1250</span>
+      <span>0</span>
+    </div>
+    <div class="trend-bars">
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:7%;--d:0.00s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:7%;--d:0.08s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:8%;--d:0.16s;"></div><div class="trend-x">2005</div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:9%;--d:0.24s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:10%;--d:0.32s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:11%;--d:0.40s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:12%;--d:0.48s;"></div><div class="trend-x">2010</div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:14%;--d:0.56s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:15%;--d:0.64s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:19%;--d:0.72s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:25%;--d:0.80s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:30%;--d:0.88s;"></div><div class="trend-x">2015</div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:35%;--d:0.96s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:38%;--d:1.04s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:43%;--d:1.12s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:48%;--d:1.20s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:58%;--d:1.28s;"></div><div class="trend-x">2020</div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:69%;--d:1.36s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:72%;--d:1.44s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:72%;--d:1.52s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:83%;--d:1.60s;"></div><div class="trend-x"></div></div>
+      <div class="trend-col"><div class="trend-bar trend-light" style="--h:100%;--d:1.68s;"></div><div class="trend-x">2025</div></div>
+    </div>
+  </div>
+  <div class="trend-x-title">Year</div>
+</div>
+```
+
+```{=html}
+</div>
+```
+
+:::
+::::
+:::
+
+```{=html}
+</div>
+```
+
+::: {.fragment data-fragment-index="3"}
+<div style="margin-top: 28px; padding: 16px 18px; background: #DAEBFE; border-left: 4px solid #2774AE; border-radius: 4px;">
+
+<div class="fragment" data-fragment-index="3" style="margin-top: 12px; font-size: 1.05em;">
+But most reviews lump everything together as **"supplements,"** making it difficult to advise individual patients.
+</div>
+
+</div>
+:::
+
+
+::: notes
+The clinical motivation is real. I'd guess most of you have fielded questions like these in clinic. The problem is the literature is genuinely hard to interpret — fish oil, turmeric, vitamins all get grouped under "nutritional psychiatry." Our goal was to cut through that by looking at individual micronutrients, in only the highest-quality trials.
+:::
+
+---
+
+## The search & scope
+
+<div class="flow-row">
+<div class="flow-box big fragment fade-up" data-fragment-index="0">
+<div class="flow-num">5,036</div>
+<div class="flow-label">records identified</div>
+</div>
+<div class="flow-arrow fragment fade-up" data-fragment-index="1">→</div>
+<div class="flow-box big fragment fade-up" data-fragment-index="1">
+<div class="flow-num">101</div>
+<div class="flow-label">RCTs included</div>
+</div>
+<div class="flow-arrow fragment fade-up" data-fragment-index="2">→</div>
+<div class="flow-box big emphasis fragment pop-in flow-emphasis" data-fragment-index="2">
+<div class="flow-num">50</div>
+<div class="flow-label">low-risk-of-bias trials<br>in the primary analysis</div>
+</div>
+</div>
+
+<div class="mini-grid two-up">
+<div class="mini-card fragment fade-up" data-fragment-index="3">
+<div class="mini-title">Outcomes</div>
+<div class="mini-body">Depression symptoms and anxiety symptoms, analyzed separately</div>
+</div>
+<div class="mini-card fragment fade-up" data-fragment-index="4">
+<div class="mini-title">Interventions</div>
+<div class="mini-body">B vitamins, vitamin C, vitamin D, zinc, magnesium, selenium, iron, and combinations of these micronutrients</div>
+</div>
+</div>
+
+::: notes
+We screened over 5,000 records. 101 RCTs made it in, but the primary analysis was restricted to the 50 studies rated low risk of bias. The PRISMA here shows the full flow. Notice we were quite selective — we weren't counting everything with "vitamin" in the title.
+:::
+
+---
+
+## What the included studies looked like
+
+::: {.columns}
+::: {.column width="52%"}
+| Micronutrient | Number of studies | Number of People |
+|:---:|:---:|---:|
+| Vitamin D |  **32** | **`r sample.size["D"]`**  |
+| B vitamins |12 | `r sample.size["B"]` |
+| Zinc | 3 | `r sample.size["zinc"]`  |
+| Magnesium | 3 | `r sample.size["magnesium"]` |
+| Iron | 2 | `r sample.size["iron"]` |
+| Selenium |  2 | `r sample.size["selenium"]` |
+| Vitamin C |  1 | `r sample.size["C"]` |
+: {tbl-colwidths="[55,23,22]"}
+:::
+
+::: {.column width="48%"}
+::: {style="font-size: 0.88em; line-height: 2.2;"}
+
+- **33,640 ** total participants
+- Published **1973–2024**
+- Median follow-up: **12 weeks**
+- Depression outcomes: **94 studies**
+- Anxiety outcomes: **32 studies**
+
+::: {.fragment style="margin-top: 16px; padding: 14px; background: #fff8e1; border-left: 4px solid #FFD100; border-radius: 4px;"}
+⚠️ Only **78%** of studies measured
+baseline nutrient levels
+*(This matters — more shortly)*
+:::
+:::
+:::
+:::
+
+::: notes
+Vitamin D dominates this literature — 32 of 50 low-RoB studies. Notice anxiety was studied far less than depression. Flag the 78% — most studies didn't confirm whether participants were actually deficient before supplementing them. That becomes really important for the subgroup analyses.
+:::
+
+---
+
+## What we did: a quick methods primer
+
+::: {.incremental}
+
+- How are effect sizes measured?
+- What's a network-meta analysis?
+- How do we estimate effects?
+
+:::
+
+---
+
+## How are effect sizes measured?
+
+::: {.incremental}
+- A variety of depression and anxiety surveys used 
+- Different scales have different ranges and interpretations, making it hard to compare results across studies
+- We used the **standardized mean difference (SMD)** to put everything on the same scale
+:::
+
+---
+
+## What is a standardized mean difference?
+
+<!-- hidden fragments: each press of “next” advances one stage -->
+<div id="smd-frag-1" class="fragment" data-fragment-index="1" style="height:0; margin:0; padding:0;"></div>
+<div id="smd-frag-2" class="fragment" data-fragment-index="2" style="height:0; margin:0; padding:0;"></div>
+<div id="smd-frag-3" class="fragment" data-fragment-index="3" style="height:0; margin:0; padding:0;"></div>
+<div id="smd-frag-4" class="fragment" data-fragment-index="4" style="height:0; margin:0; padding:0;"></div>
+
+```{=html}
+<div id="smd-stage" style="margin-top: 6px;"></div>
+<script>
+(() => {
+  if (window.__smdStandaloneInitialized) return;
+  window.__smdStandaloneInitialized = true;
+
+  const NS = "http://www.w3.org/2000/svg";
+  const stageEl = document.getElementById("smd-stage");
+  if (!stageEl) return;
+
+  const width = 980;
+  const height = 520;
+  const margin = { top: 78, right: 40, bottom: 72, left: 74 };
+  const muControl = 58;
+  const muTreat = 50;
+  const sdControl = 10;
+  const sdTreat = 10;
+  const pooledSD = Math.sqrt((sdControl ** 2 + sdTreat ** 2) / 2);
+  const rawDiff = muTreat - muControl;
+  const smd = rawDiff / pooledSD;
+  const xMin = 15;
+  const xMax = 95;
+  let arrowAnimatedForStage = -1;
+  let hasAnimatedMeanArrow = false;
+  const controlColor = "#5B8FD1";
+  const treatmentColor = "#E15759";
+  const summaryYControl = 238;
+  const summaryYTreat = 310;
+
+  const normalPdf = (x, mu, sd) =>
+    (1 / (sd * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * ((x - mu) / sd) ** 2);
+
+  const xs = [];
+  for (let value = xMin; value <= xMax + 0.001; value += 0.25) xs.push(value);
+  const controlCurve = xs.map((x) => ({ x, y: normalPdf(x, muControl, sdControl) }));
+  const treatCurve = xs.map((x) => ({ x, y: normalPdf(x, muTreat, sdTreat) }));
+  const yMax = Math.max(...controlCurve.map(d => d.y), ...treatCurve.map(d => d.y)) * 1.18;
+
+  const scaleX = (x) => margin.left + ((x - xMin) / (xMax - xMin)) * (width - margin.left - margin.right);
+  const scaleY = (y) => height - margin.bottom - (y / yMax) * (height - margin.top - margin.bottom);
+
+  const make = (tag, attrs = {}, text) => {
+    const el = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+    if (text != null) el.textContent = text;
+    return el;
+  };
+
+  const pathFrom = (points) => {
+    return points.map((point, index) => {
+      const cmd = index === 0 ? "M" : "L";
+      return `${cmd} ${scaleX(point.x).toFixed(2)} ${scaleY(point.y).toFixed(2)}`;
+    }).join(" ");
+  };
+
+  const addText = (svg, x, y, text, attrs = {}) => {
+    svg.appendChild(make("text", { x, y, ...attrs }, text));
+  };
+
+  const addSummaryEstimate = (svg, y, mean, sd, label, color, stage, group = svg) => {
+    const xLo = scaleX(mean - sd);
+    const xMean = scaleX(mean);
+    const xHi = scaleX(mean + sd);
+    const labelY = stage >= 2 ? y + 34 : y + 28;
+    group.appendChild(make("line", { x1: xLo, x2: xHi, y1: y, y2: y, stroke: color, "stroke-width": "4" }));
+    group.appendChild(make("line", { x1: xLo, x2: xLo, y1: y - 10, y2: y + 10, stroke: color, "stroke-width": "3" }));
+    group.appendChild(make("line", { x1: xHi, x2: xHi, y1: y - 10, y2: y + 10, stroke: color, "stroke-width": "3" }));
+    group.appendChild(make("circle", { cx: xMean, cy: y, r: 7, fill: color }));
+    addText(group, margin.left + 22, y - 16, label, {
+      "font-size": "17",
+      "font-weight": "700",
+      fill: color
+    });
+    addText(group, xMean, labelY, `mean = ${mean}, SD = ${sd}`, {
+      "text-anchor": "middle",
+      "font-size": "16",
+      "font-weight": "500",
+      fill: "#35516d"
+    });
+  };
+
+  const draw = (stage) => {
+    stageEl.innerHTML = "";
+    const svg = make("svg", {
+      viewBox: `0 0 ${width} ${height}`,
+      style: "display:block;width:100%;height:auto;overflow:visible;font-family:Inter,system-ui,sans-serif;"
+    });
+
+    const defs = make("defs");
+    const marker = make("marker", {
+      id: "arrow-smd-inline",
+      viewBox: "0 -5 10 10",
+      refX: "9",
+      refY: "0",
+      markerWidth: "7",
+      markerHeight: "7",
+      orient: "auto"
+    });
+    marker.appendChild(make("path", { d: "M0,-5L10,0L0,5", fill: "#222" }));
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+
+    const plotLeft = margin.left;
+    const plotRight = width - margin.right;
+    const plotTop = margin.top;
+    const plotBottom = height - margin.bottom;
+
+    const axisGroup = make("g");
+    const curveGroup = make("g");
+    const summaryGroup = make("g");
+
+    if (stage <= 1) {
+      [0, 0.25, 0.5, 0.75, 1].forEach((tick) => {
+        const y = plotBottom - tick * (plotBottom - plotTop);
+        axisGroup.appendChild(make("line", {
+          x1: plotLeft,
+          x2: plotRight,
+          y1: y,
+          y2: y,
+          stroke: "#d7e3f3",
+          "stroke-width": "1"
+        }));
+      });
+      axisGroup.appendChild(make("line", { x1: plotLeft, x2: plotRight, y1: plotBottom, y2: plotBottom, stroke: "#7e96b4", "stroke-width": "1.5" }));
+      axisGroup.appendChild(make("line", { x1: plotLeft, x2: plotLeft, y1: plotTop, y2: plotBottom, stroke: "#7e96b4", "stroke-width": "1.5" }));
+    } else {
+      svg.appendChild(make("line", { x1: plotLeft, x2: plotRight, y1: plotBottom, y2: plotBottom, stroke: "#7e96b4", "stroke-width": "1.5" }));
+    }
+
+    [20, 40, 60, 80].forEach((tick) => {
+      const x = scaleX(tick);
+      svg.appendChild(make("line", { x1: x, x2: x, y1: plotBottom, y2: plotBottom + 7, stroke: "#7e96b4", "stroke-width": "1.5" }));
+      addText(svg, x, plotBottom + 24, String(tick), {
+        "text-anchor": "middle",
+        "font-size": "16",
+        fill: "#4a4a4a"
+      });
+    });
+
+    if (stage <= 1) {
+      [0, 0.01, 0.02, 0.03].forEach((tick) => {
+        const y = scaleY(tick);
+        axisGroup.appendChild(make("line", { x1: plotLeft - 7, x2: plotLeft, y1: y, y2: y, stroke: "#7e96b4", "stroke-width": "1.5" }));
+        addText(axisGroup, plotLeft - 12, y + 5, tick.toFixed(2), {
+          "text-anchor": "end",
+          "font-size": "16",
+          fill: "#4a4a4a"
+        });
+      });
+    }
+
+    addText(svg, width / 2, height - 18, "Outcome scale", {
+      "text-anchor": "middle",
+      "font-size": "20",
+      fill: "#222"
+    });
+
+    if (stage <= 1) {
+      const yAxisTitle = make("text", {
+        transform: `translate(24 ${height / 2}) rotate(-90)`,
+        "text-anchor": "middle",
+        "font-size": "20",
+        fill: "#222"
+      }, "Density");
+      axisGroup.appendChild(yAxisTitle);
+    }
+
+    let headline = "Start with the raw distributions";
+    let subhead = "Two groups can differ on the original outcome scale.";
+    if (stage === 1) {
+      headline = "Collapse each distribution into mean ± SD";
+      subhead = "This is the summary information used to compute a standardized effect.";
+    } else if (stage === 2) {
+      headline = "Then compute the raw mean difference";
+      subhead = "Treatment mean minus control mean gives the unstandardized gap.";
+    } else if (stage === 3) {
+      headline = "Now scale that gap by the pooled SD";
+      subhead = "Using a shared SD makes the effect comparable across different measures.";
+    } else if (stage === 4) {
+      headline = "Finally: the standardized mean difference";
+      subhead = "SMD expresses the mean difference in units of standard deviations.";
+    }
+
+    addText(svg, plotLeft, 28, headline, { "font-size": "28", "font-weight": "700", fill: "#000" });
+    addText(svg, plotLeft, 56, subhead, { "font-size": "16", "font-weight": "500", fill: "#4a4a4a" });
+
+    if (stage <= 1) {
+      curveGroup.appendChild(make("path", {
+        d: pathFrom(controlCurve),
+        fill: "none",
+        stroke: controlColor,
+        "stroke-width": "4"
+      }));
+
+      curveGroup.appendChild(make("path", {
+        d: pathFrom(treatCurve),
+        fill: "none",
+        stroke: treatmentColor,
+        "stroke-width": "4"
+      }));
+
+      addText(curveGroup, scaleX(72), scaleY(yMax * 0.98), "Control distribution", {
+        "text-anchor": "end",
+        "font-size": "17",
+        "font-weight": "500",
+        fill: controlColor
+      });
+      addText(curveGroup, scaleX(73), scaleY(yMax * 0.84), "Treatment distribution", {
+        "text-anchor": "end",
+        "font-size": "17",
+        "font-weight": "500",
+        fill: treatmentColor
+      });
+    }
+
+    if (stage >= 1) {
+      addSummaryEstimate(svg, summaryYControl, muControl, sdControl, "Control", controlColor, stage, summaryGroup);
+      addSummaryEstimate(svg, summaryYTreat, muTreat, sdTreat, "Treatment", treatmentColor, stage, summaryGroup);
+      summaryGroup.appendChild(make("line", {
+        x1: margin.left,
+        x2: width - margin.right,
+        y1: 282,
+        y2: 282,
+        stroke: "#d7e3f3",
+        "stroke-width": "1.5",
+        "stroke-dasharray": "5,5"
+      }));
+      addText(summaryGroup, margin.left + 10, 170, "Summary estimates", {
+        "text-anchor": "start",
+        "font-size": "16",
+        "font-weight": "600",
+        fill: "#5f7897"
+      });
+    }
+
+    if (stage <= 1) svg.appendChild(axisGroup);
+    if (stage <= 1) svg.appendChild(curveGroup);
+    if (stage >= 1) svg.appendChild(summaryGroup);
+
+    if (stage === 1) {
+      axisGroup.style.opacity = "1";
+      curveGroup.style.opacity = "1";
+      summaryGroup.style.opacity = "0";
+      axisGroup.style.transition = "opacity 1200ms ease";
+      curveGroup.style.transition = "opacity 1200ms ease";
+      summaryGroup.style.transition = "opacity 900ms ease 180ms";
+      requestAnimationFrame(() => {
+        axisGroup.style.opacity = "0";
+        curveGroup.style.opacity = "0";
+        summaryGroup.style.opacity = "1";
+      });
+    }
+
+    if (stage >= 2) {
+      const arrowY = 194;
+      const xStart = scaleX(muControl - 0.7);
+      const xEnd = scaleX(muTreat + 0.7);
+      const arrow = make("path", {
+        d: `M ${xStart} ${arrowY} L ${xEnd} ${arrowY}`,
+        fill: "none",
+        stroke: "#222",
+        "stroke-width": "3",
+        "stroke-linecap": "round",
+        "marker-end": "url(#arrow-smd-inline)"
+      });
+      svg.appendChild(arrow);
+
+      const rawLabel = make("text", {
+        x: (xStart + xEnd) / 2,
+        y: arrowY - 18,
+        "text-anchor": "middle",
+        "font-size": "15",
+        "font-weight": "600",
+        fill: "#222"
+      }, `Mean difference = ${rawDiff.toFixed(1)}`);
+      svg.appendChild(rawLabel);
+
+      if (!hasAnimatedMeanArrow && arrowAnimatedForStage !== stage) {
+        const totalLength = arrow.getTotalLength();
+        arrow.style.strokeDasharray = `${totalLength} ${totalLength}`;
+        arrow.style.strokeDashoffset = totalLength;
+        arrow.style.transition = "stroke-dashoffset 700ms cubic-bezier(0.2, 0.8, 0.2, 1)";
+        rawLabel.style.opacity = "0";
+        rawLabel.style.transition = "opacity 300ms ease";
+        requestAnimationFrame(() => {
+          arrow.style.strokeDashoffset = "0";
+          setTimeout(() => { rawLabel.style.opacity = "1"; }, 520);
+        });
+        arrowAnimatedForStage = stage;
+        hasAnimatedMeanArrow = true;
+      } else {
+        arrow.style.strokeDasharray = "none";
+        arrow.style.strokeDashoffset = "0";
+        rawLabel.style.opacity = "1";
+      }
+    }
+
+    if (stage >= 3) {
+      const pooledGroup = make("g");
+      const controlLo = scaleX(muControl - sdControl);
+      const controlHi = scaleX(muControl + sdControl);
+      const treatLo = scaleX(muTreat - sdTreat);
+      const treatHi = scaleX(muTreat + sdTreat);
+      const pooledCenter = (scaleX(muControl) + scaleX(muTreat)) / 2;
+      const pooledHalf = (scaleX(muControl + pooledSD) - scaleX(muControl));
+      const pooledLo = pooledCenter - pooledHalf;
+      const pooledHi = pooledCenter + pooledHalf;
+      const topY = 350;
+      const pooledY = 430;
+
+      pooledGroup.appendChild(make("line", {
+        x1: controlLo, x2: controlHi, y1: topY, y2: topY,
+        stroke: controlColor, "stroke-width": "3", opacity: "0.45"
+      }));
+      pooledGroup.appendChild(make("line", {
+        x1: treatLo, x2: treatHi, y1: topY + 20, y2: topY + 20,
+        stroke: treatmentColor, "stroke-width": "3", opacity: "0.45"
+      }));
+      addText(pooledGroup, (controlLo + controlHi) / 2, topY - 10, "Control SD", {
+        "text-anchor": "middle",
+        "font-size": "14",
+        "font-weight": "600",
+        fill: controlColor
+      });
+      addText(pooledGroup, (treatLo + treatHi) / 2, topY + 44, "Treatment SD", {
+        "text-anchor": "middle",
+        "font-size": "14",
+        "font-weight": "600",
+        fill: treatmentColor
+      });
+
+      pooledGroup.appendChild(make("line", {
+        x1: (controlLo + controlHi) / 2, x2: pooledCenter - 26,
+        y1: topY + 4, y2: pooledY - 18,
+        stroke: "#9aa8b7", "stroke-width": "2.5", "stroke-dasharray": "5,5"
+      }));
+      pooledGroup.appendChild(make("line", {
+        x1: (treatLo + treatHi) / 2, x2: pooledCenter + 26,
+        y1: topY + 20, y2: pooledY - 18,
+        stroke: "#9aa8b7", "stroke-width": "2.5", "stroke-dasharray": "5,5"
+      }));
+
+      pooledGroup.appendChild(make("line", { x1: pooledLo, x2: pooledHi, y1: pooledY, y2: pooledY, stroke: "#444", "stroke-width": "4" }));
+      pooledGroup.appendChild(make("line", { x1: pooledLo, x2: pooledLo, y1: pooledY - 11, y2: pooledY + 11, stroke: "#444", "stroke-width": "4" }));
+      pooledGroup.appendChild(make("line", { x1: pooledHi, x2: pooledHi, y1: pooledY - 11, y2: pooledY + 11, stroke: "#444", "stroke-width": "4" }));
+      addText(pooledGroup, pooledCenter, pooledY - 16, `Pooled SD = ${pooledSD.toFixed(1)}`, {
+        "text-anchor": "middle",
+        "font-size": "17",
+        "font-weight": "600",
+        fill: "#222"
+      });
+      addText(pooledGroup, pooledCenter, pooledY + 34, "A shared average spread across both groups", {
+        "text-anchor": "middle",
+        "font-size": "15",
+        "font-weight": "500",
+        fill: "#5f7897"
+      });
+      svg.appendChild(pooledGroup);
+    }
+
+    if (stage >= 4) {
+      const boxX = width - 286;
+      const boxY = 104;
+      const boxW = 228;
+      const boxH = 88;
+      svg.appendChild(make("rect", {
+        x: boxX, y: boxY, width: boxW, height: boxH, rx: "14", ry: "14",
+        fill: "#f7f7f7", stroke: "#cfcfcf"
+      }));
+      addText(svg, boxX + boxW / 2, boxY + 30, "Standardized mean difference", {
+        "text-anchor": "middle",
+        "font-size": "16",
+        "font-weight": "600",
+        fill: "#222"
+      });
+      addText(svg, boxX + boxW / 2, boxY + 58, `SMD = ${rawDiff.toFixed(1)} / ${pooledSD.toFixed(1)}`, {
+        "text-anchor": "middle",
+        "font-size": "16",
+        "font-weight": "500",
+        fill: "#222"
+      });
+      addText(svg, boxX + boxW / 2, boxY + 82, `${Math.abs(smd).toFixed(2)} SD lower`, {
+        "text-anchor": "middle",
+        "font-size": "22",
+        "font-weight": "700",
+        fill: "#111"
+      });
+    }
+
+    addText(svg, width - 30, height - 18, `Step ${stage + 1} of 5`, {
+      "text-anchor": "end",
+      "font-size": "16",
+      fill: "#777"
+    });
+
+    stageEl.appendChild(svg);
+  };
+
+  const resolveStage = () => {
+    const slide = stageEl.closest("section");
+    if (!slide || !slide.classList.contains("present")) return;
+    let stage = 0;
+    if (slide.querySelector("#smd-frag-1.visible")) stage = 1;
+    if (slide.querySelector("#smd-frag-2.visible")) stage = 2;
+    if (slide.querySelector("#smd-frag-3.visible")) stage = 3;
+    if (slide.querySelector("#smd-frag-4.visible")) stage = 4;
+    draw(stage);
+  };
+
+  const onFragment = (event) => {
+    const slide = stageEl.closest("section");
+    if (slide && slide.contains(event.fragment)) resolveStage();
+  };
+
+  const onSlideChanged = () => {
+    resolveStage();
+  };
+
+  const bindReveal = () => {
+    if (typeof Reveal === "undefined" || typeof Reveal.on !== "function") return false;
+    if (stageEl.dataset.revealBound === "true") return true;
+    Reveal.on("fragmentshown", onFragment);
+    Reveal.on("fragmenthidden", onFragment);
+    Reveal.on("slidechanged", onSlideChanged);
+    stageEl.dataset.revealBound = "true";
+    resolveStage();
+    return true;
+  };
+
+  const waitForReveal = () => {
+    if (bindReveal()) return;
+    const timer = window.setInterval(() => {
+      if (bindReveal()) window.clearInterval(timer);
+    }, 120);
+  };
+
+  draw(0);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", waitForReveal, { once: true });
+  } else {
+    waitForReveal();
+  }
+})();
+</script>
+```
+
+---
+
+## What's a network meta-analysis?
+
+::: {.columns}
+::: {.column width="48%"}
+<ul>
+<div class="fragment" data-fragment-index="1"><strong>Standard meta-analysis</strong></div>
+<li class="fragment" data-fragment-index="2">Each nutrient analyzed separately vs. placebo</li>
+<li class="fragment" data-fragment-index="3">Answers questions like: "Does vitamin D work?"</li>
+<li class="fragment" data-fragment-index="4">Misses indirect comparisons between nutrients</li>
+</ul>
+:::
+
+::: {.column width="4%"}
+:::
+
+::: {.column width="48%"}
+<ul>
+<div class="fragment" data-fragment-index="6"><strong>Network meta-analysis</strong></div>
+<li class="fragment" data-fragment-index="7">All nutrients analyzed together in one model</li>
+<li class="fragment" data-fragment-index="8">Uses both direct and indirect comparisons</li>
+<li class="fragment" data-fragment-index="9">Can estimate vitamin D vs. B6 even without a head-to-head trial</li>
+</ul>
+:::
+:::
+
+```{=html}
+<div style="position: relative; margin-top: 20px; height: 255px;">
+```
+
+::: {.fragment data-fragment-index="5" style="position: absolute; inset: 0;"}
+```{=html}
+<svg viewBox="0 0 980 250" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto;">
+  <text x="94" y="34" style="font-size:21px;font-weight:700;fill:#003B5C;">Pairwise meta-analysis</text>
+  <circle cx="150" cy="128" r="40" fill="#DAEBFE" stroke="#2774AE" stroke-width="3.5"></circle>
+  <circle cx="318" cy="128" r="40" fill="#DAEBFE" stroke="#2774AE" stroke-width="3.5"></circle>
+  <line x1="190" y1="128" x2="278" y2="128" stroke="#2774AE" stroke-width="6.5" stroke-linecap="round"></line>
+  <text x="150" y="135" text-anchor="middle" style="font-size:16px;font-weight:700;fill:#003B5C;">Placebo</text>
+  <text x="318" y="135" text-anchor="middle" style="font-size:16px;font-weight:700;fill:#003B5C;">Vit D</text>
+</svg>
+```
+:::
+
+::: {.fragment data-fragment-index="10" style="position: absolute; inset: 0;"}
+```{=html}
+<svg viewBox="0 0 980 250" xmlns="http://www.w3.org/2000/svg" style="display:block; width:100%; height:auto;">
+  <line x1="420" y1="24" x2="420" y2="218" stroke="#D7E3F3" stroke-width="3"></line>
+  <text x="528" y="34" style="font-size:21px;font-weight:700;fill:#003B5C;">Network meta-analysis</text>
+  <circle cx="690" cy="72" r="34" fill="#DAEBFE" stroke="#2774AE" stroke-width="3.5"></circle>
+  <circle cx="578" cy="158" r="34" fill="#EEF4FB" stroke="#5B8FD1" stroke-width="3.5"></circle>
+  <circle cx="802" cy="158" r="34" fill="#EEF4FB" stroke="#5B8FD1" stroke-width="3.5"></circle>
+  <circle cx="690" cy="214" r="34" fill="#EEF4FB" stroke="#5B8FD1" stroke-width="3.5"></circle>
+  <line x1="663" y1="98" x2="603" y2="143" stroke="#2774AE" stroke-width="5.5" stroke-linecap="round"></line>
+  <line x1="690" y1="106" x2="690" y2="180" stroke="#2774AE" stroke-width="5.5" stroke-linecap="round"></line>
+  <line x1="770" y1="184" x2="721" y2="201" stroke="#8BB8E8" stroke-width="3.5" stroke-linecap="round"></line>
+  <text x="690" y="78" text-anchor="middle" style="font-size:15px;font-weight:700;fill:#003B5C;">Placebo</text>
+  <text x="578" y="164" text-anchor="middle" style="font-size:15px;font-weight:700;fill:#003B5C;">Vit D</text>
+  <text x="802" y="164" text-anchor="middle" style="font-size:15px;font-weight:700;fill:#003B5C;">Mg</text>
+  <text x="690" y="220" text-anchor="middle" style="font-size:15px;font-weight:700;fill:#003B5C;">B6</text>
+</svg>
+```
+:::
+
+```{=html}
+</div>
+```
+
+::: {.fragment style="margin-top: 30px; padding: 16px; background: #fff8e1; border-left: 4px solid #FFD100; border-radius: 4px;"}
+**Bayesian** = full uncertainty distribution rather than a binary p-value.
+**Primary analysis restricted to low risk-of-bias trials only.**
+:::
+
+::: notes
+A network meta-analysis lets us compare treatments that were never tested head-to-head, by linking them through a shared comparator — in our case, placebo. The Bayesian piece means instead of a yes/no p-value, we get a probability distribution over possible effects. We restricted the primary analysis to the 50 highest-quality trials.
+:::
+
+---
+
+## How do we estimate effects? {#sec-meta-build-clinical .meta-bayes-slide}
+
+::: {.columns}
+::: {.column width="34%"}
+
+### The process
+
+<ul class="meta-build-list">
+<li class="fragment" data-fragment-index="1">Each study gives an estimate of the treatment effect, with some uncertainty.</li>
+<li class="fragment" data-fragment-index="2"><strong><span class="mu-accent">μ</span></strong> = the overall average treatment effect.</li>
+<li class="fragment" data-fragment-index="3"><strong><span class="tau-accent">τ</span></strong> = how much the true effect varies across studies.</li>
+<li class="fragment" data-fragment-index="4">As studies accumulate, the posterior for <strong><span class="mu-accent">μ</span></strong> shifts and usually tightens.</li>
+<li class="fragment" data-fragment-index="5">At the same time, the posterior for <strong><span class="tau-accent">τ</span></strong> tells you whether studies are genuinely disagreeing.</li>
+</ul>
+
+
+```{=html}
+<div id="meta-fragments" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;">
+  <span class="fragment" data-fragment-index="7"></span>
+  <span class="fragment" data-fragment-index="8"></span>
+  <span class="fragment" data-fragment-index="9"></span>
+  <span class="fragment" data-fragment-index="10"></span>
+  <span class="fragment" data-fragment-index="11"></span>
+  <span class="fragment" data-fragment-index="12"></span>
+  <span class="fragment" data-fragment-index="13"></span>
+</div>
+```
+
+:::
+::: {.column width="66%"}
+
+::: {.fragment data-fragment-index="6"}
+```{=html}
+<div id="meta-bayes-root"></div>
+<script>
+(() => {
+  if (window.__metaBayesInitialized) return;
+  window.__metaBayesInitialized = true;
+
+  const root = document.getElementById("meta-bayes-root");
+  if (!root) return;
+  const NS = "http://www.w3.org/2000/svg";
+
+  const studies = [
+    {study: "Study 1", yi: -0.42, sei: 0.18},
+    {study: "Study 2", yi: -0.15, sei: 0.12},
+    {study: "Study 3", yi: -0.63, sei: 0.22},
+    {study: "Study 4", yi: -0.05, sei: 0.10},
+    {study: "Study 5", yi: -0.36, sei: 0.16},
+    {study: "Study 6", yi:  0.08, sei: 0.14},
+    {study: "Study 7", yi: -0.27, sei: 0.11},
+    {study: "Study 8", yi: -0.54, sei: 0.20}
+  ];
+
+  const beats = [
+    {
+      headline: "Start with one study: the posterior is still mostly prior + one likelihood",
+      body: "With a single study, μ is very uncertain and τ is barely identified at all."
+    },
+    {
+      headline: "Add another study: pooled effect updates quickly",
+      body: "μ moves toward the accumulated evidence while uncertainty narrows."
+    },
+    {
+      headline: "Consistent evidence stabilizes the pooled effect",
+      body: "When studies point in the same direction, μ becomes more credible without forcing τ upward."
+    },
+    {
+      headline: "More studies tighten inference, but only to a point",
+      body: "Credible intervals shrink as evidence accumulates, though heterogeneity still matters."
+    },
+    {
+      headline: "Conflicting evidence mainly shows up in τ",
+      body: "When one study disagrees, τ rises faster than μ moves. That is the random-effects logic."
+    },
+    {
+      headline: "By the end, you have learned about μ and τ separately",
+      body: "The final answer is not just an average effect. It is an average plus honest uncertainty about between-study variation."
+    }
+  ];
+
+  const muColor = "#2774AE";
+  const muColorSoft = "#8BB8E8";
+  const tauColor = "#59A14F";
+  const tauColorSoft = "rgba(89, 161, 79, 0.18)";
+  const studyColor = "#7C8798";
+
+  const sum = arr => arr.reduce((a, b) => a + b, 0);
+  const seq = (start, end, n) => Array.from({length: n}, (_, i) => start + i * (end - start) / (n - 1));
+  const fmt = x => `${x < 0 ? "−" : ""}${Math.abs(x).toFixed(2)}`;
+  const fmt3 = x => `${x < 0 ? "−" : ""}${Math.abs(x).toFixed(3)}`;
+  const linearScale = (d0, d1, r0, r1) => x => r0 + ((x - d0) / (d1 - d0)) * (r1 - r0);
+
+  const niceTicks = (min, max, count = 5) => {
+    const span = max - min;
+    if (span <= 0) return [min];
+    const raw = span / Math.max(1, count);
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const norm = raw / mag;
+    const step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag;
+    const start = Math.ceil(min / step) * step;
+    const out = [];
+    for (let v = start; v <= max + 0.5 * step; v += step) out.push(+v.toFixed(10));
+    return out;
+  };
+
+  const quantileFromGrid = (x, w, p) => {
+    const total = sum(w);
+    let cum = 0;
+    for (let i = 0; i < x.length; i++) {
+      cum += w[i];
+      if (cum / total >= p) return x[i];
+    }
+    return x[x.length - 1];
+  };
+
+  const normalize = arr => {
+    const s = sum(arr);
+    return arr.map(v => v / s);
+  };
+
+  const logNormalPdf = (x, m, s) =>
+    -0.5 * Math.log(2 * Math.PI * s * s) - 0.5 * ((x - m) / s) ** 2;
+
+  const logHalfNormalPdf = (x, s) => {
+    if (x < 0) return -Infinity;
+    return Math.log(Math.sqrt(2 / Math.PI) / s) - 0.5 * (x / s) ** 2;
+  };
+
+  const bayesMetaGrid = (dat, {
+    muMin = -1.2,
+    muMax = 0.6,
+    nMu = 220,
+    tauMin = 0.0001,
+    tauMax = 0.8,
+    nTau = 180,
+    muPriorSd = 1.0,
+    tauPriorSd = 0.5
+  } = {}) => {
+    const muGrid = seq(muMin, muMax, nMu);
+    const tauGrid = seq(tauMin, tauMax, nTau);
+    const logPost = [];
+    let maxLogPost = -Infinity;
+
+    for (let j = 0; j < tauGrid.length; j++) {
+      const tau = tauGrid[j];
+      for (let i = 0; i < muGrid.length; i++) {
+        const mu = muGrid[i];
+        let lp = logNormalPdf(mu, 0, muPriorSd) + logHalfNormalPdf(tau, tauPriorSd);
+        for (const d of dat) {
+          const v = d.sei * d.sei + tau * tau;
+          lp += -0.5 * Math.log(2 * Math.PI * v) - 0.5 * ((d.yi - mu) ** 2) / v;
+        }
+        logPost.push(lp);
+        if (lp > maxLogPost) maxLogPost = lp;
+      }
+    }
+
+    const post = normalize(logPost.map(v => Math.exp(v - maxLogPost)));
+    const muMarg = muGrid.map((_, i) => sum(tauGrid.map((__, j) => post[j * muGrid.length + i])));
+    const tauMarg = tauGrid.map((_, j) => sum(muGrid.map((__, i) => post[j * muGrid.length + i])));
+
+    return {
+      muMean: sum(muGrid.map((x, i) => x * muMarg[i])),
+      tauMean: sum(tauGrid.map((x, i) => x * tauMarg[i])),
+      muQ025: quantileFromGrid(muGrid, muMarg, 0.025),
+      muQ975: quantileFromGrid(muGrid, muMarg, 0.975),
+      tauQ025: quantileFromGrid(tauGrid, tauMarg, 0.025),
+      tauQ975: quantileFromGrid(tauGrid, tauMarg, 0.975)
+    };
+  };
+
+  const history = Array.from({length: studies.length}, (_, i) => {
+    const fit = bayesMetaGrid(studies.slice(0, i + 1));
+    return {
+      k: i + 1,
+      muMean: fit.muMean,
+      muLo: fit.muQ025,
+      muHi: fit.muQ975,
+      tauMean: fit.tauMean,
+      tauLo: fit.tauQ025,
+      tauHi: fit.tauQ975
+    };
+  });
+
+  const makeSvg = (width, height, label) => {
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("aria-label", label);
+    return svg;
+  };
+
+  const svgNode = (tag, attrs = {}, text) => {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+    if (text != null) node.textContent = text;
+    return node;
+  };
+
+  const appendText = (svg, x, y, text, attrs = {}) => {
+    svg.appendChild(svgNode("text", {x, y, ...attrs}, text));
+  };
+
+  const pathFromPoints = (points) =>
+    points.map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`).join(" ");
+
+  const areaPath = (upper, lower) => {
+    const top = upper.map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`).join(" ");
+    const bottom = lower.slice().reverse().map(p => `L${p[0]},${p[1]}`).join(" ");
+    return `${top}${bottom}Z`;
+  };
+
+  const forestChart = (dat, fit) => {
+    const width = 880;
+    const height = 300;
+    const margin = {top: 32, right: 118, bottom: 38, left: 145};
+    const rows = dat.map((d, i) => ({...d, row: i + 1, lo: d.yi - 1.96 * d.sei, hi: d.yi + 1.96 * d.sei}));
+    const xVals = rows.flatMap(d => [d.lo, d.hi]).concat([fit.muQ025, fit.muQ975, 0]);
+    const xmin = Math.min(-1.05, ...xVals) - 0.02;
+    const xmax = Math.max(0.45, ...xVals) + 0.02;
+    const x = linearScale(xmin, xmax, margin.left, width - margin.right);
+    const y = linearScale(0, rows.length + 2.0, margin.top, height - margin.bottom);
+    const ticks = niceTicks(xmin, xmax, 6);
+
+    const svg = makeSvg(width, height, "Forest plot");
+    appendText(svg, margin.left, 18, "Study estimates and posterior pooled effect", {"font-size": "18", "font-weight": "700"});
+    svg.appendChild(svgNode("line", {x1: x(0), x2: x(0), y1: y(0.5), y2: y(rows.length + 1.5), stroke: "#9aa0a6", "stroke-dasharray": "4,4"}));
+
+    rows.forEach(d => {
+      svg.appendChild(svgNode("line", {x1: x(d.lo), x2: x(d.hi), y1: y(d.row), y2: y(d.row), stroke: studyColor, "stroke-width": "2"}));
+      svg.appendChild(svgNode("line", {x1: x(d.lo), x2: x(d.lo), y1: y(d.row) - 5, y2: y(d.row) + 5, stroke: studyColor}));
+      svg.appendChild(svgNode("line", {x1: x(d.hi), x2: x(d.hi), y1: y(d.row) - 5, y2: y(d.row) + 5, stroke: studyColor}));
+      svg.appendChild(svgNode("rect", {x: x(d.yi) - 5.5, y: y(d.row) - 5.5, width: 11, height: 11, fill: studyColor}));
+      appendText(svg, margin.left - 10, y(d.row) + 4, d.study, {"font-size": "14", "text-anchor": "end"});
+      appendText(svg, width - margin.right + 8, y(d.row) + 4, `${fmt(d.yi)} [${fmt(d.lo)}, ${fmt(d.hi)}]`, {"font-size": "16"});
+    });
+
+    svg.appendChild(svgNode("line", {x1: x(fit.muQ025), x2: x(fit.muQ975), y1: y(rows.length + 1.1), y2: y(rows.length + 1.1), stroke: muColor, "stroke-width": "3"}));
+    svg.appendChild(svgNode("circle", {cx: x(fit.muMean), cy: y(rows.length + 1.1), r: 6, fill: muColor}));
+    appendText(svg, margin.left - 10, y(rows.length + 1.1) + 4, "Posterior for μ", {"font-size": "16", "text-anchor": "end", "font-weight": "700"});
+    appendText(svg, width - margin.right + 8, y(rows.length + 1.1) + 4, `${fmt(fit.muMean)} [${fmt(fit.muQ025)}, ${fmt(fit.muQ975)}]`, {"font-size": "16"});
+
+    svg.appendChild(svgNode("line", {x1: margin.left, x2: width - margin.right, y1: height - margin.bottom, y2: height - margin.bottom, stroke: "#555"}));
+    ticks.forEach(t => {
+      svg.appendChild(svgNode("line", {x1: x(t), x2: x(t), y1: height - margin.bottom, y2: height - margin.bottom + 6, stroke: "#555"}));
+      appendText(svg, x(t), height - margin.bottom + 20, fmt(t), {"text-anchor": "middle", "font-size": "16"});
+    });
+    appendText(svg, (margin.left + width - margin.right) / 2, height - 6, "Effect size", {"text-anchor": "middle", "font-size": "16", "font-weight": "600"});
+    return svg;
+  };
+
+  const historyChart = (historyRows, currentK, key, label, color, yMin = null) => {
+    const width = 430;
+    const height = 186;
+    const margin = {top: 28, right: 16, bottom: 34, left: 44};
+    const xs = historyRows.map(d => d.k);
+    const los = historyRows.map(d => d[`${key}Lo`]);
+    const his = historyRows.map(d => d[`${key}Hi`]);
+    const ymin = yMin === null ? Math.min(...los) - 0.03 : yMin;
+    const ymax = Math.max(...his) + 0.03;
+    const x = linearScale(1, historyRows.length, margin.left, width - margin.right);
+    const y = linearScale(ymin, ymax, height - margin.bottom, margin.top);
+    const ticks = niceTicks(ymin, ymax, 4);
+    const partialRows = historyRows.slice(0, currentK);
+    const areaUpper = partialRows.map(d => [x(d.k), y(d[`${key}Hi`])]);
+    const areaLower = partialRows.map(d => [x(d.k), y(d[`${key}Lo`])]);
+    const linePts = partialRows.map(d => [x(d.k), y(d[`${key}Mean`])]);
+    const current = partialRows[partialRows.length - 1];
+    const svg = makeSvg(width, height, label);
+
+    appendText(svg, margin.left, 16, label, {"font-size": "16", "font-weight": "700"});
+    ticks.forEach(t => {
+      svg.appendChild(svgNode("line", {x1: margin.left, x2: width - margin.right, y1: y(t), y2: y(t), stroke: "#eceff1"}));
+      appendText(svg, margin.left - 8, y(t) + 4, fmt(t), {"text-anchor": "end", "font-size": "16"});
+    });
+
+    if (partialRows.length > 1) {
+      svg.appendChild(svgNode("path", {d: areaPath(areaUpper, areaLower), fill: color, opacity: "0.18"}));
+      svg.appendChild(svgNode("path", {d: pathFromPoints(linePts), fill: "none", stroke: color, "stroke-width": "2.5"}));
+    }
+    svg.appendChild(svgNode("line", {x1: x(currentK), x2: x(currentK), y1: margin.top, y2: height - margin.bottom, stroke: "#666", "stroke-dasharray": "4,4"}));
+    svg.appendChild(svgNode("circle", {cx: x(currentK), cy: y(current[`${key}Mean`]), r: 4.5, fill: color}));
+    svg.appendChild(svgNode("line", {x1: margin.left, x2: width - margin.right, y1: height - margin.bottom, y2: height - margin.bottom, stroke: "#555"}));
+    xs.forEach(v => {
+      svg.appendChild(svgNode("line", {x1: x(v), x2: x(v), y1: height - margin.bottom, y2: height - margin.bottom + 5, stroke: "#555"}));
+      appendText(svg, x(v), height - margin.bottom + 17, String(v), {"text-anchor": "middle", "font-size": "16"});
+    });
+    return svg;
+  };
+
+  const render = (step) => {
+    const current = studies.slice(0, step);
+    const fit = bayesMetaGrid(current);
+    const beat = beats[Math.min(step - 1, beats.length - 1)];
+
+    root.innerHTML = "";
+    const wrap = document.createElement("div");
+    wrap.className = "chart-stack";
+
+    const stageText = document.createElement("div");
+    stageText.className = "meta-stage";
+    stageText.innerHTML = `
+      <div class="meta-stage-kicker">Study ${step} of ${studies.length}</div>
+      <div class="meta-stage-headline">${beat.headline}</div>
+      <div class="meta-stage-body">${beat.body}</div>
+    `;
+
+    const mini = document.createElement("div");
+    mini.className = "mini-grid";
+    mini.appendChild(historyChart(history, step, "mu", "Posterior pooled effect μ as studies accumulate", muColor));
+    mini.appendChild(historyChart(history, step, "tau", "Posterior heterogeneity τ as studies accumulate", tauColor, 0));
+
+    wrap.append(stageText, forestChart(current, fit), mini);
+    root.appendChild(wrap);
+  };
+
+  const resolveStep = () => {
+    const slide = root.closest("section");
+    if (!slide || !slide.classList.contains("present")) return;
+    const n = slide.querySelectorAll("#meta-fragments .fragment.visible").length;
+    render(Math.max(1, Math.min(studies.length, n + 1)));
+  };
+
+  const onFragment = (event) => {
+    const slide = root.closest("section");
+    if (slide && slide.contains(event.fragment)) resolveStep();
+  };
+
+  const onSlideChanged = () => resolveStep();
+
+  const bindReveal = () => {
+    if (typeof Reveal === "undefined" || typeof Reveal.on !== "function") return false;
+    if (root.dataset.revealBound === "true") return true;
+    Reveal.on("fragmentshown", onFragment);
+    Reveal.on("fragmenthidden", onFragment);
+    Reveal.on("slidechanged", onSlideChanged);
+    root.dataset.revealBound = "true";
+    resolveStep();
+    return true;
+  };
+
+  const waitForReveal = () => {
+    if (bindReveal()) return;
+    const timer = window.setInterval(() => {
+      if (bindReveal()) window.clearInterval(timer);
+    }, 120);
+  };
+
+  render(1);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", waitForReveal, { once: true });
+  } else {
+    waitForReveal();
+  }
+})();
+</script>
+```
+:::
+
+:::
+:::
+
+
+---
+
+## {auto-animate=true}
+
+::: {data-id="depress-forest"}
+::: {style="transform: scale(2.5); transform-origin: center 35%; margin-top: 40px;"}
+![](img/forest_depression_full.jpeg){width="100%"}
+:::
+:::
+
+::: notes
+Let's zoom in on the most important part of the depression forest plot — the Vitamin D row. The x-axis is standardized mean difference. Zero is the dashed null line. Left of zero means the supplement reduced symptoms. Vitamin D's credible interval sits entirely to the left — it doesn't touch zero.
+:::
+
+---
+
+## Vitamin D: the main finding {auto-animate=true}
+
+::: {data-id="depress-forest"}
+::: {style="transform: scale(2.5); transform-origin: center 35%; margin-top: 10px;"}
+![](img/forest_depression_full.jpeg){width="100%"}
+:::
+:::
+
+::: {style="margin-top: 18px; font-size: 0.85em;"}
+::: {.columns}
+::: {.column width="50%"}
+**SMD −0.32** (95% CrI: −0.51 to −0.13)
+→ ~2–3 BDI points in plain terms
+→ Credible interval **excludes zero** ✓
+:::
+::: {.column width="50%"}
+Confidence: **Low** (CINeMA)
+32 studies, largest evidence base
+Modest but the most consistent signal
+:::
+:::
+:::
+
+::: notes
+The posterior mean effect is −0.32 standard deviations relative to placebo. Using a typical BDI standard deviation of about 9 points, that's roughly 2–3 points on the scale. Modest — not a cure — but consistent across the high-quality trials. CINeMA confidence is low, but this is the strongest signal in the whole dataset.
+:::
+
+---
+
+## Selenium: intriguing, but... {auto-animate=true}
+
+::: {data-id="depress-forest"}
+::: {style="transform: scale(2.5); transform-origin: center 3%; margin-top: 10px;"}
+![](img/forest_depression_full.jpeg){width="100%"}
+:::
+:::
+
+::: {style="margin-top: 18px; font-size: 0.85em;"}
+::: {.columns}
+::: {.column width="50%"}
+**SMD −0.99** (95% CrI: −1.90 to −0.11)
+→ Larger point estimate than vitamin D
+→ But: only **2 studies, N = 122**
+:::
+::: {.column width="50%"}
+Mechanism: antioxidant defense, thyroid
+metabolism, neuroendocrine pathways
+**Verdict: hypothesis-generating only**
+:::
+:::
+:::
+
+::: notes
+Selenium also had a credible interval excluding zero — and a larger point estimate than vitamin D. But two studies with 122 total participants is a very sparse network. Large effects in sparse networks are often unstable. Biologically plausible, but not practice-informing evidence yet.
+:::
+
+---
+
+## Depression: the full network {auto-animate=true}
+
+::: {data-id="depress-forest"}
+::: {style="transform: scale(1); transform-origin: center center;"}
+![](img/forest_depression_full.jpeg){width="85%"}
+:::
+:::
+
+::: {style="font-size: 0.9em; margin-top: 6px; color: #555; text-align: center;"}
+← Favors supplement · SMD = 0 (no effect) · Favors placebo →
+**Only Vitamin D and Selenium have credible intervals excluding zero**
+:::
+
+::: notes
+Zooming out to the full network. Every row is a micronutrient or combination. Most credible intervals cross the null. B vitamins, magnesium, zinc, C — point estimates often suggest possible benefit but uncertainty is too wide. Only Vitamin D and Selenium are exceptions. Wide intervals aren't definitive null effects — for many nutrients, we just don't have enough good evidence yet.
+:::
+
+---
+
+## Does baseline deficiency change the picture?
+
+![](img/forest_vitd_subgroup.jpeg){width="90%"}
+
+::: notes
+This is the conceptual heart of the paper. The plot is faceted — left panel non-depressed, right panel depressed. Colors show deficiency: purple = deficient, blue = replete, gray = unknown. Look at Vitamin D in the right depressed panel. The purple deficient estimate is clearly left of zero; the blue replete interval crosses zero. In the left non-depressed panel, everything is near zero. The signal for vitamin D is concentrated in people who are both depressed AND deficient.
+:::
+
+---
+
+## The deficiency-informed framework
+
+```{=html}
+<div style="display: flex; gap: 36px; font-size: 0.88em; margin-top: 24px;">
+  <div style="flex: 1; padding: 20px; background: #fff3cd; border-radius: 8px; border-top: 4px solid #FFD100;">
+    <div style="font-weight: 700; font-size: 1.05em; margin-bottom: 12px; color: #003B5C;">❌ Universal supplementation</div>
+    Patient has depression<br>↓<br>
+    Add micronutrients<br>↓<br>
+    Assume benefit<br><br>
+    <em style="color: #888;">What most trials implicitly test —<br>mixing deficient + replete patients</em>
+  </div>
+  <div style="flex: 1; padding: 20px; background: #e8f5e9; border-radius: 8px; border-top: 4px solid #2e7d32;">
+    <div style="font-weight: 700; font-size: 1.05em; margin-bottom: 12px; color: #003B5C;">✅ Deficiency-informed model</div>
+    Patient has depression<br>↓<br>
+    <strong>Check levels first</strong><br>↓<br>
+    Deficient → Correct deficiency<br>
+    Replete → Evidence doesn't support supplementation<br><br>
+    <em style="color: #888;">What the subgroup data support</em>
+  </div>
+</div>
+```
+
+::: {.fragment style="margin-top: 18px; font-size: 0.9em; color: #777; font-style: italic; text-align: center;"}
+⚠️ Caveat: study-level, not patient-level data — effect modification is suggestive, not definitive
+:::
+
+::: notes
+This is the conceptual contribution I'm most proud of. The reason the literature is hard to interpret is that most trials enroll whoever has depression — deficient and replete mixed together. When you average across those groups, you dilute the real signal from the deficient subgroup. The framework: check first, supplement if there's a biochemical reason to.
+:::
+
+---
+
+## What about augmentation?
+
+::: {.columns}
+::: {.column width="55%"}
+![](img/forest_augmentation.jpeg){width="100%"}
+:::
+
+::: {.column width="45%"}
+::: {style="font-size: 0.88em; line-height: 1.9;"}
+**18 studies** added micronutrients
+to existing antidepressants
+
+Modeled **separately** — disconnected
+from main placebo-controlled network
+
+| Intervention | SMD | CrI |
+|:---|:---:|:---:|
+| Vit D + AD | −0.28 | −1.08, 0.49 |
+| B9 + AD | −0.55 | −1.23, 0.19 |
+| B6/B9/B12 + AD | −0.45 | −1.44, 0.56 |
+
+: {tbl-colwidths="[52,24,24]"}
+
+::: {.fragment style="margin-top: 10px; font-size: 0.9em; font-style: italic; color: #777;"}
+Signals exist. Evidence is thin.
+:::
+:::
+:::
+:::
+
+::: notes
+18 studies used micronutrients as augmentation on top of antidepressants. We modeled these separately — can't compare vitamin D vs. placebo with vitamin D + antidepressant vs. antidepressant alone in the same network. Point estimates are in the right direction but every credible interval crosses zero. Worth watching, not actionable yet.
+:::
+
+---
+
+## Anxiety: the full picture {background-color="#fafafa"}
+
+![](img/forest_anxiety_full.jpeg){width="78%"}
+
+::: {style="font-size: 0.9em; margin-top: 6px; text-align: center; color: #c0392b; font-weight: 600;"}
+No micronutrient reached a credible interval excluding zero · All rated **very low confidence**
+:::
+
+::: notes
+For anxiety, the picture is starker. Nothing crosses the line. The forest plot is much sparser — only 7 rows vs. 14 for depression. Selenium has the largest point estimate at −0.24 but the interval is wide. Vitamin D, which drove the depression signal, shows essentially no effect here. All comparisons were rated very low confidence by CINeMA. This may be an underpowered literature, not a definitive null.
+:::
+
+---
+
+## Why anxiety might have lagged
+
+::: {.incremental style="font-size: 0.95em; line-height: 2.4;"}
+- Only **32 studies** assessed anxiety vs. **94** for depression
+- Substantial heterogeneity (τ = 0.34, 95% CrI: 0.05 to 0.68)
+- Vitamin D — which drove the depression signal — showed **essentially no effect** on anxiety
+- Most vitamin D trials enrolled older adults with depression, not anxiety disorders
+:::
+
+::: {.fragment style="margin-top: 28px; padding: 16px; background: #DAEBFE; border-left: 4px solid #2774AE; border-radius: 4px;"}
+**The anxiety question is genuinely open** — underpowered literature, not a definitive null
+:::
+
+::: notes
+The anxiety finding is less "micronutrients don't work for anxiety" and more "we haven't studied this well enough." Fewer trials, more heterogeneity, different participant profiles. The anxiety literature needs purpose-built trials.
+:::
+
+---
+
+## Safety
+
+::: {.columns}
+::: {.column width="60%"}
+::: {style="font-size: 0.95em; line-height: 2.2;"}
+✅ No micronutrient was associated with
+a credible increase in adverse events
+
+✅ All odds ratio credible intervals
+included the null
+
+📋 Based on 33 of 50 low-RoB studies
+(64.7%) with available safety data
+:::
+:::
+
+::: {.column width="40%"}
+::: {style="padding: 20px; background: #fff3cd; border-left: 4px solid #FFD100; border-radius: 4px; font-size: 0.88em;"}
+⚠️ **"Seems safe" ≠ indiscriminate**
+
+- Vitamin D hypercalcemia at high doses
+- B6 neuropathy long-term high dose
+- Drug-nutrient interactions
+- "Natural" ≠ harmless
+:::
+:::
+:::
+
+::: notes
+The safety picture is reassuring — no micronutrient associated with a credible increase in adverse events. But I want to push back on the framing that supplements are inherently benign. High-dose vitamin D can cause hypercalcemia. Long-term high-dose B6 has been linked to peripheral neuropathy. Clinical judgment still applies.
+:::
+
+---
+
+## What this study is **not** saying
+
+::: {.columns}
+::: {.column width="50%"}
+::: {style="padding: 20px; background: #fff0f0; border-radius: 8px; font-size: 0.9em; border-top: 3px solid #C62828;"}
+❌ "Vitamins treat depression"
+
+❌ "All supplements are useless"
+
+❌ "Check levels on every patient"
+
+❌ "Natural means safe, try it"
+:::
+:::
+
+::: {.column width="50%"}
+::: {style="padding: 20px; background: #f0fff0; border-radius: 8px; font-size: 0.9em; border-top: 3px solid #2e7d32;"}
+✅ Vitamin D has **modest credible evidence** for depressive symptoms, especially in deficient patients
+
+✅ For most other nutrients: too weak to act on
+
+✅ Targeted deficiency assessment may have a role in selected patients
+:::
+:::
+:::
+
+::: notes
+I want to be explicit about what we can and can't conclude. The evidence doesn't support writing vitamin D on every depressed patient's problem list. It supports thinking carefully about whether a specific patient might be deficient — and if so, correcting that has the best evidence base we found.
+:::
+
+---
+
+## Limitations
+
+::: {.incremental style="font-size: 0.9em; line-height: 2.1;"}
+- **High heterogeneity** across all networks (τ = 0.45 for depression)
+  Prediction intervals are wide even when point estimates look promising
+
+- **Baseline biomarker data** inconsistently reported in ~22% of studies
+  Limits our ability to test deficiency-modification across most nutrients
+
+- **Study-level, not patient-level** subgroup analyses
+  More vulnerable to ecological confounding
+
+- **Sparse evidence** for most nutrients beyond vitamin D
+  Wide credible intervals do not equal proof of no effect
+
+- **Low to very low confidence** for most comparisons (CINeMA)
+  This is an honest, unsettled field
+:::
+
+::: notes
+I don't want to oversell this. The heterogeneity is real. The subgroup data are study-level — a weaker form of evidence. And for most nutrients outside vitamin D, we simply don't have enough good studies to draw firm conclusions in either direction.
+:::
+
+---
+
+## Conclusions
+
+::: {style="font-size: 0.95em; line-height: 2.4;"}
+::: {.incremental}
+- **Vitamin D** had the most consistent evidence for depressive symptoms — modest effect, concentrated in deficient + depressed patients
+
+- **Anxiety outcomes** inconclusive across all micronutrients evaluated
+
+- **Other micronutrients:** insufficient high-quality evidence to support or refute benefit
+
+- Current evidence supports a **targeted, deficiency-informed** approach — not broad supplementation
+:::
+:::
+
+::: notes
+To summarize: vitamin D is the one micronutrient with credible evidence, and even that is modest and context-dependent. Anxiety remains open. For everything else — B vitamins, magnesium, zinc, selenium — we genuinely don't know yet, and the evidence base isn't strong enough to act on clinically.
+:::
+
+---
+
+## What to do Monday morning {background-color="#2774AE"}
+
+::: {style="color: white; font-size: 0.92em; line-height: 2.5; margin-top: 20px;"}
+::: {.incremental}
+🩺 **Patient asks about supplements for depression:**
+→ "Evidence is strongest for vitamin D — but only if you're deficient"
+
+🔬 **Consider checking vitamin D** in depressed patients at higher risk for deficiency
+→ Older adults, limited sun exposure, darker skin, malabsorption
+
+💊 **Don't recommend broad supplementation** — evidence isn't there yet
+
+📋 **Patients already taking supplements:** counsel on dose limits; more isn't always better
+:::
+:::
+
+::: notes
+The practical close. A framework for answering the question your patients are already asking. Vitamin D in the right patient, with the right indication. Everything else: honest uncertainty.
+:::
+
+---
+
+## {background-color="#2774AE"}
+
+::: {style="color: white; text-align: center; padding-top: 100px;"}
+::: {style="font-size: 1.6em; font-weight: 700;"}
+Questions?
+:::
+
+::: {style="font-size: 0.9em; margin-top: 40px; color: #FFD100;"}
+Manuscript available on request
+Full 180-page appendix also available (yes, really)
+:::
+
+::: {style="font-size: 0.85em; margin-top: 20px; color: #c8dff0;"}
+eric.dunipace@stanford.edu
+:::
+:::
+
+::: notes
+Happy to take questions. If anyone wants to dig into the methods — the Bayesian model, node-splitting, MCMC diagnostics — I have a 180-page appendix and will absolutely talk your ear off about it.
+:::
