@@ -1,5 +1,7 @@
 project:
   type: book
+  pre-render:
+    - "python3 scripts/build_index_from_manuscript.py"
   post-render:
     - "python3 scripts/patch_appendix_docx.py"
   
@@ -7,9 +9,9 @@ book:
   title: "Micronutrient Supplementation for Depressive and Anxiety Symptoms in Adults: A Systematic Review and Bayesian Network Meta-Analysis of Randomized Controlled Trials"
   chapters:
     - index.qmd
-    - Methods.qmd
-    - Results.qmd
     - Appendix.qmd
+
+csl: https://www.zotero.org/styles/nlm
   
 format:
   html:

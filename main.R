@@ -76,14 +76,14 @@ run_function <- function() {
       source(here("R","analysis.R"))
       cli::cli(cli::cli_h2("Running sensitivity analysis"))
       source(here("R","sensitivity.R"))
-      cli::cli(cli::cli_h2("Generating tables"))
-      source(here("R","tables.R"))
       cli::cli(cli::cli_h2("Generating figures"))
       source(here("R","figures.R"))
+      cli::cli(cli::cli_h2("Generating tables"))
+      source(here("R","tables.R"))
       # cli::cli(cli::cli_h2("Generating sensitivity analysis markdown"))
       cli::cli(cli::cli_h2("Generating main document results text"))
       quarto::quarto_render(
-        input =  here::here("outputs","documents","Results.qmd"),
+        input =  here::here("outputs","documents"),
         output_format = "all"
       )
     }, value = FALSE)

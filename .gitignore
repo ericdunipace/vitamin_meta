@@ -19,4 +19,9 @@ outputs/saved_models
 outputs/depression
 outputs/overall
 outputs/anxiety
-outputs/documents
+outputs/documents/Results_cache
+outputs/documents/Appendix_cache
+outputs/documents/_book/Micronutrient-Supplementation-for-Depressive-and-Anxiety-Symptoms-in-Adults--A-Systematic-Review-and-Bayesian-Network-Meta-Analysis-of-Randomized-Controlled-Trials.docx
+outputs/documents/Appendix_files
+outputs/documents/renv
+outputs/documents/.gitignore

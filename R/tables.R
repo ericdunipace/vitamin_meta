@@ -25,13 +25,19 @@ if(length(ls()) > 1 || length(ls()) ==0) {
   box::reload(vit)
 }
 
-outcomes <- c("depression","anxiety")
 mem.maxVSize(1024*1024)
 
 #### Load Data ####
 # full data
 data <- vit$get_vitamin_data(outcome = NULL, simple_analysis = FALSE,
                              include_full_bias = TRUE)
+
+main_data <- vit$get_vitamin_data(outcome = NULL, simple_analysis = TRUE,
+                                  include_full_bias = FALSE) %>% 
+  filter(bias == "low")
+
+main   <- main_data %>%  
+  distinct(study) %>% pull(study)
 
 #### setup directories ####
 {
@@ -955,6 +961,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   # demographics tab low bias
   demo_tab_low <- baseline.vars %>% 
     filter(bias.overall == "low") %>% 
+    filter(study %in% main) %>% 
     demo_create()
   
   study_demo <- demo_tab %>% 
@@ -985,7 +992,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   
   pop_demo <- demo_tab %>% select(
     intervention,
-    n,
+    n = b.n,
     age,
     male
   )
@@ -998,7 +1005,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   
   pop_demo_low <- demo_tab_low %>% select(
     intervention,
-    n,
+    n = b.n,
     age,
     male
     # , baseline.y
@@ -1034,6 +1041,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   
   dose_ranges_low <-   baseline.vars %>%
     filter(bias.overall == "low") %>% 
+    filter(study %in% main) %>% 
     distinct(study, intervention, .keep_all = TRUE) %>%
     mutate(b.weights = baseline.N,
            f.weights = final.N) %>% 
@@ -1262,6 +1270,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   # demographics tab low bias
   demo_tab_low.comp <- baseline.vars.comp %>% 
     filter(bias.overall == "low") %>% 
+    filter(study %in% main) %>% 
     demo_create() %>% 
     tidyr::separate(
       intervention,
@@ -1300,7 +1309,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   pop_demo.comp <- demo_tab.comp %>% select(
     intervention,
     Comparator,
-    n,
+    n = b.n,
     age,
     male
   )
@@ -1309,7 +1318,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   select(
     intervention,
     Comparator,
-    n,
+    n = b.n,
     age,
     male
     # , baseline.y
@@ -1340,6 +1349,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   
   dose_ranges_low.comp <-   baseline.vars.comp %>%
     filter(bias.overall == "low") %>% 
+    filter(study %in% main) %>% 
     distinct(study, intervention, .keep_all = TRUE) %>%
     mutate(b.weights = baseline.N,
            f.weights = final.N) %>% 
@@ -1556,6 +1566,15 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
              .keep_all = TRUE) %>% 
     mutate(depressed = ifelse(depressed == 1, "Yes", "No"),
            anxiety = ifelse(anxiety == 1, "Yes", "No")) %>%
+    mutate(
+      across(
+        any_of("bias.overall"),
+        ~ forcats::fct_recode(.x, 
+                              "Low" = "low",
+                              "Unclear" = "some concerns",
+                              "High" = "high")
+      )
+    ) %>% 
     select(Study = study, Intervention = intervention,
            N = final.N, `Duration in weeks` = duration, 
            Depressed = depressed,
@@ -1620,6 +1639,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
              vit.def, bias.overall,
              .keep_all = TRUE) %>% 
     filter(bias.overall == "low") %>%
+    filter(study %in% main) %>% 
     mutate(depressed = ifelse(depressed == 1, "Yes", "No"),
            anxiety = ifelse(anxiety == 1, "Yes", "No")) %>%
     select(Study = study, Intervention = intervention,
@@ -1705,7 +1725,78 @@ adverse_summ_ssri %>%
   save_mult_formats(outdir = here::here("outputs", "overall", "tables"),
                     file.name = glue::glue("adverse_outcomes_low_bias_ssri_table"))
 
-#### Load models and tables for regressions ####
+
+#### create vitamin level tables ####
+{
+  level_low <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_low_bias.rds"))
+  level_ssri_low <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_low_bias_ssri.rds"))
+  level_ssri <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_all_ssri.rds"))
+  level_all <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_all.rds"))
+  
+  level_tab <- function(lev, nm) {
+    llt <- vector("list", length(lev))
+    
+    for(i in seq_along(lev)) {
+      if(is.null(lev[[i]])) next
+      
+      llt[[i]] <- lev[[i]] %>% 
+        vit$summary_brms_nma(keep = c(".trt")) %>% summary()
+      llt[[i]]$micro <- names(lev)[i] %>% stringr::str_remove("end\\.") %>% stringr::str_to_title()
+      llt[[i]]$unit <- lev[[i]]$unit
+      
+    }
+    fmt <- function(v, d) formatC(v, format = "f", digits = 2)
+    
+    llt_out <- llt %>% bind_rows() %>% 
+      select(-.observed) %>% 
+      mutate(micro = ifelse(micro == "Rbc.b9", "R.B.C. B9", micro)) %>% 
+      select(Intervention = .trt, Micronutrient = micro, Unit = unit, everything()) %>% 
+      select(-c(S.E., `q50%`)) %>%
+      mutate(M.D. = fmt(Estimate, digits)) %>% 
+      mutate(ci = glue::glue("({fmt(`q2.5%`, digits)}, {fmt(`q97.5%`, digits)})")) %>% 
+      select(-c(Estimate, `q2.5%`, `q97.5%`)) %>% 
+      rename("95% Credible Interval" = ci) %>% 
+      mutate(Intervention = as.character(Intervention))
+    
+    data.table::setorder(llt_out, Intervention, Micronutrient)
+    
+    llt_out %>% saveRDS(
+      here::here("outputs","overall","tables", "raw",
+                 glue::glue("vitamin_levels_{nm}_tab.rds"))
+    )
+    
+    llt_out %>% gt() %>%
+      fmt_number() %>% 
+      saveRDS(
+        here::here("outputs","overall","tables", "gt",
+                   glue::glue("vitamin_levels_{nm}_tab.rds"))
+      )
+    
+    llt_out %>% flextable::flextable() %>% 
+      flextable::autofit() %>% 
+      saveRDS(
+        here::here("outputs","overall","tables", "gt",
+                   glue::glue("vitamin_levels_{nm}_tab.rds"))
+      )
+    
+    llt_out %>% flextable::flextable() %>% 
+      flextable::autofit() %>% 
+      flextable::save_as_docx(
+        path = here::here("outputs","overall","tables", "docx",
+                          glue::glue("vitamin_levels_{nm}_tab.docx"))
+      )
+    
+  }
+  
+  level_tab(level_low, "low_bias")
+  level_tab(level_ssri_low, "low_bias_ssri")
+  level_tab(level_ssri, "all_bias_ssri")
+  level_tab(level_all, "all_data")
+  
+}
+
+#### Regression tables by outcome ####
+outcomes <- c("depression","anxiety")
 
 if (rlang::is_interactive()) {
   outcomes <- outcome <- c("depression")
@@ -2167,7 +2258,10 @@ for (outcome in outcomes) {
       ) %>%
       select(-any_of(c("se_diff_low",
                        "se_diff_some",
-                       "se_diff_high"))) %>%
+                       "se_diff_high",
+                       "lowse",
+                       "unclear/lowse",
+                       "high/unclear/lowse"))) %>%
       flextable::flextable() %>% 
       flextable::set_header_labels(
         Likelihood = "Likelihood",
@@ -2253,7 +2347,10 @@ for (outcome in outcomes) {
       ) %>%
       select(-any_of(c("se_diff_low",
                        "se_diff_some",
-                       "se_diff_high"))) %>%
+                       "se_diff_high",
+                       "lowse",
+                       "unclear/lowse",
+                       "high/unclear/lowse"))) %>%
       flextable() %>% 
       flextable::set_header_labels(
         Model = "Model",
@@ -2651,76 +2748,5 @@ for (outcome in outcomes) {
     
     
   }
-  
-}
-
-
-
-#### create vitamin level tables ####
-{
-  level_low <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_low_bias.rds"))
-  level_ssri_low <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_low_bias_ssri.rds"))
-  level_ssri <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_all_ssri.rds"))
-  level_all <- readRDS(here::here("outputs", "saved_models", "vitamin_levels_all.rds"))
-  
-  level_tab <- function(lev, nm) {
-    llt <- vector("list", length(lev))
-    
-    for(i in seq_along(lev)) {
-      if(is.null(lev[[i]])) next
-      
-      llt[[i]] <- lev[[i]] %>% 
-        vit$summary_brms_nma(keep = c(".trt")) %>% summary()
-      llt[[i]]$micro <- names(lev)[i] %>% stringr::str_remove("end\\.") %>% stringr::str_to_title()
-      llt[[i]]$unit <- lev[[i]]$unit
-      
-    }
-    fmt <- function(v, d) formatC(v, format = "f", digits = 2)
-    
-    llt_out <- llt %>% bind_rows() %>% 
-      select(-.observed) %>% 
-      mutate(micro = ifelse(micro == "Rbc.b9", "R.B.C. B9", micro)) %>% 
-      select(Intervention = .trt, Micronutrient = micro, Unit = unit, everything()) %>% 
-      select(-c(S.E., `q50%`)) %>%
-      mutate(M.D. = fmt(Estimate, digits)) %>% 
-      mutate(ci = glue::glue("({fmt(`q2.5%`, digits)}, {fmt(`q97.5%`, digits)})")) %>% 
-      select(-c(Estimate, `q2.5%`, `q97.5%`)) %>% 
-      rename("95% Credible Interval" = ci) %>% 
-      mutate(Intervention = as.character(Intervention))
-      
-    data.table::setorder(llt_out, Intervention, Micronutrient)
-    
-    llt_out %>% saveRDS(
-      here::here("outputs","overall","tables", "raw",
-                 glue::glue("vitamin_levels_{nm}_tab.rds"))
-    )
-    
-    llt_out %>% gt() %>%
-      fmt_number() %>% 
-      saveRDS(
-        here::here("outputs","overall","tables", "gt",
-                   glue::glue("vitamin_levels_{nm}_tab.rds"))
-      )
-    
-    llt_out %>% flextable::flextable() %>% 
-      flextable::autofit() %>% 
-      saveRDS(
-        here::here("outputs","overall","tables", "gt",
-                   glue::glue("vitamin_levels_{nm}_tab.rds"))
-      )
-    
-    llt_out %>% flextable::flextable() %>% 
-      flextable::autofit() %>% 
-      flextable::save_as_docx(
-        path = here::here("outputs","overall","tables", "docx",
-                   glue::glue("vitamin_levels_{nm}_tab.docx"))
-      )
-    
-  }
-  
-  level_tab(level_low, "low_bias")
-  level_tab(level_ssri_low, "low_bias_ssri")
-  level_tab(level_ssri, "all_bias_ssri")
-  level_tab(level_all, "all_data")
   
 }

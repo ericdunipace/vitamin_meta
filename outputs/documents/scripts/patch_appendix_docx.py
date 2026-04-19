@@ -19,6 +19,7 @@ import shutil
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import re
+from typing import Iterable
 
 NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
 ET.register_namespace("w", NS["w"])
@@ -36,6 +37,28 @@ STYLE_NAME_HINTS = {
     "AppendixHeading3": "Appendix Heading 3",
     "AppendixHeading4": "Appendix Heading 4",
 }
+
+DOCX_HEADING1_STYLES = {"Heading1", "heading 1", "Heading 1"}
+APPENDIX_HEADING1_STYLES = {"AppendixHeading1"}
+DOCX_HEADING_STYLE_IDS = {f"Heading{i}" for i in range(1, 10)}
+CROSSREF_PREFIXES = (
+    "sec-",
+    "fig-",
+    "tbl-",
+    "eq-",
+    "lst-",
+    "thm-",
+    "lem-",
+    "cor-",
+    "prp-",
+    "cnj-",
+    "def-",
+    "exm-",
+    "exr-",
+    "ch-",
+    "apx-",
+)
+CITATION_PATTERN = re.compile(r"@([A-Za-z0-9_][A-Za-z0-9_:.#$%&+?/\-]*)")
 
 
 def eprint(*args: object) -> None:
@@ -87,7 +110,199 @@ def _read_quarto_output_files() -> list[Path]:
     return out
 
 
-def _patch_document_xml(xml_bytes: bytes, debug: bool = False) -> tuple[bytes, int]:
+def _extract_citation_ids(text: str) -> set[str]:
+    ids: set[str] = set()
+    for match in CITATION_PATTERN.finditer(text):
+        key = match.group(1).rstrip(".,;:")
+        if any(key.startswith(prefix) for prefix in CROSSREF_PREFIXES):
+            continue
+        ids.add(key)
+    return ids
+
+
+def _citation_scopes(project_dir: Path) -> dict[str, set[str]]:
+    scopes: dict[str, set[str]] = {}
+    chapter_files = {
+        "main": project_dir / "index.qmd",
+        "appendix": project_dir / "Appendix.qmd",
+    }
+    for scope, path in chapter_files.items():
+        if path.exists():
+            scopes[scope] = _extract_citation_ids(path.read_text(encoding="utf-8"))
+    return scopes
+
+
+def _style_id_for_paragraph(p: ET.Element) -> str | None:
+    ppr = p.find("w:pPr", NS)
+    pstyle = ppr.find("w:pStyle", NS) if ppr is not None else None
+    return pstyle.get(f"{{{NS['w']}}}val") if pstyle is not None else None
+
+
+def _top_level_text(elem: ET.Element) -> str:
+    texts = []
+    for t in elem.findall(".//w:t", NS):
+        if t.text:
+            texts.append(t.text)
+    return "".join(texts)
+
+
+def _normalize_heading_text(text: str) -> str:
+    stripped = text.strip()
+    return re.sub(r"^\d+(?:\.\d+)*\.\s*", "", stripped).strip().lower()
+
+
+def _filter_docx_bibliographies(root: ET.Element, citation_scopes: dict[str, set[str]], debug: bool = False) -> int:
+    body = root.find("w:body", NS)
+    if body is None or not citation_scopes:
+        return 0
+
+    children = list(body)
+    sections: list[tuple[str, int, int]] = []
+    in_appendix = False
+
+    i = 0
+    while i < len(children):
+        node = children[i]
+        if node.tag != f"{{{NS['w']}}}p":
+            i += 1
+            continue
+
+        text = _normalize_heading_text(_top_level_text(node))
+        style_id = _style_id_for_paragraph(node)
+
+        if style_id in DOCX_HEADING1_STYLES and text == "appendix":
+            in_appendix = True
+            i += 1
+            continue
+
+        is_references = text == "references" and (
+            style_id in DOCX_HEADING1_STYLES or style_id in APPENDIX_HEADING1_STYLES
+        )
+        if not is_references:
+            i += 1
+            continue
+
+        scope = "appendix" if in_appendix or style_id in APPENDIX_HEADING1_STYLES else "main"
+        start = i + 1
+        end = start
+        seen_bibliography = False
+        while end < len(children):
+            child = children[end]
+            if child.tag == f"{{{NS['w']}}}p":
+                child_style = _style_id_for_paragraph(child)
+                if child_style == "Bibliography":
+                    seen_bibliography = True
+                    end += 1
+                    continue
+                if seen_bibliography:
+                    break
+                end += 1
+                continue
+            if child.tag in (f"{{{NS['w']}}}bookmarkStart", f"{{{NS['w']}}}bookmarkEnd"):
+                end += 1
+                continue
+            if seen_bibliography:
+                break
+            end += 1
+
+        sections.append((scope, start, end))
+        i = end
+
+    removed = 0
+    for scope, start, end in reversed(sections):
+        allowed = citation_scopes.get(scope)
+        if not allowed:
+            continue
+
+        section_nodes = children[start:end]
+        filtered: list[ET.Element] = []
+        k = 0
+        while k < len(section_nodes):
+            node = section_nodes[k]
+            if node.tag == f"{{{NS['w']}}}bookmarkStart":
+                name = node.get(f"{{{NS['w']}}}name")
+                if name == "refs":
+                    filtered.append(node)
+                    k += 1
+                    continue
+                if name and name.startswith("ref-"):
+                    entry_id = name[4:]
+                    entry_nodes = [node]
+                    k += 1
+                    while k < len(section_nodes):
+                        next_node = section_nodes[k]
+                        next_name = (
+                            next_node.get(f"{{{NS['w']}}}name")
+                            if next_node.tag == f"{{{NS['w']}}}bookmarkStart"
+                            else None
+                        )
+                        if next_name and next_name.startswith("ref-"):
+                            break
+                        entry_nodes.append(next_node)
+                        k += 1
+                    if entry_id in allowed:
+                        filtered.extend(entry_nodes)
+                    else:
+                        removed += 1
+                    continue
+            filtered.append(node)
+            k += 1
+
+        for node in section_nodes:
+            body.remove(node)
+        for offset, node in enumerate(filtered):
+            body.insert(start + offset, node)
+        if debug:
+            eprint(f"Filtered {scope} bibliography: kept {len(filtered)} XML nodes")
+
+    return removed
+
+
+def _strip_main_heading_numbering(styles_xml: bytes, numbering_xml: bytes | None, debug: bool = False) -> tuple[bytes, bytes | None, int]:
+    styles_root = ET.fromstring(styles_xml)
+    removed = 0
+
+    for style in styles_root.findall("w:style", NS):
+        style_id = style.get(f"{{{NS['w']}}}styleId")
+        if style_id not in DOCX_HEADING_STYLE_IDS:
+            continue
+        ppr = style.find("w:pPr", NS)
+        if ppr is None:
+            continue
+        numpr = ppr.find("w:numPr", NS)
+        if numpr is not None:
+            ppr.remove(numpr)
+            removed += 1
+            if debug:
+                eprint(f"Removed numbering from style {style_id}")
+
+    new_numbering_xml = numbering_xml
+    if numbering_xml:
+        numbering_root = ET.fromstring(numbering_xml)
+        for lvl in numbering_root.findall(".//w:lvl", NS):
+            pstyle = lvl.find("w:pStyle", NS)
+            if pstyle is None:
+                continue
+            val = pstyle.get(f"{{{NS['w']}}}val")
+            if val in DOCX_HEADING_STYLE_IDS:
+                lvl.remove(pstyle)
+                removed += 1
+                if debug:
+                    eprint(f"Removed numbering mapping for style {val}")
+        new_numbering_xml = ET.tostring(numbering_root, encoding="utf-8", xml_declaration=True)
+
+    return (
+        ET.tostring(styles_root, encoding="utf-8", xml_declaration=True),
+        new_numbering_xml,
+        removed,
+    )
+
+
+def _patch_document_xml(
+    xml_bytes: bytes,
+    citation_scopes: dict[str, set[str]] | None = None,
+    debug: bool = False,
+) -> tuple[bytes, int]:
     root = ET.fromstring(xml_bytes)
     patched = 0
     caption_patched = 0
@@ -260,11 +475,12 @@ def _patch_document_xml(xml_bytes: bytes, debug: bool = False) -> tuple[bytes, i
         style_id = pstyle.get(f"{{{NS['w']}}}val") if pstyle is not None else None
 
         text = get_paragraph_text(p)
+        normalized_text = _normalize_heading_text(text)
         if not text:
             continue
 
         # Detect appendix boundary (level-1 heading titled 'Appendix')
-        if style_id in ("Heading1", "heading 1", "Heading 1") and text.strip().lower() == "appendix":
+        if style_id in ("Heading1", "heading 1", "Heading 1") and normalized_text == "appendix":
             in_appendix = True
             appendix_letter = None
             appendix_index = 0
@@ -400,6 +616,12 @@ def _patch_document_xml(xml_bytes: bytes, debug: bool = False) -> tuple[bytes, i
     if debug:
         eprint(f"Caption paragraphs updated: {caption_patched}")
 
+    if citation_scopes:
+        removed = _filter_docx_bibliographies(root, citation_scopes, debug=debug)
+        patched += removed
+        if debug:
+            eprint(f"Bibliography entries removed: {removed}")
+
     return ET.tostring(root, encoding="utf-8", xml_declaration=True), patched
 
 
@@ -416,7 +638,29 @@ def patch_docx(input_path: Path, output_path: Path | None = None, debug: bool = 
         document_xml = z.read("word/document.xml")
         other_files = {name: z.read(name) for name in z.namelist() if name != "word/document.xml"}
 
-    new_xml, patched = _patch_document_xml(document_xml, debug=debug)
+    project_dir = Path.cwd()
+    if input_path.parent.name == "_book":
+        project_dir = input_path.parent.parent
+    citation_scopes = _citation_scopes(project_dir)
+
+    new_xml, patched = _patch_document_xml(
+        document_xml,
+        citation_scopes=citation_scopes,
+        debug=debug,
+    )
+
+    styles_xml = other_files.get("word/styles.xml")
+    numbering_xml = other_files.get("word/numbering.xml")
+    if styles_xml:
+        new_styles_xml, new_numbering_xml, style_patched = _strip_main_heading_numbering(
+            styles_xml,
+            numbering_xml,
+            debug=debug,
+        )
+        other_files["word/styles.xml"] = new_styles_xml
+        if new_numbering_xml is not None:
+            other_files["word/numbering.xml"] = new_numbering_xml
+        patched += style_patched
 
     # Write out new docx
     with tempfile.TemporaryDirectory() as td:

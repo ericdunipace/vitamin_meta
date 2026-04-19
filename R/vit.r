@@ -22,7 +22,7 @@ box::use(loo)
 box::use(snakecase)
 box::use(foreach[`%dopar%`])
 box::use(here)
-box::use(doRNG[`%dorng%`])
+box::use(doFuture[`%dofuture%`])
 box::use(doFuture)
 box::use(future)
 box::use(glue)
@@ -31,6 +31,7 @@ box::use(purrr)
 box::use(matrixStats)
 box::use(cli)
 box::use(rprojroot)
+box::use(progressr)
 
 rootcrit <- rprojroot::as_root_criterion(
   rprojroot::has_file("vitamin_meta.Rproj")
@@ -4700,80 +4701,80 @@ plot_brms_nma <- function(fit, prep, ref_trt = "placebo", ...) {
   return(p)
 }
 
-multinma_loo <- function(fit, seed, cores = NULL) {
-  call <- match.call()
-  if(!is.null(cores) && cores > 1) {
-    cat("Registering parallel backend with", cores, "cores\n")
-    cl <- parallel::makeCluster(cores)
-    
-    on.exit({
-      parallel::stopCluster(cl)
-    }, add = TRUE)
-    
-    doParallel::registerDoParallel(cl)
-    
-    doRNG::registerDoRNG(seed)
-  } else {
-    cat("Registering sequential backend\n")
-    foreach::registerDoSEQ()
-    
-    set.seed(seed)
-  }
-  
-  net <- fit_RE$network
-  data<- net$agd_contrast
-  
-  studies <- data$.study
-  unique_studies <- unique(studies)
-  nstudy <- length(unique_studies)
-  
-  cat(sprintf("Running leave-one-study-out analyses on %i studies based on model `%s`...\n", 
-              nstudy, prettify_name(call$fit)))
-  foreach::foreach(i = 1:nstudy, 
-                   .packages = c("dplyr","brms","multinma"),
-                   .export = c("unique_studies",
-                               "control", "iter", "warmup", "chains",
-                               "main","interactive","confounders", "addl_form",
-                               "family",
-                               "fit","mod_sc","sm","studies","stand",
-                               "data")) %dopar% {
-    study_i <- unique_studies[i]
-    cat("  Fitting without study", i, ":", as.character(study_i), "\n")
-    
-    loo_dat <- data %>% filter(.study != study_i)
-    
-    loo_net <- construct_nma_network(
-      loo_dat,
-      trt_ref = as.character(net$treatments[1])
-    )
-    
-    fit_loo <- multinma::nma(loo_net,
-                             trt_effects = fit_RE$trt_effects,
-                             prior_trt = fit_RE$prior_trt,
-                             prior_het = fit_RE$prior_het,
-                             prior_intercept = fit_RE$prior_intercept,
-                             prior_covariates = fit_RE$prior_covariates,
-                             control = fit_RE$control,
-                             refresh = refresh,
-                             open_progress = open_progress,
-                             show_messages = show_messages)
-    
-    
-    
-    # fit_loo <- prep_brms_nma(data = data %>%
-    #                            dplyr::filter(study != study_i)
-    # ) %>% fit_brms_nma(
-    #   cores = 1L,
-    #   iter = iter, warmup = warmup,
-    #   chains = chains,
-    #   control = control,
-    #   silent = 2L, refresh = 0)
-    
-  } -> sum_loo
-  
-  return(sum_loo)
-  
-}
+# multinma_loo <- function(fit, seed, cores = NULL) {
+#   call <- match.call()
+#   if(!is.null(cores) && cores > 1) {
+#     cat("Registering parallel backend with", cores, "cores\n")
+#     cl <- parallel::makeCluster(cores)
+#     
+#     on.exit({
+#       parallel::stopCluster(cl)
+#     }, add = TRUE)
+#     
+#     doParallel::registerDoParallel(cl)
+#     
+#     doRNG::registerDoRNG(seed)
+#   } else {
+#     cat("Registering sequential backend\n")
+#     foreach::registerDoSEQ()
+#     
+#     set.seed(seed)
+#   }
+#   
+#   net <- fit_RE$network
+#   data<- net$agd_contrast
+#   
+#   studies <- data$.study
+#   unique_studies <- unique(studies)
+#   nstudy <- length(unique_studies)
+#   
+#   cat(sprintf("Running leave-one-study-out analyses on %i studies based on model `%s`...\n", 
+#               nstudy, prettify_name(call$fit)))
+#   foreach::foreach(i = 1:nstudy, 
+#                    .packages = c("dplyr","brms","multinma"),
+#                    .export = c("unique_studies",
+#                                "control", "iter", "warmup", "chains",
+#                                "main","interactive","confounders", "addl_form",
+#                                "family",
+#                                "fit","mod_sc","sm","studies","stand",
+#                                "data")) %dopar% {
+#     study_i <- unique_studies[i]
+#     cat("  Fitting without study", i, ":", as.character(study_i), "\n")
+#     
+#     loo_dat <- data %>% filter(.study != study_i)
+#     
+#     loo_net <- construct_nma_network(
+#       loo_dat,
+#       trt_ref = as.character(net$treatments[1])
+#     )
+#     
+#     fit_loo <- multinma::nma(loo_net,
+#                              trt_effects = fit_RE$trt_effects,
+#                              prior_trt = fit_RE$prior_trt,
+#                              prior_het = fit_RE$prior_het,
+#                              prior_intercept = fit_RE$prior_intercept,
+#                              prior_covariates = fit_RE$prior_covariates,
+#                              control = fit_RE$control,
+#                              refresh = refresh,
+#                              open_progress = open_progress,
+#                              show_messages = show_messages)
+#     
+#     
+#     
+#     # fit_loo <- prep_brms_nma(data = data %>%
+#     #                            dplyr::filter(study != study_i)
+#     # ) %>% fit_brms_nma(
+#     #   cores = 1L,
+#     #   iter = iter, warmup = warmup,
+#     #   chains = chains,
+#     #   control = control,
+#     #   silent = 2L, refresh = 0)
+#     
+#   } -> sum_loo
+#   
+#   return(sum_loo)
+#   
+# }
 
 extract_metric_brms <- function(fit) {
   
@@ -5121,7 +5122,7 @@ prettify_name <- function(x) {
   return(name_str)
 }
 
-loo_estimates <- function(fit, seed = NULL, 
+loo_estimates <- function(fit, seed = TRUE, 
                           cores = NULL, verbose = FALSE, resp = "y",
                           keep = NULL, get_estimates = TRUE,
                           reuse_metric = TRUE,
@@ -5130,27 +5131,34 @@ loo_estimates <- function(fit, seed = NULL,
   
   check_vitfit(fit)
   
+  if(missing(seed) || is.null(seed) || !is.numeric(seed)) {
+    seed <- TRUE
+  }
+  
+  old_plan <- future::plan()
+  oopts <- options()
+  on.exit({
+    future::plan(old_plan)
+    options(oopts)
+  }, add = TRUE)
+  
   if(!is.null(cores) && cores > 1) {
-    cat("Registering parallel backend with", cores, "cores\n")
+    message("Using future::multisession with ", cores, " workers")
     # cl <- parallel::makeCluster(cores)
     future::plan(future::multisession, workers = cores)
     oopts <- options(future.globals.maxSize = 1e10) # 10 GB
-    doFuture::registerDoFuture()
-    
-    on.exit({
-      future::plan(future::sequential)
-      doParallel::stopImplicitCluster()
-      foreach::registerDoSEQ()
-      options(oopts)
-    }, add = TRUE)
-    
-    doRNG::registerDoRNG(seed)
+    # old_env <- Sys.getenv(c("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"))
+    # Sys.setenv(
+    #   OMP_NUM_THREADS = "1",
+    #   OPENBLAS_NUM_THREADS = "1",
+    #   MKL_NUM_THREADS = "1",
+    #   VECLIB_MAXIMUM_THREADS = "1"
+    # )
+    # on.exit(do.call(Sys.setenv, as.list(old_env)), add = TRUE)
   } else {
-    cat("Registering sequential backend\n")
+    message("Using future::sequential")
     future::plan(future::sequential)
-    doFuture::registerDoFuture()
-    foreach::registerDoSEQ()
-    set.seed(seed)
+    
   }
   
   data    <- fit$prep$data
@@ -5238,133 +5246,175 @@ loo_estimates <- function(fit, seed = NULL,
     rlang::abort("Unsupported backend: ", fit$backend, call = call)
   }
   
+  ll_orig_full <- log_lik(fit,
+                          allow_new_levels = TRUE, 
+                          sample_new_levels = "uncertainty", 
+                          resp = resp)
+  
   cat(sprintf("Running leave-one-study-out analyses on %i studies based on model `%s`...\n", 
               nstudy, prettify_name(call$fit)))
-  foreach::foreach(i = 1:nstudy, 
-                   .packages = c("dplyr","brms","multinma",
-                                 "rstan", "stringr"),
-                   .export = c("unique_studies",
-                               "control", "iter", "warmup", "chains",
-                               "main","interactions","confounders", "addl_form",
-                               "family","sample_iter",
-                               "fit","mod_sc","sm","studies","stand",
-                               "metric","layout","init_fun",
-                               "data","cm","exe","adapt_engaged","step_size","inv_metric"
-                               )) %dopar% {
-                                 
-      # pullout study to drop
-      study_i       <- unique_studies[i]
-      
-      # which interventions are targeted in this study?
-      flagged_intervention <- data %>% filter(.study == study_i) %>%
-        select(.trt) %>% dplyr::pull() %>% unique() %>% stringr::str_to_title()
-      
-      # get data for the dropped study
-      nd            <- get_desired_study_raw_data(fit, studies, study_i)
-      
-      # calculate original log-likelihood on the full model
-      # do it somewhat inefficiently to account for MI models
-      ll_orig       <- log_lik(fit,
-                               allow_new_levels = TRUE, 
-                               sample_new_levels = "uncertainty", 
-                               resp = resp)[, which(unique_studies == study_i)]
-      
-      cat("  Fitting without study", i, ":", as.character(study_i), "\n")
-      
-      # get random seed
-      seed_i <- sample.int(.Machine$integer.max, 1L)
-      
-      #two optional fitting methods depending on backend
-      fit_loo     <- fit
-      mod_stand   <- drop_desired_study(fit_loo, 
-                                        study_i)
-      if(fit$backend == "cmdstanr") { # reuses step size
-        # init_fun <- function() make_init_from_brms(fit, layout, studies, study_i)
-        m <- cmdstanr::cmdstan_model(cm$stan_file(), exe_file = exe, compile = FALSE)
-        outs <- m$sample(data = mod_stand, 
-                          init = inits,
-                          metric = metric$metric,
-                          inv_metric = inv_metric, 
-                          adapt_engaged = adapt_engaged, 
-                          step_size = step_size, 
-                          iter_sampling = sample_iter, iter_warmup = warmup, 
-                          parallel_chains = 1, chains = chains,
-                          show_messages = show_messages, 
-                          show_exceptions = FALSE,
-                          diagnostics = NULL, refresh = refresh, 
-                          seed = seed_i,
-                          max_treedepth = control$max_treedepth)
-        fit_loo$fit <- brms::read_csv_as_stanfit(outs$output_files(), model = m) 
-      } else if(fit$backend == "rstan") {
-      
-        fit_loo$fit <- rstan::sampling(sm, data = mod_stand, chains = chains,
-                                       iter = iter,
-                                       warmup = warmup,
-                                       cores = 1L,
-                                       seed = seed_i,
-                                       control = control, 
-                                       open_progress = open_progress, 
-                                       show_messages = show_messages,
-                                       refresh = refresh,
-                                       verbose = FALSE
-        )
-      } else {
-        rlang::abort("Unsupported backend: ", fit$backend)
-      }
-      fit_loo$model <- stanc
-      # fit_loo$data  <- fit$data %>% filter(.study != study_i)
-      fit_loo       <- brms::rename_pars(fit_loo)
-      if (!inherits(fit_loo,"vitfit")) {
-        class(fit_loo) <- c("vitfit",class(fit_loo))
-        fit_loo$prep <- fit$prep
-      }
-      
-      # calculate log-likelihood on the dropped obs from the LOO model
-      # tricky right now because MI models need to be handled carefully
-      # right now just will return NA if any covariates are missing,
-      # which is not ideal
-      ll_newmod     <- log_lik(fit_loo, 
-                           allow_new_levels = TRUE, 
-                           sample_new_levels = "uncertainty",
-                           resp = resp)
-      ll_new        <- ll_newmod[,i]
-      ll_est        <- data.frame(
-        loo = ll_new,
-        ll  = ll_orig
-      )
-      ll_est$iter   <- 1:nrow(ll_est)
-      
-      # obs log_lik of new model on observed data
-      
-      ll_avg <- rep(NA_real_, nstudy) 
-      ll_avg[-i] <- ll_newmod[,-i] %>% colMeans()
-      
-      if (get_estimates) {
-        sum_loo_i     <- summary_brms_nma(fit_loo, keep = keep)
-      } else {
-        sum_loo_i <- dplyr::tibble(
-          .trt = NA_character_,
-          estimate = NA_real_,
-          iter = 1:brms::ndraws(fit)
-        )
-        class(sum_loo_i) <- c("summary_brms_nma", class(sum_loo_i))
-        attr(sum_loo_i, "reference_treatment") <- get_reference_treatment(fit)
-        attr(sum_loo_i, "ndraws") <- brms::ndraws(fit)
-      }
-      sum_loo_i$left_out_study <- study_i
-      sum_loo_i     <- sum_loo_i %>% mutate(
-        interventions_affected = ifelse(.trt %in% flagged_intervention, TRUE, FALSE)
-      )
-      sum_loo_i$loo_iter <- i
-      sum_loo_i     <- sum_loo_i %>%
-        dplyr::left_join(
-          ll_est,
-          by = c("iter" = "iter")
-        )
-      
-      return(list(sum = sum_loo_i, ll_avg = ll_avg))
-    
-  } -> sum_loo
+  progressr::with_progress({
+    # progressr::handlers("cli")
+    p <- progressr::progressor(steps = nstudy, message = "LOO analyses")
+    foreach::foreach(i = 1:nstudy, 
+                     # .packages = c("dplyr","brms","multinma",
+                     #               "rstan", "stringr"),
+                     # .export = c("unique_studies",
+                     #             "control", "iter", "warmup", "chains",
+                     #             "main","interactions","confounders", "addl_form",
+                     #             "family","sample_iter",
+                     #             "fit","mod_sc","sm","studies","stand",
+                     #             "metric","layout","init_fun",
+                     #             "data","cm","exe","adapt_engaged","step_size","inv_metric"
+                     # ),
+                     .options.future = list(seed = seed)) %dofuture% {
+                       
+                       rng_state_before <- .Random.seed
+                       rng_kind <- RNGkind()
+                       worker_dir <- file.path(tempdir(), sprintf("loo-study-%03d", i))
+                       dir.create(worker_dir, recursive = TRUE, showWarnings = FALSE)
+                       
+                       
+                       # pullout study to drop
+                       study_i       <- unique_studies[i]
+                       
+                       # which interventions are targeted in this study?
+                       flagged_intervention <- data %>% filter(.study == study_i) %>%
+                         select(.trt) %>% dplyr::pull() %>% unique() %>% stringr::str_to_title()
+                       
+                       # get data for the dropped study
+                       nd            <- get_desired_study_raw_data(fit, studies, study_i)
+                       
+                       # calculate original log-likelihood on the full model
+                       # do it somewhat inefficiently to account for MI models
+                       ll_orig       <- ll_orig_full[, i]
+                       
+                       p(sprintf("  Fitting without study %d: %s", i, as.character(study_i)) )  # update progress
+                       
+                       # get random seed
+                       seed_i <- sample.int(.Machine$integer.max, 1L)
+                       
+                       #two optional fitting methods depending on backend
+                       fit_loo     <- fit
+                       mod_stand   <- drop_desired_study(fit_loo, 
+                                                         study_i)
+                       if(fit$backend == "cmdstanr") { # reuses step size
+                         # init_fun <- function() make_init_from_brms(fit, layout, studies, study_i)
+                         m <- cmdstanr::cmdstan_model(cm$stan_file(), exe_file = exe, compile = FALSE)
+                         outs <- m$sample(data = mod_stand, 
+                                          init = inits,
+                                          metric = metric$metric,
+                                          inv_metric = inv_metric, 
+                                          adapt_engaged = adapt_engaged, 
+                                          step_size = step_size, 
+                                          iter_sampling = sample_iter, iter_warmup = warmup, 
+                                          parallel_chains = 1, chains = chains,
+                                          show_messages = show_messages, 
+                                          show_exceptions = FALSE,
+                                          diagnostics = NULL, refresh = refresh, 
+                                          seed = seed_i,
+                                          max_treedepth = control$max_treedepth,
+                                          output_dir = worker_dir,
+                                          output_basename = sprintf("study-%03d-seed-%d", i, seed_i))
+                         fit_loo$fit <- brms::read_csv_as_stanfit(outs$output_files(), model = m) 
+                       } else if(fit$backend == "rstan") {
+                         
+                         fit_loo$fit <- rstan::sampling(sm, data = mod_stand, chains = chains,
+                                                        iter = iter,
+                                                        warmup = warmup,
+                                                        cores = 1L,
+                                                        seed = seed_i,
+                                                        control = control, 
+                                                        open_progress = open_progress, 
+                                                        show_messages = show_messages,
+                                                        refresh = refresh,
+                                                        verbose = FALSE
+                         )
+                       } else {
+                         rlang::abort("Unsupported backend: ", fit$backend)
+                       }
+                       fit_loo$model <- stanc
+                       # fit_loo$data  <- fit$data %>% filter(.study != study_i)
+                       fit_loo       <- brms::rename_pars(fit_loo)
+                       if (!inherits(fit_loo,"vitfit")) {
+                         class(fit_loo) <- c("vitfit",class(fit_loo))
+                         fit_loo$prep <- fit$prep
+                       }
+                       
+                       # calculate log-likelihood on the dropped obs from the LOO model
+                       # tricky right now because MI models need to be handled carefully
+                       # right now just will return NA if any covariates are missing,
+                       # which is not ideal
+                       ll_newmod     <- log_lik.vitfit(fit_loo, 
+                                                allow_new_levels = TRUE, 
+                                                sample_new_levels = "gaussian",
+                                                resp = resp)
+                       get_idx       <- which(unique(fit_loo$data$.study) == study_i)
+                       ll_new        <- ll_newmod[,get_idx]
+                       ll_est        <- data.frame(
+                         loo = ll_new,
+                         ll  = ll_orig
+                       )
+                       ll_est$iter   <- 1:nrow(ll_est)
+                       if (anyNA(ll_new) || anyNA(ll_orig)) {
+                         rlang::warn(sprintf("NA log-likelihoods for left-out study %s; see saved debug info for details", study_i))
+                         tryCatch({
+                           saveRDS(list(
+                             i = i,
+                             study_i = study_i,
+                             seed_i = seed_i,
+                             rng_state_before = .Random.seed,
+                             fit_loo = fit_loo,
+                             nd = nd,
+                             ll_newmod = ll_newmod,
+                             session = sessionInfo(),
+                             log_lik_method = utils::getS3method("log_lik", "vitfit", optional = TRUE)
+                           ), file = file.path("test", 
+                                             sprintf("loo-debug-%s.rds", gsub("/", "-", study_i))))
+                         rlang::warn(sprintf("Saved debug info to %s", file.path(tempdir(), sprintf("loo-debug-%s.rds", gsub("/", "-", study_i)))))
+                         }, error = function(e) {
+                           list(error = conditionMessage(e), study_i = study_i, i = i, seed_i = seed_i)
+                         })
+                       }
+                       
+                       # obs log_lik of new model on observed data
+                       
+                       ll_avg <- rep(NA_real_, nstudy) 
+                       ll_avg[-i] <- ll_newmod[,-i] %>% colMeans()
+                       
+                       if (get_estimates) {
+                         sum_loo_i     <- summary_brms_nma(fit_loo, keep = keep)
+                       } else {
+                         sum_loo_i <- dplyr::tibble(
+                           .trt = NA_character_,
+                           estimate = NA_real_,
+                           iter = 1:brms::ndraws(fit)
+                         )
+                         class(sum_loo_i) <- c("summary_brms_nma", class(sum_loo_i))
+                         attr(sum_loo_i, "reference_treatment") <- get_reference_treatment(fit)
+                         attr(sum_loo_i, "ndraws") <- brms::ndraws(fit)
+                       }
+                       sum_loo_i$left_out_study <- study_i
+                       sum_loo_i     <- sum_loo_i %>% mutate(
+                         interventions_affected = ifelse(.trt %in% flagged_intervention, TRUE, FALSE)
+                       )
+                       sum_loo_i$loo_iter <- i
+                       sum_loo_i     <- sum_loo_i %>%
+                         dplyr::left_join(
+                           ll_est,
+                           by = c("iter" = "iter")
+                         )
+                       
+                       return(list(sum = sum_loo_i, ll_avg = ll_avg,
+                                   ll_est = ll_est,
+                                   seed = seed_i,
+                                   rng_state_before = rng_state_before,
+                                   rng_kind = rng_kind))
+                       
+                     } -> sum_loo
+  }
+  )
+  
   
   cat("Combining results...\n")
   if (inherits (sum_loo[[1]]$sum, "data.table")) {
@@ -5388,8 +5438,8 @@ loo_estimates <- function(fit, seed = NULL,
     attr(out, "reference_treatment") <- get_reference_treatment(fit)
     attr(out, "nchains") <- chains
     attr(out, "ndraws")  <- brms::ndraws(fit)
-     attr(out, "ntreatments") <- ntreatments(fit)
-     attr(out, "treatments") <- fit$prep$network$treatments %>% levels()
+    attr(out, "ntreatments") <- ntreatments(fit)
+    attr(out, "treatments") <- fit$prep$network$treatments %>% levels()
     attr(out, "ll_delta_avg")  <- ll_avg_mat
     attr(out, "ll_avg") <- log_lik(fit) %>% colMeans()
   }

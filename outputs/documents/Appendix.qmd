@@ -1,5 +1,6 @@
 ---
 title: "Appendix"
+bibliography: appendix.bib
 ---
 
 ```{r}
@@ -592,54 +593,54 @@ dose_anx_results <- vit$summary_brms_nma(fit_dose_anx, keep = c(".trt",".dose"))
 
 | Section | Item | Description | Location Reported |
 |----------|------|------------|-------------------|
-| Title | 1 | Identify the report as a systematic review. | |
-| Abstract | 2 | See PRISMA 2020 Abstract Checklist. | |
-| Introduction | 3 | Describe the rationale for the review in the context of existing knowledge. | |
-| Introduction | 4 | Provide explicit statement of objectives/questions. | |
-| Methods | 5 | Specify inclusion and exclusion criteria and grouping for syntheses. | |
-| Methods | 6 | Specify all information sources and dates searched. | |
+| Title | 1 | Identify the report as a systematic review. | [Title page](#sec-title-page) |
+| Abstract | 2 | See PRISMA 2020 Abstract Checklist. | @sec-abstract-objective, @sec-abstract-methods, @sec-abstract-results, @sec-abstract-conclusions |
+| Introduction | 3 | Describe the rationale for the review in the context of existing knowledge. | [Introduction](@sec-intro) |
+| Introduction | 4 | Provide explicit statement of objectives/questions. | @sec-abstract-objective |
+| Methods | 5 | Specify inclusion and exclusion criteria and grouping for syntheses. | @sec-inclusion-exclusion, @sec-stat-analysis |
+| Methods | 6 | Specify all information sources and dates searched. | @sec-abstract-methods, @sec-search-strategy |
 | Methods | 7 | Present full search strategies including filters and limits. | @sec-search-strategy |
-| Methods | 8 | Describe study selection process and reviewer roles. | |
-| Methods | 9 | Describe data collection process and reviewer roles. | |
-| Methods | 10a | Define all outcomes sought and handling of multiple measures/time-points. | |
-| Methods | 10b | Define other variables collected and assumptions about missing data. | |
+| Methods | 8 | Describe study selection process and reviewer roles. | @sec-study-selection |
+| Methods | 9 | Describe data collection process and reviewer roles. | @sec-study-char |
+| Methods | 10a | Define all outcomes sought and handling of multiple measures/time-points. | @sec-outcomes, @sec-rating-scales |
+| Methods | 10b | Define other variables collected and assumptions about missing data. | @sec-study-char |
 | Methods | 11 | Describe risk-of-bias assessment methods and tools used. | @sec-rob |
-| Methods | 12 | Specify effect measures used for each outcome. | |
-| Methods | 13a | Describe processes for determining study eligibility for each synthesis. | |
-| Methods | 13b | Describe data preparation methods (e.g., conversions, missing data handling). | |
-| Methods | 13c | Describe tabulation or visualization methods. | |
-| Methods | 13d | Describe synthesis methods, models, heterogeneity assessment, software. | |
-| Methods | 13e | Describe methods for exploring heterogeneity (subgroup/meta-regression). | |
-| Methods | 13f | Describe sensitivity analyses conducted. | |
-| Methods | 14 | Describe assessment of reporting bias. | |
-| Methods | 15 | Describe certainty/confidence assessment methods. | |
-| Results | 16a | Describe search and selection results (flow diagram recommended). | |
-| Results | 16b | Cite excluded studies and reasons for exclusion. | |
-| Results | 17 | Cite included studies and present characteristics. | |
-| Results | 18 | Present risk-of-bias assessments. | |
-| Results | 19 | Present summary statistics and effect estimates for each study. | |
+| Methods | 12 | Specify effect measures used for each outcome. | @sec-outcomes, @sec-effect-measures |
+| Methods | 13a | Describe processes for determining study eligibility for each synthesis. | @sec-stat-analysis, @sec-study-selection |
+| Methods | 13b | Describe data preparation methods (e.g., conversions, missing data handling). | @sec-stat-analysis, @sec-coding-decisions |
+| Methods | 13c | Describe tabulation or visualization methods. | @sec-study-char, @sec-trans |
+| Methods | 13d | Describe synthesis methods, models, heterogeneity assessment, software. | @sec-stat-analysis, @sec-stats-detailed |
+| Methods | 13e | Describe methods for exploring heterogeneity (subgroup/meta-regression). | @sec-stat-analysis, @sec-meta-reg |
+| Methods | 13f | Describe sensitivity analyses conducted. | @sec-sens |
+| Methods | 14 | Describe assessment of reporting bias. | @sec-stat-analysis, @sec-reporting-bias |
+| Methods | 15 | Describe certainty/confidence assessment methods. | @sec-stat-analysis, @sec-cinema |
+| Results | 16a | Describe search and selection results (flow diagram recommended). | @sec-study-selection |
+| Results | 16b | Cite excluded studies and reasons for exclusion. | @sec-excluded-studies |
+| Results | 17 | Cite included studies and present characteristics. | @sec-results-characteristics, @sec-study-char, @sec-included-studies |
+| Results | 18 | Present risk-of-bias assessments. | @sec-results-rob, @sec-rob |
+| Results | 19 | Present summary statistics and effect estimates for each study. | @sec-results-depression, @sec-results-anxiety, @sec-study-char |
 | Results | 20a | Summarize characteristics and bias of contributing studies. | @sec-study-char |
-| Results | 20b | Present synthesis results including summary estimates and heterogeneity. | |
-| Results | 20c | Present heterogeneity investigations. | |
-| Results | 20d | Present sensitivity analyses. | |
-| Results | 21 | Present reporting bias assessments. | |
-| Results | 22 | Present certainty of evidence assessments. | |
-| Discussion | 23a | Interpret results in context of other evidence. | |
-| Discussion | 23b | Discuss limitations of included evidence. | |
-| Discussion | 23c | Discuss limitations of review process. | |
-| Discussion | 23d | Discuss implications for practice, policy, and research. | |
-| Other | 24a | Provide registration information. | |
-| Other | 24b | Indicate where protocol can be accessed. | |
-| Other | 24c | Describe amendments to protocol or registration. | |
-| Other | 25 | Describe financial or non-financial support. | |
-| Other | 26 | Declare competing interests. | |
-| Other | 27 | Report availability of data, code, and materials. | |
-
-From: Page MJ, McKenzie JE, Bossuyt PM, Boutron I, Hoffmann TC, Mulrow CD, et al. The PRISMA 2020 statement: an updated guideline for reporting systematic reviews. MetaArXiv. 2020, September 14. DOI: 10.31222/osf.io/v7gm2. For more information, visit: www.prisma-statement.org
+| Results | 20b | Present synthesis results including summary estimates and heterogeneity. | @sec-results-depression, @sec-results-anxiety |
+| Results | 20c | Present heterogeneity investigations. | @sec-meta-reg, @sec-heterogeneity |
+| Results | 20d | Present sensitivity analyses. | @sec-sens |
+| Results | 21 | Present reporting bias assessments. | @sec-reporting-bias |
+| Results | 22 | Present certainty of evidence assessments. | @sec-cinema |
+| Discussion | 23a | Interpret results in context of other evidence. | [Discussion](@sec-discussion) |
+| Discussion | 23b | Discuss limitations of included evidence. | [Discussion](@sec-discussion) |
+| Discussion | 23c | Discuss limitations of review process. | [Discussion](@sec-discussion) |
+| Discussion | 23d | Discuss implications for practice, policy, and research. | [Discussion](@sec-discussion) |
+| Other | 24a | Provide registration information. | [Discussion](@sec-discussion) |
+| Other | 24b | Indicate where protocol can be accessed. | [Discussion](@sec-discussion) |
+| Other | 24c | Describe amendments to protocol or registration. | [Discussion](@sec-discussion) |
+| Other | 25 | Describe financial or non-financial support. | Not reported |
+| Other | 26 | Declare competing interests. | Not reported |
+| Other | 27 | Report availability of data, code, and materials. | @sec-data-code |
+@page_prisma_2020
+<!-- From: Page MJ, McKenzie JE, Bossuyt PM, Boutron I, Hoffmann TC, Mulrow CD, et al. The PRISMA 2020 statement: an updated guideline for reporting systematic reviews. MetaArXiv. 2020, September 14. DOI: 10.31222/osf.io/v7gm2. For more information, visit: www.prisma-statement.org -->
 
 
 ## Protocol  {#sec-protocol .appendix}
-The protocol for this review was registered on PROSPERO (CRD42024575661) and is available at [https://www.crd.york.ac.uk/PROSPERO/view/CRD42024575661]. The protocol was developed in accordance with PRISMA-P guidelines and included detailed plans for literature search, study selection, data extraction, risk-of-bias assessment, and statistical analysis. Any deviations from the protocol are described in the Methods section of this report.
+The protocol for this review was registered on PROSPERO (CRD42024575661) and is available at [https://www.crd.york.ac.uk/PROSPERO/view/CRD42024575661] [@chien_effectiveness_2026]. The protocol was developed in accordance with PRISMA-P guidelines and included detailed plans for literature search, study selection, data extraction, risk-of-bias assessment, and statistical analysis. Any deviations from the protocol are described in the Methods section of this report.
 
 <!-- ### Background and rationale {.appendx} -->
 
@@ -868,31 +869,185 @@ Given the restrictiveness of setting a whole population as deficient vs non-defi
 
 Similarly for baseline depression and anxiety status, we will estimate percent of the population that is depressed or anxious at baseline using a log-Normal distribution.
 
-## Search Strategy and Study Selection {#sec-search .appendix}
+## Search Strategy and Study Selection {#sec-search-app .appendix}
 ### Full Search Strategy {#sec-search-strategy .appendix}
 
-test
+```{r}
+#| label: search-strategy
 
-| filler | filler |
-|---|---|
-| filler | filler |
+supp_table_1 <- tibble(
+  step = c("#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10",
+           "#11", "#12", "#13", "#14", "#15", "#16", "#17", "#18", "#19", "#20"),
+  query = c(
+    'Anxiety/ OR (anxiet* OR anxious* OR GAD OR cothymia?).ti,ab,kf. OR Anxiety Disorders/ OR Panic Disorder/ OR Panic/ OR panic.ti,ab,kf OR exp Depression/ OR (depression? OR depressive OR MDD).ti,ab,kf. OR Depressive Disorder/ OR melancholia?.ti,ab,kf. OR exp "Depressive Disorder, Treatment-Resistant"/ OR "Depressive Disorder, Major"/ OR Depression, Postpartum/ OR (postnatal dysphoria? OR postpartum dysphoria? OR post partum dysphoria? OR post natal dysphoria?).ti,ab,kf. OR Dysthymic Disorder/ OR (dysthymic disorder? OR dysthymia?).ti,ab,kf. OR Premenstrual Dysphoric Disorder/ OR (premenstrual dysphoric disorder? OR pre menstrual dysphoric disorder? OR PMDD).ti,ab,kf. OR Seasonal Affective Disorder/ OR (seasonal affective disorder? OR seasonal mood disorder?).ti,ab,kf. OR Vascular Depression/',
+    '(supplement* OR multivitamin? OR megavitamin?).ti,ab,kf. OR Complementary Therapies/ OR (alternative medicine? OR complementary medicine? OR alternative therapies OR alternative therapy OR complementary therapies).ti,ab,kf. OR Orthomolecular Therapy/ OR (orthomolecular).ti,ab,kf.',
+    '"Vitamin D"/ OR ("vitamin D").ti,ab,kf. OR Cholecalciferol/ OR ("vitamin D 3" OR "vitamin D3" OR calciol OR cholecalciferol?).ti,ab,kf. OR Ergocalciferols/ OR ("vitamin D2" OR "vitamin D 2" OR ergocalciferol? OR calciferols).ti,ab,kf.',
+    'Vitamin B Complex/ OR (B vitamin? OR "vitamin B").ti,ab,kf.',
+    'Thiamine/ OR ("vitamin B1" OR "vitamin B 1" OR thiamine OR thiamin OR aneurin).ti,ab,kf.',
+    'Riboflavin/ OR (riboflavin OR "vitamin B2" OR "vitamin B 2" OR "vitamin G").ti,ab,kf.',
+    'Niacinamide/ OR ("vitamin B3" OR "vitamin B 3" OR nicotinamide OR niacinamide OR "vitamin PP" OR "3 pyridinecarboxamide" OR enduramide OR nicobion OR "nicotinsaureamid jenapharm" OR papulex).ti,ab,kf.',
+    'Pantothenic Acid/ OR ("vitamin B5" OR "vitamin B 5" OR pantothenic acid OR calcium pantothenate OR dexol).ti,ab,kf.',
+    '"Vitamin B 6"/ OR ("vitamin B6" OR "vitamin B 6").ti,ab,kf. OR Pyridoxine/ OR (pyridoxol OR pyridoxin OR rodex OR pyridoxine).ti,ab,kf.',
+    'Biotin/ OR ("vitamin B7" OR "vitamin B 7" OR biotin OR "vitamin H" OR biodermatin OR biokur OR biotine roche OR deacura OR gabunat OR medebiotin OR medobiotin OR rombellin).ti,ab,kf. OR Niacin/ OR ("3 pyridinecarboxylic acid" OR enduracin OR induracin OR niacin OR nicamin OR "nico 400" OR nico400 OR nicobid OR nicocap OR nicolar OR nicotinate OR nicotinic acid OR wampocap).ti,ab,kf.',
+    'Folic Acid/ OR ("vitamin B9" OR "vitamin B 9" OR "vitamin M" OR folic acid OR pteroylglutamic acid OR folacin OR folvite OR folate).ti,ab,kf.',
+    '"Vitamin B 12"/ OR ("vitamin B12" OR "vitamin B 12" OR cyanocobalamin OR cobalamins OR cobalamin OR eritron).ti,ab,kf.',
+    'exp Ascorbic Acid/ OR ("vitamin C" OR ascorbic acid OR ascorbate OR magnesium ascorbicum OR magnorbin OR hybrin OR dehydroascorbic acid).ti,ab,kf.',
+    'Minerals/ OR mineral?.ti,ab,kf. OR Zinc/ OR zinc.ti,ab,kf. OR Selenium/ OR selenium.ti,ab,kf. OR Magnesium Compounds/ OR magnesium.ti,ab,kf. OR Magnesium Chloride/ OR MgCl2.ti,ab,kf. OR Magnesium Sulfate/ OR Magnesium Oxide/ OR magnesia.ti,ab,kf OR Trace Elements/ OR (biometal? OR trace element?).ti,ab,kf',
+    'or/3-14',
+    '2 and 15',
+    '"Iron, Dietary"/ OR dietary iron.ti,ab,kf. OR Micronutrients/ OR (micronutrient? OR micro nutrient? OR multimineral? OR multi mineral? OR multinutrient? OR multi nutrient?).ti,ab,kf',
+    '16 or 17',
+    'random*.mp',
+    '1 and 18 and 19'
+  )
+)
 
-more filler
+supp_table_2 <- tibble(
+  step = c("#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10",
+           "#11", "#12", "#13", "#14", "#15", "#16", "#17", "#18", "#19", "#20"),
+  query = c(
+    "'anxiety'/de OR (anxiet* OR anxious* OR GAD OR cothymia?):ab,ti,kw OR 'generalized anxiety disorder'/exp OR 'anxiety disorder'/de OR 'panic'/exp OR 'panic':ab,ti,kw OR 'depression'/de OR (depression? OR depressive OR MDD):ab,ti,kw OR melancholia?:ab,ti,kw OR 'treatment resistant depression'/de OR 'major depression'/exp OR 'postnatal depression'/exp OR ('postnatal dysphoria?' OR 'postpartum dysphoria?' OR 'post partum dysphoria?' OR 'post natal dysphoria?'):ab,ti,kw OR 'dysthymia'/de OR ('dysthymic disorder?' OR dysthymia?):ab,ti,kw OR 'premenstrual dysphoric disorder'/exp OR ('premenstrual dysphoric disorder?' OR 'pre menstrual dysphoric disorder?' OR PMDD):ab,ti,kw OR 'seasonal affective disorder'/exp OR ('seasonal affective disorder?' OR 'seasonal mood disorder?'):ab,ti,kw OR 'vascular depression'/de OR 'atypical depression'/exp OR 'chronic depression'/exp OR 'perinatal depression'/exp OR 'mixed anxiety and depression'/exp OR 'recurrent brief depression'/exp OR 'late life depression'/exp",
+    "(supplement* OR multivitamin? OR megavitamin?):ab,ti,kw OR 'alternative medicine'/de OR ('alternative medicine?' OR 'complementary medicine?' OR 'alternative therapies' OR 'alternative therapy' OR 'complementary therapies'):ab,ti,kw OR 'orthomolecular medicine'/exp OR orthomolecular:ab,ti,kw",
+    "'vitamin D'/de OR 'vitamin D':ab,ti,kw OR 'colecalciferol'/exp OR ('vitamin D 3' OR 'vitamin D3' OR calciol OR cholecalciferol?):ab,ti,kw OR 'ergocalciferol'/exp OR ('vitamin D2' OR 'vitamin D 2' OR ergocalciferol? OR calciferols):ab,ti,kw",
+    "'vitamin B complex'/exp OR ('B vitamin?' OR 'vitamin B'):ab,ti,kw",
+    "'thiamine'/de OR ('vitamin B1' OR 'vitamin B 1' OR thiamine OR thiamin OR aneurin):ab,ti,kw",
+    "'riboflavin'/de OR (riboflavin OR 'vitamin B2' OR 'vitamin B 2' OR 'vitamin G'):ab,ti,kw",
+    "'nicotinamide'/de OR ('vitamin B3' OR 'vitamin B 3' OR nicotinamide OR niacinamide OR 'vitamin PP' OR '3 pyridinecarboxamide' OR enduramide OR nicobion OR 'nicotinsaureamid jenapharm' OR papulex):ab,ti,kw",
+    "'pantothenic acid'/de OR ('vitamin B5' OR 'vitamin B 5' OR 'pantothenic acid' OR 'calcium pantothenate' OR dexol):ab,ti,kw",
+    "'Vitamin B 6'/de OR ('vitamin B6' OR 'vitamin B 6'):ab,ti,kw OR 'pyridoxine'/exp OR (pyridoxol OR pyridoxin OR rodex OR pyridoxine):ab,ti,kw",
+    "'biotin'/exp OR ('vitamin B7' OR 'vitamin B 7' OR biotin OR 'vitamin H' OR biodermatin OR biokur OR 'biotine roche' OR deacura OR gabunat OR medebiotin OR medobiotin OR rombellin):ab,ti,kw OR 'nicotinic acid'/exp OR ('3 pyridinecarboxylic acid' OR enduracin OR induracin OR niacin OR nicamin OR 'nico 400' OR nico400 OR nicobid OR nicocap OR nicolar OR nicotinate OR 'nicotinic acid' OR wampocap):ab,ti,kw",
+    "'folic acid'/exp OR ('vitamin B9' OR 'vitamin B 9' OR 'vitamin M' OR 'folic acid' OR 'pteroylglutamic acid' OR folacin OR folvite OR folate):ab,ti,kw",
+    "'cyanocobalamin'/exp OR ('vitamin B12' OR 'vitamin B 12' OR cyanocobalamin OR cobalamins OR cobalamin OR eritron):ab,ti,kw",
+    "'ascorbic acid'/de OR ('vitamin C' OR 'ascorbic acid' OR ascorbate OR 'magnesium ascorbicum' OR magnorbin OR hybrin OR 'dehydroascorbic acid'):ab,ti,kw",
+    "'mineral'/exp OR mineral?:ab,ti,kw OR 'zinc'/exp OR zinc:ab,ti,kw OR 'selenium'/exp OR selenium:ab,ti,kw OR 'magnesium derivative'/exp OR magnesium:ab,ti,kw OR 'magnesium chloride'/exp OR MgCl2:ab,ti,kw OR 'magnesium sulfate'/exp OR 'magnesium oxide'/exp OR magnesia:ab,ti,kw OR 'trace element'/de OR (biometal? OR 'trace element?'):ab,ti,kw",
+    "#3 OR #4 OR #5 OR #6 OR #7 OR #8 OR #9 OR #10 OR #11 OR #12 OR #13 OR #14",
+    "#2 and #15",
+    "'iron intake'/exp OR 'dietary iron':ab,ti,kw OR (micronutrient? OR 'micro nutrient?' OR multimineral? OR 'multi mineral?' OR multinutrient? OR 'multi nutrient?'):ab,ti,kw",
+    "#16 or #17",
+    "random*:ti,ab,kw",
+    "#1 and #18 and #19"
+  )
+)
 
-| filler | filler |
-|---|---|
-| filler | filler |
+supp_table_3 <- tibble(
+  step = c("#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10", "#11", "#12"),
+  query = c(
+    'TS=(anxiet* OR anxious* OR GAD OR cothymia$ OR panic OR depression$ OR depressive OR MDD OR melancholia$ OR postnatal dysphoria$ OR postpartum dysphoria$ OR post partum dysphoria$ OR post natal dysphoria$ OR dysthymic disorder$ OR dysthymia$ OR premenstrual dysphoric disorder$ OR pre menstrual dysphoric disorder$ OR PMDD OR seasonal affective disorder$ OR seasonal mood disorder$)',
+    'TS=(supplement* OR multivitamin$ OR megavitamin$ OR "alternative medicine$" OR "complementary medicine$" OR "alternative therapies" OR "alternative therapy" OR "complementary therapies" OR orthomolecular)',
+    'TS=("vitamin D" OR "vitamin D 3" OR "vitamin D3" OR calciol OR cholecalciferol$ OR "vitamin D2" OR "vitamin D 2" OR ergocalciferol$ OR calciferols)',
+    'TS=("B vitamin$" OR "vitamin B" OR "vitamin B1" OR "vitamin B 1" OR thiamine OR thiamin OR aneurin OR riboflavin OR "vitamin B2" OR "vitamin B 2" OR "vitamin G" OR "vitamin B3" OR "vitamin B 3" OR nicotinamide OR niacinamide OR "vitamin PP" OR "3 pyridinecarboxamide" OR enduramide OR nicobion OR "nicotinsaureamid jenapharm" OR papulex OR "vitamin B5" OR "vitamin B 5" OR "pantothenic acid" OR "calcium pantothenate" OR dexol OR "vitamin B6" OR "vitamin B 6" OR pyridoxol OR pyridoxin OR rodex OR pyridoxine OR "vitamin B7" OR "vitamin B 7" OR biotin OR "vitamin H" OR biodermatin OR biokur OR "biotine roche" OR deacura OR gabunat OR medebiotin OR medobiotin OR rombellin OR "3 pyridinecarboxylic acid" OR enduracin OR induracin OR niacin OR nicamin OR "nico 400" OR nico400 OR nicobid OR nicocap OR nicolar OR nicotinate OR nicotinic acid OR wampocap OR "vitamin B9" OR "vitamin B 9" OR "vitamin M" OR "folic acid" OR "pteroylglutamic acid" OR folacin OR folvite OR folate OR "vitamin B12" OR "vitamin B 12" OR cyanocobalamin OR cobalamins OR cobalamin OR eritron)',
+    'TS=("vitamin C" OR "ascorbic acid" OR ascorbate OR "magnesium ascorbicum" OR magnorbin OR hybrin OR "dehydroascorbic acid")',
+    'TS=(mineral$ OR zinc OR selenium OR magnesium OR MgCl2 OR magnesia OR biometal$ OR "trace element$")',
+    '#3 OR #4 OR #5 OR #6',
+    '#2 AND #7',
+    'TS=("dietary iron" OR micronutrient$ OR "micro nutrient$" OR multimineral$ OR "multi mineral$" OR multinutrient$ OR "multi nutrient$")',
+    '#8 OR #9',
+    'TS=(random*)',
+    '#1 AND #10 AND #11'
+  )
+)
 
-more filler
+supp_table_4 <- tibble(
+  step = c("#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10", "#11", "#12"),
+  query = c(
+    'Anxiety/ OR (anxiet* OR anxious* OR GAD OR cothymia?).ti,ab. OR Anxiety Disorders/ OR Panic Disorder/ OR Panic Attack/ OR Panic/ OR panic.ti,ab OR (depression? OR depressive OR MDD OR melancholia?).ti,ab. OR Treatment Resistant Depression/ OR Major Depression/ OR Postpartum Depression/ OR (postnatal dysphoria? OR postpartum dysphoria? OR post partum dysphoria? OR post natal dysphoria?).ti,ab. OR Dysthymic Disorder/ OR (dysthymic disorder? OR dysthymia?).ti,ab. OR Premenstrual Dysphoric Disorder/ OR (premenstrual dysphoric disorder? OR pre menstrual dysphoric disorder? OR PMDD).ti,ab. OR Seasonal Affective Disorder/ OR (seasonal affective disorder? OR seasonal mood disorder?).ti,ab. OR Atypical Depression/ OR Late Life Depression/ OR Generalized Anxiety Disorder/ OR Recurrent Depression/',
+    'Vitamin Therapy/ OR (supplement* OR multivitamin? OR megavitamin?).ti,ab. OR Alternative Medicine/ OR (alternative medicine? OR complementary medicine? OR alternative therapies OR alternative therapy OR complementary therapies OR orthomolecular).ti,ab.',
+    '("vitamin D" OR "vitamin D 3" OR "vitamin D3" OR calciol OR cholecalciferol? OR "vitamin D2" OR "vitamin D 2" OR ergocalciferol? OR calciferols).ti,ab.',
+    '(B vitamin? OR "vitamin B").ti,ab. OR ("vitamin B1" OR "vitamin B 1" OR thiamine OR thiamin OR aneurin).ti,ab. OR (riboflavin OR "vitamin B2" OR "vitamin B 2" OR "vitamin G").ti,ab. OR Nicotinamide/ OR ("vitamin B3" OR "vitamin B 3" OR nicotinamide OR niacinamide OR "vitamin PP" OR "3 pyridinecarboxamide" OR enduramide OR nicobion OR "nicotinsaureamid jenapharm" OR papulex).ti,ab. OR ("vitamin B5" OR "vitamin B 5" OR pantothenic acid OR calcium pantothenate OR dexol).ti,ab. OR ("vitamin B6" OR "vitamin B 6" OR pyridoxol OR pyridoxin OR rodex OR pyridoxine).ti,ab. OR ("vitamin B7" OR "vitamin B 7" OR biotin OR "vitamin H" OR biodermatin OR biokur OR biotine roche OR deacura OR gabunat OR medebiotin OR medobiotin OR rombellin).ti,ab. OR Nicotinic Acid/ OR ("3 pyridinecarboxylic acid" OR enduracin OR induracin OR niacin OR nicamin OR "nico 400" OR nico400 OR nicobid OR nicocap OR nicolar OR nicotinate OR nicotinic acid OR wampocap).ti,ab OR Folic Acid/ OR ("vitamin B9" OR "vitamin B 9" OR "vitamin M" OR folic acid OR pteroylglutamic acid OR folacin OR folvite OR folate).ti,ab. OR ("vitamin B12" OR "vitamin B 12" OR cyanocobalamin OR cobalamins OR cobalamin OR eritron).ti,ab.',
+    'exp Ascorbic Acid/ OR ("vitamin C" OR ascorbic acid OR ferrous ascorbate OR magnesium ascorbate OR magnesium ascorbicum OR magnesium di l ascorbate OR magnorbin OR hybrin OR sodium ascorbate OR dehydroascorbic acid).ti,ab',
+    'mineral?.ti,ab. OR Zinc/ OR (zinc OR selenium).ti,ab. OR Magnesium/ OR (magnesium OR MgCl2 OR magnesia OR biometal? OR trace element?).ti,ab',
+    'or/3-6',
+    '2 and 7',
+    'Iron/ OR (dietary iron OR micronutrient? OR micro nutrient? OR multimineral? OR multi mineral? OR multinutrient? OR multi nutrient?).ti,ab',
+    '8 or 9',
+    'random*.mp',
+    '1 and 10 and 11'
+  )
+)
 
-| filler | filler |
-|---|---|
-| filler | filler |
+supp_table_5 <- tibble(
+  field = c("Condition/disease","Intervention/treatment"),
+  query = c("anxiety OR anxieties OR anxious OR anxiousness OR cothymia OR cothymias OR GAD OR panic OR depression OR depressions OR depressive OR MDD OR melancholia OR melancholias OR postnatal dysphoria OR postpartum dysphoria OR post partum dysphoria OR post natal dysphoria OR postnatal dysphorias OR postpartum dysphorias OR post partum dysphorias OR post natal dysphorias OR dysthymic OR dysthymia OR dysthymias OR remenstrual dysphoric disorder OR pre menstrual dysphoric disorder OR remenstrual dysphoric disorders OR pre menstrual dysphoric disorders OR PMDD OR seasonal affective OR seasonal mood",
+            "vitamin D OR vitamin D 3 OR vitamin D3 OR calciol OR cholecalciferol OR vitamin D2 OR vitamin D 2 OR ergocalciferol OR calciferols OR B vitamin OR vitamin B OR vitamin B1 OR vitamin B 1 OR thiamine OR thiamin OR aneurin OR riboflavin OR vitamin B2 OR vitamin B 2 OR vitamin G OR vitamin B3 OR vitamin B 3 OR nicotinamide OR niacinamide OR vitamin PP OR 3 pyridinecarboxamide OR enduramide OR nicobion OR nicotinsaureamid jenapharm OR papulex OR vitamin B5 OR vitamin B 5 OR pantothenic acid OR calcium pantothenate OR dexol OR vitamin B6 OR vitamin B 6 OR pyridoxol OR pyridoxin OR rodex OR pyridoxine OR vitamin B7 OR vitamin B 7 OR biotin OR vitamin H OR biodermatin OR biokur OR biotine roche OR deacura OR gabunat OR medebiotin OR medobiotin OR rombellin OR 3 pyridinecarboxylic acid OR enduracin OR induracin OR niacin OR nicamin OR nico 400 OR nico400 OR nicobid OR nicocap OR nicolar OR nicotinate OR nicotinic acid OR wampocap OR vitamin B9 OR vitamin B 9 OR vitamin M OR folic acid OR pteroylglutamic acid OR folacin OR folvite OR folate OR vitamin B12 OR vitamin B 12 OR cyanocobalamin OR cobalamins OR cobalamin OR eritron OR dietary iron OR micronutrient OR micro nutrient OR multimineral OR multi mineral OR multinutrient OR multi nutrient OR vitamin C OR ascorbic acid OR ascorbate OR magnesium ascorbicum OR magnorbin OR hybrin OR dehydroascorbic acid OR mineral OR zinc OR selenium OR magnesium OR MgCl2 OR magnesia OR biometal OR trace element OR cholecalciferols OR ergocalciferols OR micronutrients OR micro nutrients OR multiminerals OR multi minerals OR multinutrients OR multi nutrients OR minerals OR biometals OR trace elements"
+)
+)
 
-### Inclusion and Exclusion Criteria  {.appendix}
+supp_table_6 <- tibble(
+  step = c("#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10",
+           "#11", "#12", "#13", "#14", "#15", "#16", "#17", "#18", "#19"),
+  query = c(
+    'Anxiety/ OR (anxiet* OR anxious* OR GAD OR cothymia?).ti,ab,kf. OR Anxiety Disorders/ OR Panic Disorder/ OR Panic/ OR panic.ti,ab,kf OR exp Depression/ OR (depression? OR depressive OR MDD).ti,ab,kf. OR Depressive Disorder/ OR melancholia?.ti,ab,kf. OR exp "Depressive Disorder, Treatment-Resistant"/ OR "Depressive Disorder, Major"/ OR Depression, Postpartum/ OR (postnatal dysphoria? OR postpartum dysphoria? OR post partum dysphoria? OR post natal dysphoria?).ti,ab,kf. OR Dysthymic Disorder/ OR (dysthymic disorder? OR dysthymia?).ti,ab,kf. OR Premenstrual Dysphoric Disorder/ OR (premenstrual dysphoric disorder? OR pre menstrual dysphoric disorder? OR PMDD).ti,ab,kf. OR Seasonal Affective Disorder/ OR (seasonal affective disorder? OR seasonal mood disorder?).ti,ab,kf. OR Vascular Depression/',
+    '(supplement* OR multivitamin? OR megavitamin?).ti,ab,kf. OR Complementary Therapies/ OR (alternative medicine? OR complementary medicine? OR alternative therapies OR alternative therapy OR complementary therapies).ti,ab,kf. OR Orthomolecular Therapy/ OR (orthomolecular).ti,ab,kf.',
+    '"Vitamin D"/ OR ("vitamin D").ti,ab,kf. OR Cholecalciferol/ OR ("vitamin D 3" OR "vitamin D3" OR calciol OR cholecalciferol?).ti,ab,kf. OR Ergocalciferols/ OR ("vitamin D2" OR "vitamin D 2" OR ergocalciferol? OR calciferols).ti,ab,kf.',
+    'Vitamin B Complex/ OR (B vitamin? OR "vitamin B").ti,ab,kf.',
+    'Thiamine/ OR ("vitamin B1" OR "vitamin B 1" OR thiamine OR thiamin OR aneurin).ti,ab,kf.',
+    'Riboflavin/ OR (riboflavin OR "vitamin B2" OR "vitamin B 2" OR "vitamin G").ti,ab,kf.',
+    'Niacinamide/ OR ("vitamin B3" OR "vitamin B 3" OR nicotinamide OR niacinamide OR "vitamin PP" OR "3 pyridinecarboxamide" OR enduramide OR nicobion OR "nicotinsaureamid jenapharm" OR papulex).ti,ab,kf.',
+    'Pantothenic Acid/ OR ("vitamin B5" OR "vitamin B 5" OR pantothenic acid OR calcium pantothenate OR dexol).ti,ab,kf.',
+    '"Vitamin B 6"/ OR ("vitamin B6" OR "vitamin B 6").ti,ab,kf. OR Pyridoxine/ OR (pyridoxol OR pyridoxin OR rodex OR pyridoxine).ti,ab,kf.',
+    'Biotin/ OR ("vitamin B7" OR "vitamin B 7" OR biotin OR "vitamin H" OR biodermatin OR biokur OR biotine roche OR deacura OR gabunat OR medebiotin OR medobiotin OR rombellin).ti,ab,kf. OR Niacin/ OR ("3 pyridinecarboxylic acid" OR enduracin OR induracin OR niacin OR nicamin OR "nico 400" OR nico400 OR nicobid OR nicocap OR nicolar OR nicotinate OR nicotinic acid OR wampocap).ti,ab,kf.',
+    'Folic Acid/ OR ("vitamin B9" OR "vitamin B 9" OR "vitamin M" OR folic acid OR pteroylglutamic acid OR folacin OR folvite OR folate).ti,ab,kf.',
+    '"Vitamin B 12"/ OR ("vitamin B12" OR "vitamin B 12" OR cyanocobalamin OR cobalamins OR cobalamin OR eritron).ti,ab,kf.',
+    'exp Ascorbic Acid/ OR ("vitamin C" OR ascorbic acid OR ascorbate OR magnesium ascorbicum OR magnorbin OR hybrin OR dehydroascorbic acid).ti,ab,kf.',
+    'Minerals/ OR mineral?.ti,ab,kf. OR Zinc/ OR zinc.ti,ab,kf. OR Selenium/ OR selenium.ti,ab,kf. OR Magnesium Compounds/ OR magnesium.ti,ab,kf. OR Magnesium Chloride/ OR MgCl2.ti,ab,kf. OR Magnesium Sulfate/ OR Magnesium Oxide/ OR magnesia.ti,ab,kf OR Trace Elements/ OR (biometal? OR trace element?).ti,ab,kf',
+    'or/3-14',
+    '2 and 15',
+    '"Iron, Dietary"/ OR dietary iron.ti,ab,kf. OR Micronutrients/ OR (micronutrient? OR micro nutrient? OR multimineral? OR multi mineral? OR multinutrient? OR multi nutrient?).ti,ab,kf',
+    '16 or 17',
+    '1 and 18'
+  )
+)
+
+```
 
 
-### List of Excluded Full-text Studies {.appendix}
+```{r}
+#| label: tbl-search-strategy-ovid
+#| tbl-cap: "Search strategy for Ovid MEDLINE. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
+flextable::flextable(supp_table_1) |>
+  autofit() 
+```
+
+```{r}
+#| label: tbl-search-strategy-embase
+#| tbl-cap: "Search strategy for Embase.com. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
+flextable::flextable(supp_table_2) |>
+  autofit() 
+```
+
+```{r}
+#| label: tbl-search-strategy-WOS
+#| tbl-cap: "Search strategy for the Web of Science. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
+flextable::flextable(supp_table_3) |>
+  autofit() 
+```
+
+```{r}
+#| label: tbl-search-strategy-PsycINFO
+#| tbl-cap: "Search strategy for PsycINFO. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
+flextable::flextable(supp_table_4) |>
+  autofit() 
+```
+
+```{r}
+#| label: tbl-search-strategy-clincaltrials
+#| tbl-cap: "Search strategy for ClinicalTrials.gov. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
+flextable::flextable(supp_table_5) |>
+  autofit() 
+```
+
+```{r}
+#| label: tbl-search-strategy-cochrane
+#| tbl-cap: "Search strategy for the Web of Cochrane CENTRAL. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
+flextable::flextable(supp_table_6) |>
+  autofit()
+```
+
+
+### Inclusion and Exclusion Criteria  {#sec-inclusion-exclusion .appendix}
+
+
+### List of Excluded Full-text Studies {#sec-excluded-studies .appendix}
 
 We excluded several studies at after the extraction phase for the reasons listed in the table below.
 
@@ -916,12 +1071,12 @@ We excluded several studies at after the extraction phase for the reasons listed
 ### Data Tables  {.appendix}
 ::: {.landscape}
 
-#### Baseline demographics  {#sec-baseline .appendix}
+#### Baseline Demographics  {#sec-baseline .appendix}
 
-##### Low bias studies included in main analysis  {.appendix}
+##### Low Bias Studies Included in the Main Analysis  {.appendix}
 ```{r}
 #| label: tbl-baseline-low
-#| tbl-cap: "Baseline demographics of low bias studies. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
+#| tbl-cap: "Baseline demographics of studies in the main analysis. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
 comb_tab_low <- readRDS(here::here("outputs","overall","tables","ft","combined_demo_low_bias_table.rds"))
 
 comb_tab_low %>% 
@@ -955,7 +1110,7 @@ comb_tab_low %>%
 
 ```{r}
 #| label: tbl-comp-low
-#| tbl-cap: "Baseline demographics of low bias studies by comparison. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
+#| tbl-cap: "Baseline demographics of studies in the main analysis by comparison. Values are n (%) or mean (SD) where appropriate. *Dose is reported as mean [min, max] across included studies. Percentages should be consistent across rows but may not add exactly to 100 due to rounding."
 comb_tab_low.comp <- readRDS(here::here("outputs","overall","tables","ft","combined_demo_low_bias_table_comparison.rds"))
 
 comb_tab_low.comp %>%  set_table_properties(layout = "fixed") %>%                # good to do before scaling
@@ -1085,7 +1240,7 @@ anxiety_measures %>% select(Name = scale, bias) %>% group_by(Name) %>% summarize
 ```
 
 
-### Coding decisions for data extraction  {.appendix}
+### Coding decisions for data extraction  {#sec-coding-decisions .appendix}
 Most studies measured baseline depression status on the above validated scales and several studies measured baseline micro-nutrient status of the vitamin being repleted. However, to ease comparison between studies, we dichotomized these measures. For baseline depression status, we categorized studies as including a depressed population if the average baseline score on the primary depression scale used in the study met or exceeded the standard cutoff for mild depression. For baseline micro-nutrient status, we categorized studies as including a deficient population if they measured baseline levels of the vitamin being repleted and the average level was in the deficient range according to standard clinical cutoffs. These categorizations were used in subgroup and meta-regression analyses to evaluate potential effect modification by baseline depression and micro-nutrient status. These particular cutoffs are detailed in the tables below.
 
 ``` {r}
@@ -1252,7 +1407,7 @@ knitr::knit_print()
 
 Further, cross-over trials were permissible in our study but we only used the first period of randomization before cross-over to avoid carry-over effects. In studies with multiple active arms, we combined active arms together when appropriate to avoid double counting the placebo arm. In studies with multiple control arms, we selected the most appropriate control arm for comparison with the active arm(s) based on the study design and characteristics of the control arms. 
 
-### List of included studies  {.appendix}
+### List of included studies  {#sec-included-studies .appendix}
 
 ```{r}
 #| label: tbl-studies-main
@@ -1289,10 +1444,10 @@ study_tab %>% knitr::knit_print()
 ## Statistical Methods in Detail {#sec-stats-detailed .appendix}
 
 <!-- Bayesian network meta-analyses allow for the incorporation of prior information (if any) as  -->
-### Measures of Treatment Effects {.appendix}
-The effect size for our studies was the standardized mean difference (SMD). This was selected because the included studies in our analysis use a variety of different depression and anxiety scales (See @sec-rating-scales). We preferred utilizing regression estimates when available and relevant followed by gain scores and finally end point measures. To transform these into SMDs, we calculated the SMD following Hedge's g (Hedge year). When studies provided medians, interquartile ranges, and minima and maxima we calculated an estimate of the mean using the methods described in Wan et al. (2014). In most networks considered in the analysis, placebo was the reference treatment. In the antidepressant network, we used treatment with any kind of antidepressant (TCAs, SSRIs, SNRIs, etc.) as the reference treatment.
+### Measures of Treatment Effects {#sec-effect-measures .appendix}
+The effect size for our studies was the standardized mean difference (SMD). This was selected because the included studies in our analysis use a variety of different depression and anxiety scales (See @sec-rating-scales). We preferred utilizing regression estimates when available and relevant followed by gain scores and finally end point measures. To transform these into SMDs, we calculated the SMD following Hedge's $g$ [@hedges1981distribution]. When studies provided medians, interquartile ranges, and minima and maxima we calculated an estimate of the mean using the methods described in @wanEstimatingSampleMean2014 In most networks considered in the analysis, placebo was the reference treatment. In the antidepressant network, we used treatment with any kind of antidepressant (TCAs, SSRIs, SNRIs, etc.) as the reference treatment.
 
-Missing standard deviations were handled in a few ways when possible. First, some studies reported standard errors so these were transformed into standard deviations using the usual formula. Second, if both were missing but confidence intervals, t-values, or p-values were available we used the methods described in Section 7.7.3 of the Cochrane Handbook for Systematic Reviews (Higgins 2008). Finally, if only medians were available and the study reported either the interquartile range or range, we estimated the standard deviation following the method described in Wan et al. (2014).  
+Missing standard deviations were handled in a few ways when possible. First, some studies reported standard errors so these were transformed into standard deviations using the usual formula. Second, if both were missing but confidence intervals, t-values, or p-values were available we used the methods described in Section 6.5.2.3 of the Cochrane Handbook for Systematic Reviews [@higgins2023cochrane]. Finally, if only medians were available and the study reported either the interquartile range or range, we estimated the standard deviation following the method described in @wanEstimatingSampleMean2014  
 
 ### Network Meta-Analysis Model Specification {.appendix}
 
@@ -1336,7 +1491,7 @@ where R is a $J_i \times J_i$ correlation matrix with 1's on the diagonal and $\
 
 We set a prior on effect sizes of $\theta \sim N(0, 2.5^2)$ with the same prior on effect modifiers $\delta$ and $\alpha$. We took $\tau \sim N_+(0, 0.5^2)$, a half-normal prior which is commonly used for variance parameters in random effects.
 
-In our meta regression, we put a regularized prior as described in the BRMS documentation on $\beta$ to help prevent overfitting given the large number of covariates and relatively small number of studies (Carvalho, 2009; Piironen 2017):
+In our meta regression, we put a regularized prior as described in the BRMS documentation on $\beta$ to help prevent overfitting given the large number of covariates and relatively small number of studies [@carvalho2009handling, @piironen2017hyperprior]:
 
 $$ \beta_1, \ldots \beta_K \sim \text{regularized-horseshoe}(\text{df} = 3, \text{global scale} = 0.1, \text{scale slab} = 1). $$
 
@@ -1368,7 +1523,7 @@ The network between the full data differs from the low bias data in that all tre
 
 ![](../depression/pdf/nma_network_full.pdf)
 
-Network geometry for depression studies. Left panel is the network geometry for low bias studies; right panel is the network geometry for all studies.
+Network geometry for depression studies. Left panel is the network geometry for low bias studies in the main analysis; right panel is the network geometry for all studies.
 
 :::
 
@@ -1378,17 +1533,17 @@ Network geometry for depression studies. Left panel is the network geometry for 
 
 ![](../anxiety/pdf/nma_network_full.pdf) 
 
-Network geometry for anxiety studies. Left panel is the network geometry for low bias studies; right panel is the network geometry for all studies.
+Network geometry for anxiety studies. Left panel is the network geometry for low bias studies in the main analysis; right panel is the network geometry for all studies.
 
 :::
 
-Given the suspected effect modification by baseline deficiency and depression/anxiety status, we also examined the network geometry broken out by these characteristics. The network geometry for low bias studies broken out by deficiency and depression/anxiety status is presented in @fig-network-def-dep and @fig-network-def-anx. We can see that some caution needs to be taken in interpreting simple analyses as some comparisons  are informed by studies with different distributions of baseline deficiency and depression/anxiety status. For example, the comparison of vitamin B9 to placebo is informed by a couple of studies in depressed and non-deficient populations across all data, but no studies in non-depressed or deficient populations.
+Given the suspected effect modification by baseline deficiency and depression/anxiety status, we also examined the network geometry broken out by these characteristics. The network geometry for low bias studies in the main analysis broken out by deficiency and depression/anxiety status is presented in @fig-network-def-dep and @fig-network-def-anx. We can see that some caution needs to be taken in interpreting simple analyses as some comparisons  are informed by studies with different distributions of baseline deficiency and depression/anxiety status. For example, the comparison of vitamin B9 to placebo is informed by a couple of studies in depressed and non-deficient populations across all data, but no studies in non-depressed or deficient populations.
 
 ::: {#fig-network-def-dep}
 
 ![](../depression/pdf/nma_def_and_dep_networks_low_bias.pdf)
 
-Network geometry for low bias studies broken out by deficiency and depression status. 
+Network geometry for low bias studies in the main analysis broken out by deficiency and depression status. 
 
 :::
 
@@ -1396,7 +1551,7 @@ Network geometry for low bias studies broken out by deficiency and depression st
 
 ![](../anxiety/pdf/nma_def_and_dep_networks_low_bias.pdf)
 
-Network geometry for low bias studies broken out by deficiency and anxiety status. 
+Network geometry for low bias studies in the main analysis broken out by deficiency and anxiety status. 
 
 :::
 
@@ -1418,7 +1573,7 @@ Network geometry for low bias studies broken out by deficiency and anxiety statu
 ::: {.landscape}
 ```{r}
 #| label: tbl-contribution-dep
-#| tbl-cap:  "Contribution matrix for depression scales in low bias studies. The contribution of each study to the overall network meta-analysis estimates is shown as a percentage. The rows correspond to the comparisons in the network meta-analysis and the columns correspond to the individual studies. The values in the table represent the percentage contribution of each study to each comparison."
+#| tbl-cap:  "Contribution matrix for depression scales in low bias studies in the main analysis. The contribution of each study to the overall network meta-analysis estimates is shown as a percentage. The rows correspond to the comparisons in the network meta-analysis and the columns correspond to the individual studies. The values in the table represent the percentage contribution of each study to each comparison."
 contribution.mat.dep <- readRDS(here::here("outputs","depression","tables","ft","contribution_matrix_low_bias.rds"))
 
 contribution.mat.dep %>%  
@@ -1436,7 +1591,7 @@ contribution.mat.dep %>%
 
 ```{r}
 #| label: tbl-contribution-anx
-#| tbl-cap: "Contribution matrix for anxiety scales in low bias studies. The contribution of each study to the overall network meta-analysis estimates is shown as a percentage. The rows correspond to the comparisons in the network meta-analysis and the columns correspond to the individual studies. The values in the table represent the percentage contribution of each study to each comparison."
+#| tbl-cap: "Contribution matrix for anxiety scales in low bias studies in the main analysis. The contribution of each study to the overall network meta-analysis estimates is shown as a percentage. The rows correspond to the comparisons in the network meta-analysis and the columns correspond to the individual studies. The values in the table represent the percentage contribution of each study to each comparison."
 
 contribution.mat.anx<- readRDS(here::here("outputs","anxiety","tables","ft","contribution_matrix_low_bias.rds"))
 
@@ -1464,7 +1619,7 @@ We summarized the distribution of these characteristics across treatment compari
 #| label: fig-age-trans-low-inter
 #| warning: false
 #| message: false
-#| tbl-cap: "Boxplot of age distribution across interventions in low bias studies. The distribution of age across interventions is relatively similar."
+#| tbl-cap: "Boxplot of age distribution across interventions in low bias studies in the main analysis. The distribution of age across interventions is relatively similar."
 data %>% filter(bias == "low") %>% 
   ggplot(aes(x = intervention, y = age)) +
   geom_point(
@@ -1641,7 +1796,7 @@ When examining the effect of placebo over time, there did not appear to be any m
 
 ::: {#fig-placebo-endpoint}
 
-![](../depression/pdf/placebo_effects_over_time.pdf)
+![](../overall/pdf/placebo_effects_over_time.pdf)
 
 The mean end score of placebo arms by year of publication for placebo arms. The points are the observed points for placebo arms in studies included in our main and sensitivity analyses with and endpoint available. The line is the predicted mean from a random effects meta-regression model adjusting for scale used. There does not appear to be a major trend in placebo response over time.
 
@@ -1649,13 +1804,13 @@ The mean end score of placebo arms by year of publication for placebo arms. The 
 
 ::: {#fig-placebo-gain}
 
-![](../depression/pdf/placebo_effects_over_time.pdf)
+![](../overall/pdf/placebo_gain_score_effects_over_time.pdf)
 
 The mean gain score of placebo arms by year of publication for placebo arms. The points are the gain scores for placebo arms in studies included in our main and sensitivity analyses with a gain score available. The line is the predicted mean from a random effects meta-regression model adjusting for scale used. There does not appear to be a major trend in placebo response over time.
 
 :::
 
-### Reporting bias  {.appendix}
+### Reporting bias  {#sec-reporting-bias .appendix}
 
 #### Funnel plots for main analysis
 We assessed reporting bias by examining funnel plots both for the simple model without effect modification and for the model including effect modification by baseline deficiency and depression/anxiety status. The funnel plots for the simple model are presented in @fig-funnel-dep and @fig-funnel-anx. The funnel plots for the model including effect modification are presented in @fig-funnel-dep-mod and @fig-funnel-anx-mod.
@@ -1861,7 +2016,7 @@ Node-splitting analyses for anxiety outcomes. Each plot corresponds to a compari
 
 :::
 
-### Heterogeneity assessments  {.appendix}
+### Heterogeneity assessments  {#sec-heterogeneity .appendix}
 Heterogeneity was assessed by examining the posterior distribution of the heterogeneity parameter ($\tau$) from the network meta-analysis models. The mean and 95% credible interval for $\tau$ are reported in the results section. A larger value of $\tau$ indicates greater heterogeneity between studies. 
 
 To get a sense of the scale of heterogeneity, we also report the 95% prediction interval for the treatment effects, which incorporates both the uncertainty in the estimated treatment effects and the heterogeneity between studies. If the prediction interval is wide and includes both clinically meaningful benefits and harms, this suggests that there is substantial heterogeneity in the treatment effects across studies. We set a minimal clinically important difference (MCID) of 0.5 standardized mean difference for both depression and anxiety outcomes, based on previous literature on the interpretation of standardized mean differences in mental health research (e.g., Cuijpers et al., 2014; Furukawa et al., 2014). If the prediction interval includes values greater than 0.5 or less than -0.5, this suggests that there is substantial heterogeneity in the treatment effects across studies.
@@ -2010,7 +2165,7 @@ readRDS(glue::glue("../depression/tables/ft/nma_depression_deficiency_table_all_
 
 #### Augmentation of Antidepressants  {.appendix}
 
-Here we present the results of the network meta-analysis assessing the effects of micro-nutrients as augmentation to antidepressants in low bias data. The results are presented in @fig-augmentation-dep and @tbl-augmentation-dep. As a reminder, this network is disconnected from the other low bias studies.
+Here we present the results of the network meta-analysis assessing the effects of micro-nutrients as augmentation to antidepressants in low bias data. The results are presented in @fig-augmentation-dep and @tbl-augmentation-dep. As a reminder, this network is disconnected from the other low bias studies in the main analysis.
 
 ::: {#fig-augmentation-dep}
 
@@ -2072,7 +2227,7 @@ Cumulative probability that a treatment has a rank as high or higher than the cu
 
 ::: {#fig-cumulative-ranking-no-dep-unk-def}
 
-![](../depression/pdf/treatment_ranks_low_bias_data_unknown_def_no_dis.pdf)
+![](../depression/pdf/treatment_ranks_low_bias_data_by_unknown_def_and_no_dis.pdf)
 
 Cumulative probability that a treatment has a rank as high or higher than the current rank in non-depressed populations with unknown deficiency status.
 :::
@@ -2184,7 +2339,7 @@ readRDS(glue::glue("../anxiety/tables/ft/nma_anxiety_deficiency_table_all_data.r
 ```
 
 #### Augmentation of Antidepressants {.appendix}
-Here we present the results of the network meta-analysis assessing the effects of micro-nutrients as augmentation to antidepressants in low bias data. The results are presented in @fig-augmentation-anx and @tbl-augmentation-anx. As a reminder, this network is disconnected from the other low bias studies.
+Here we present the results of the network meta-analysis assessing the effects of micro-nutrients as augmentation to antidepressants in low bias data. The results are presented in @fig-augmentation-anx and @tbl-augmentation-anx. As a reminder, this network is disconnected from the other low bias studies in the main analysis.
 
 ::: {#fig-augmentation-anx}
 
@@ -2219,12 +2374,12 @@ fit_ssri_anx %>%
 ```
 
 ### Adverse Events
-Here were present adverse events results for low bias studies, all studies, and studies comparing augmentation to antidepressants in @fig-ae-low-bias, @fig-ae-all-bias, and @fig-ae-ssri-all-bias respectively. We also present tables of the odds ratios for adverse events for these comparisons in @tbl-ae-low-bias, @tbl-ae-all-bias, and @tbl-ae-ssri-all-bias respectively. Of note, only `r full_data %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow()` (`r round((full_data %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow())/nrow(full_data %>% distinct(study)) * 100, digits = 2)`%) of all  studies reported on adverse events and only `r data %>% filter(bias == "low") %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow()` (`r round((data %>% filter(bias == "low") %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow())/nrow(data %>% filter(bias == "low") %>% distinct(study)) * 100, digits = 2)`%) of low bias studies included in the main analysis, which may limit the conclusions that can be drawn from these analyses.
+Here were present adverse events results for low bias studies in the main analysis, all studies, and studies comparing augmentation to antidepressants in @fig-ae-low-bias, @fig-ae-all-bias, and @fig-ae-ssri-all-bias respectively. We also present tables of the odds ratios for adverse events for these comparisons in @tbl-ae-low-bias, @tbl-ae-all-bias, and @tbl-ae-ssri-all-bias respectively. Of note, only `r full_data %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow()` (`r round((full_data %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow())/nrow(full_data %>% distinct(study)) * 100, digits = 2)`%) of all  studies reported on adverse events and only `r data %>% filter(bias == "low") %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow()` (`r round((data %>% filter(bias == "low") %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow())/nrow(data %>% filter(bias == "low") %>% distinct(study)) * 100, digits = 2)`%) of low bias studies included in the main analysis, which may limit the conclusions that can be drawn from these analyses.
 
 ::: {#fig-ae-low-bias}
 ![](../overall/pdf/adverse_events_odds_ratios_low_bias_overall.pdf)
 
-Forest plots for odds ratios of adverse events as compared to placebo for low bias studies. Values less than 1 indicate that the intervention had fewer adverse events than placebo, while values greater than 1 indicate that the intervention had more adverse events than placebo. The vertical dashed line represents no effect (odds ratio = 1). Interventions with credible intervals that do not include 1 are considered to have a statistically significant effect compared to placebo.
+Forest plots for odds ratios of adverse events as compared to placebo for low bias studies included in the main analysis. Values less than 1 indicate that the intervention had fewer adverse events than placebo, while values greater than 1 indicate that the intervention had more adverse events than placebo. The vertical dashed line represents no effect (odds ratio = 1). Interventions with credible intervals that do not include 1 are considered to have a statistically significant effect compared to placebo.
 :::
 
 ::: {#fig-ae-all-bias}
@@ -2241,7 +2396,7 @@ Forest plots for odds ratios of adverse events for all studies considering augme
 
 ```{r}
 #| label: tbl-ae-low-bias
-#| tbl-cap: "Table of odds ratios for adverse events for low bias studies compared to placebo. The table lists the estimated odds ratios for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+#| tbl-cap: "Table of odds ratios for adverse events for low bias studies in the main analysis compared to placebo. The table lists the estimated odds ratios for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
 
 readRDS(file.path("..","overall","tables","ft","adverse_outcomes_low_bias_table.rds")) %>% knitr::knit_print()
 
@@ -2275,7 +2430,7 @@ readRDS(file.path("..","overall","tables","ft","adverse_outcomes_low_bias_ssri_t
 ### Effects on Vitamin Levels
 The supplementation with vitamin levels might be expected to increase vitamin levels and this is a good check to be sure that the interventions are having the expected effect both due to adequate supplementation and compliance. We present the results of our secondary analysis of the effects of micro-nutrients on vitamin levels in the figures below.
 
-#### Vitamin Levels for Low Bias Studies
+#### Vitamin Levels for Low Bias Studies in the Main Analysis
 ```{r}
 #| label: fig-vitamin-levels-low-bias
 #| results: asis
@@ -2472,13 +2627,14 @@ Cumulative probability that a treatment has a rank as high or higher than the cu
 Cumulative probability that a treatment has a rank as high or higher than the current rank in anxious populations with unknown deficiency status.
 :::
 
+No studies looked at anxiety outcomes in deficient populations with baseline anxiety, so we cannot present cumulative ranking plots for those populations.  
 
-::: {#fig-cumulative-ranking-no-anx-unk-def}
+<!-- ::: {#fig-cumulative-ranking-no-anx-unk-def} -->
 
-![](../anxiety/pdf/treatment_ranks_low_bias_data_unknown_def_no_dis.pdf)
+<!-- ![](../anxiety/pdf/treatment_ranks_low_bias_data_unknown_def_no_dis.pdf) -->
 
-Cumulative probability that a treatment has a rank as high or higher than the current rank in non-anxious populations with unknown deficiency status.
-:::
+<!-- Cumulative probability that a treatment has a rank as high or higher than the current rank in non-anxious populations with unknown deficiency status. -->
+<!-- ::: -->
 
 ### Fixed effects for anxiety outcomes {.appendix}
 ```{r}
@@ -2628,7 +2784,7 @@ We assessed the fit of models using best available outcome measure (regression e
 
 ![](../depression/pdf/gain_vs_no_gain_low_bias.pdf)
 
-Comparison of estimates on depression outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints) in low bias studies. For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
+Comparison of estimates on depression outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints) in low bias studies in the main analysis. For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
 
 
 :::
@@ -2638,7 +2794,7 @@ Comparison of estimates on depression outcomes when only using endpoints where a
 ![](../depression/pdf/gain_vs_no_gain_low_and_some_bias.pdf)
 
 
-Comparison of estimates on depression outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints) in unclear and low bias studies. For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
+Comparison of estimates on depression outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints) in unclear and low bias studies in the main analysis. For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
 
 :::
 
@@ -2657,7 +2813,7 @@ Comparison of estimates on depression outcomes when only using endpoints where a
 ![](../anxiety/pdf/gain_vs_no_gain_low_bias.pdf)
 
 
-Comparison of estimates on anxiety outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints) in low bias studies. For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
+Comparison of estimates on anxiety outcomes when only using endpoints where available (endpoint) versus using the best available estimates (regression estimates, gain scores, or endpoints) in low bias studies in the main analysis. For the most part, estimates are similar in terms of mean but have reduced variance when using all available estimates. SMD = standardized mean difference
 
 :::
 
@@ -2735,7 +2891,7 @@ Leave-one-out estimates for anxiety outcomes for data. Each plot corresponds to 
 :::
 
 ### Dose Response Estimates {.appendix}
-Part of our interest was to assess whether any dose response relationship existed between micro-nutrient supplementation and depression and anxiety outcomes. To do this, we followed the method of Watt et al. and estimated dose categories as a random effect (Watt 2022). This eliminates the need for complex modeling of the dose response curve and will also pool estimates toward the grand mean if data do not support them being different. The dose categories chose for each micro-nutrient were based on the distribution of doses in the included studies and clinical relevance. For example, for vitamin D, we categorized doses as low (<1000 IU/day), medium (1000-3000 IU/day), and high (>3000 IU/day). We then estimated the treatment effect for each dose category compared to placebo. This method also allowed us to include several additional studies that did not have a true comparison group but simply compared different doses of micro-nutrients, such as Penckofer et al. (2022) that used total daily doses of vitamin D about 700 IU versus 7000 IU. Full dose categories for micro-nutrients are presented in @tbl-dose-cat. 
+Part of our interest was to assess whether any dose response relationship existed between micro-nutrient supplementation and depression and anxiety outcomes. To do this, we followed the method of Watt et al. and estimated dose categories as a random effect [@watt_incorporating_2022]. This eliminates the need for complex modeling of the dose response curve and will also pool estimates toward the grand mean if data do not support them being different. The dose categories chose for each micro-nutrient were based on the distribution of doses in the included studies and clinical relevance. For example, for vitamin D, we categorized doses as low (<1000 IU/day), medium (1000-3000 IU/day), and high (>3000 IU/day). We then estimated the treatment effect for each dose category compared to placebo. This method also allowed us to include several additional studies that did not have a true comparison group but simply compared different doses of micro-nutrients, such as Penckofer et al. (2022) that used total daily doses of vitamin D about 700 IU versus 7000 IU. Full dose categories for micro-nutrients are presented in @tbl-dose-cat. 
 
 
 ::: {#tbl-dose-cat}
@@ -2767,7 +2923,7 @@ Dose categories for each micro-nutrient. The table lists the dose categories for
 
 #### Depression outcomes
 
-The results for data included in our main analysis (i.e., low bias studies) are presented in @tbl-dose-response-dep. Only vitamin D had evidence for a robust dose effect in low bias data. We highlight these results in the forest plot @fig-dose-dep-D.
+The results for data included in our main analysis (i.e., 50 out of 52 low bias studies) are presented in @tbl-dose-response-dep. Only vitamin D had evidence for a robust dose effect in low bias data. We highlight these results in the forest plot @fig-dose-dep-D.
 
 ``` {r}
 #| label: tbl-dose-response-dep
@@ -2951,13 +3107,13 @@ deficiency_tab_dep %>% knitr::knit_print()
 ```
 
 ## Confidence in Network Meta-Analysis Ratings {#sec-cinema .appendix}
-Our judgments below are based on the Confidence in Network Meta-Analysis (CINeMA) framework of Nikolakopoulou et al. (2018). 
+Our judgments below are based on the Confidence in Network Meta-Analysis (CINeMA) framework of @nikolakopoulou_cinema_2020. 
 
 ### Reasons for downgrading  {.appendix}
 
 <span class="custom-paragraph-header">1. Within-study bias</span>
 
-We assessed within-study bias using the Risk of Bias 1 (ROB) tool (Higgins et al., 2011). Studies were evaluated among the seven domains of bias: random sequence generation, allocation concealment, blinding of participants and personnel, blinding of outcome assessment, incomplete outcome data, selective outcome reporting, and other sources of bias. Each domain was rated as low risk, unclear risk, or high risk of bias. 
+We assessed within-study bias using the Risk of Bias 1 (ROB) tool [@higgins_cochrane_2011]. Studies were evaluated among the seven domains of bias: random sequence generation, allocation concealment, blinding of participants and personnel, blinding of outcome assessment, incomplete outcome data, selective outcome reporting, and other sources of bias. Each domain was rated as low risk, unclear risk, or high risk of bias. 
 <!-- The table below summarizes the overall rating of the studies coded via the table below, @tbl-rob-rules.  -->
 Only studies with an overall rating of "low risk" were included in our primary analyses. Bias was assessed by two authors with a third member breaking any ties. 
 
@@ -2994,15 +3150,15 @@ We examined the distribution of these variables across treatment comparisons. If
 
 <span class="custom-paragraph-header">4. Imprecision</span>
 
-We examined the credible intervals for each comparison in the network meta-analysis to assess for imprecision. If the credible interval for a comparison included the null value (SMD of 0), then we downgraded for imprecision by one level. If the credible interval was wide and included both clinically meaningful benefits and harms, then we downgraded for imprecision by two levels. We considered an standardized mean difference of 0.5 to be the threshold for clinical significance (Jakobsen, 2020). Thus, if the credible interval for a comparison included both an SMD of -0.5 and an standardized mean difference of 0.5, then we considered this to be a wide credible interval that included both clinically meaningful benefits and harms and downgraded for imprecision by two levels.
+We examined the credible intervals for each comparison in the network meta-analysis to assess for imprecision. If the credible interval for a comparison included the null value (SMD of 0), then we downgraded for imprecision by one level. If the credible interval was wide and included both clinically meaningful benefits and harms, then we downgraded for imprecision by two levels. We considered an standardized mean difference of 0.5 to be the threshold for clinical significance [@jakobsen_should_2020]. Thus, if the credible interval for a comparison included both an SMD of -0.5 and an standardized mean difference of 0.5, then we considered this to be a wide credible interval that included both clinically meaningful benefits and harms and downgraded for imprecision by two levels.
 
 <span class="custom-paragraph-header">5. Heterogeneity</span>
 
-Heterogeneity was assessed similar to imprecision. We calculated prediction intervals for each comparison, calculated by adding a random effect from a new hypothetical study to the mean estimate from the network meta analysis and calculating the 95% credible intervals. If the prediction interval crossed the null value, then we downgraded for heterogeneity by one level. If the prediction interval was wide and included both clinically meaningful benefits and harms, then we downgraded for heterogeneity by two levels. We again considered an standardized mean difference of 0.5 to be the threshold for clinical significance (Jakobsen, 2020). 
+Heterogeneity was assessed similar to imprecision. We calculated prediction intervals for each comparison, calculated by adding a random effect from a new hypothetical study to the mean estimate from the network meta analysis and calculating the 95% credible intervals. If the prediction interval crossed the null value, then we downgraded for heterogeneity by one level. If the prediction interval was wide and included both clinically meaningful benefits and harms, then we downgraded for heterogeneity by two levels. We again considered an standardized mean difference of 0.5 to be the threshold for clinical significance [@jakobsen_should_2020]. 
 
 <span class="custom-paragraph-header">6. Incoherence</span>
 
-To assess incoherence, we examined the consistency of direct and indirect evidence for each comparison in the network meta-analysis using the Separate Indirect from Direct Evidence (SIDE) approach (Gerta Rücker, Guido Schwarzer, Ulrike Krahn, Jochem König, Orestis Efthimiou. netmeta: Network Meta-Analysis using Frequentist Methods 2018). If there was a significant inconsistency between direct and indirect evidence for a comparison, then we downgraded for incoherence by one level. 
+To assess incoherence, we examined the consistency of direct and indirect evidence for each comparison in the network meta-analysis using the Separate Indirect from Direct Evidence (SIDE) approach [@dias_checking_2010, @shihEvidencesplittingApproachEvaluation2021]. If there was a significant inconsistency between direct and indirect evidence for a comparison, then we downgraded for incoherence by one level. 
 
 We also assessed the fit of unrelated mean effects (design by treatment interaction) as compared to consistency models to examine for incoherence in the network. If the fit of the unrelated mean effects model was substantially better than the consistency model, then we downgraded for incoherence by one level. If the fit of the unrelated mean effects model was substantially better than the consistency model and there were concerns about the transitivity of the network, then we downgraded for incoherence by two levels. We assessed fit by using the expected predictive log density (EPLD) and from a leave one out cross validation. If the EPLD was higher for the unrelated mean effects model than the consistency model, then we downgraded for incoherence by one level.
 
@@ -3028,26 +3184,33 @@ cinema_low_anx_def <- readRDS(here::here("outputs","anxiety","tables",
 ```
 
 ```{r}
-#| tbl-cap: "CINeMA ratings for all treatments in low bias studies compared to placebo for depression scales."
+#| label: tbl-cinema-dep
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for depression scales."
 cinema_low_dep %>% set_table_properties(layout = "fixed") %>%                # good to do before scaling
     fit_to_width(max_width = 10) %>%    # because margins will be smaller
     fontsize(size = 6, part = "all") %>%  knitr::knit_print()
 ```
 
 ```{r}
-#| tbl-cap: "CINeMA ratings for all treatments in low bias studies compared to placebo for depression scales. Estimates broken out by depression status and vitamin deficiency status."
-cinema_low_dep_def %>% knitr::knit_print()
+#| label: tbl-cinema-dep-def
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for depression scales. Estimates broken out by depression status and vitamin deficiency status."
+cinema_low_dep_def %>% set_table_properties(layout = "fixed") %>%    
+  fit_to_width(max_width = 10) %>%    # because margins will be smaller
+  fontsize(size = 6, part = "all") %>%
+  knitr::knit_print()
 ```
 
 ```{r}
-#| tbl-cap: "CINeMA ratings for all treatments in low bias studies compared to placebo for anxiety scales."
+#| label: tbl-cinema-anx
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for anxiety scales."
 cinema_low_anx %>% set_table_properties(layout = "fixed") %>%                # good to do before scaling
     fit_to_width(max_width = 10) %>%    # because margins will be smaller
     fontsize(size = 6, part = "all") %>%  knitr::knit_print()
 ```
 
 ```{r}
-#| tbl-cap: "CINeMA ratings for all treatments in low bias studies compared to placebo for anxiety scales. Estimates broken out by depression status and vitamin deficiency status."
+#| label: tbl-cinema-anx-def
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for anxiety scales. Estimates broken out by depression status and vitamin deficiency status."
 cinema_low_anx_def %>% set_table_properties(layout = "fixed") %>%                # good to do before scaling
     fit_to_width(max_width = 10) %>%    # because margins will be smaller
     fontsize(size = 6, part = "all") %>% 
@@ -3059,6 +3222,12 @@ cinema_low_anx_def %>% set_table_properties(layout = "fixed") %>%               
 
 
 
-## Data/code availability {.appendix}
+## Data/code availability {#sec-data-code .appendix}
 All code used for data extraction, analysis, and figure generation is available at [https://github.com/ericdunipace/vitamin_meta](https://github.com/ericdunipace/vitamin_meta). The data used in the analyses are also available at this repository.
 
+
+## References {#sec-appendix-ref .appendix}
+
+::: {#refs}
+
+:::
