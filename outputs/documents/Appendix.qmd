@@ -1613,26 +1613,26 @@ study_tab %>% knitr::knit_print()
 
 <!-- Bayesian network meta-analyses allow for the incorporation of prior information (if any) as  -->
 ### Measures of Treatment Effects {#sec-effect-measures .appendix}
-The effect size for our studies was the standardized mean difference (SMD). This was selected because the included studies in our analysis use a variety of different depression and anxiety scales (See @sec-rating-scales). We preferred utilizing regression estimates when available and relevant followed by gain scores and finally end point measures. To transform these into SMDs, we calculated the SMD following Hedge's $g$ [@hedges1981distribution]. When studies provided medians, interquartile ranges, and minima and maxima we calculated an estimate of the mean using the methods described in @wanEstimatingSampleMean2014 In most networks considered in the analysis, placebo was the reference treatment. In the antidepressant network, we used treatment with any kind of antidepressant (TCAs, SSRIs, SNRIs, etc.) as the reference treatment.
+The effect size for our studies was the standardized mean difference (SMD). This was selected because the included studies in our analysis use a variety of different depression and anxiety scales (see @sec-rating-scales). We preferred utilizing regression estimates when available and relevant, followed by gain scores and finally endpoint measures. To transform these into SMDs, we calculated the SMD following Hedge's $g$ [@hedges1981distribution]. When studies provided medians, interquartile ranges, and minima and maxima, we calculated an estimate of the mean using the methods described in @wanEstimatingSampleMean2014. In most networks considered in the analysis, placebo was the reference treatment. In the antidepressant network, we used treatment with any kind of antidepressant (TCAs, SSRIs, SNRIs, etc.) as the reference treatment.
 
-Missing standard deviations were handled in a few ways when possible. First, some studies reported standard errors so these were transformed into standard deviations using the usual formula. Second, if both were missing but confidence intervals, t-values, or p-values were available we used the methods described in Section 6.5.2.3 of the Cochrane Handbook for Systematic Reviews [@higgins2023cochrane]. Finally, if only medians were available and the study reported either the interquartile range or range, we estimated the standard deviation following the method described in @wanEstimatingSampleMean2014  
+Missing standard deviations were handled in a few ways when possible. First, some studies reported standard errors, so these were transformed into standard deviations using the usual formula. Second, if both were missing but confidence intervals, t-values, or p-values were available, we used the methods described in Section 6.5.2.3 of the Cochrane Handbook for Systematic Reviews [@higgins2023cochrane]. Finally, if only medians were available and the study reported either the interquartile range or range, we estimated the standard deviation following the method described in @wanEstimatingSampleMean2014.
 
 ### Network Meta-Analysis Model Specification {.appendix}
 
 We fitted our Bayesian network meta-analysis and meta-regression models using the `brms` package in `R` to interface with the Stan sampling language. We accounted for correlations between multi-arm studies by assuming a correlation parameter of 0.5 between arms of the same study.
 
-using the `brms` functionality for multivariate meta-analysis. We used weakly informative priors for all parameters and conducted sensitivity analyses to evaluate the impact of different prior choices on our results. The details of the model specification, including the likelihood, random effects structure, and priors, are described in the sections below.
+Using the `brms` functionality for multivariate meta-analysis, we used weakly informative priors for all parameters and conducted sensitivity analyses to evaluate the impact of different prior choices on our results. The details of the model specification, including the likelihood, random effects structure, and priors, are described in the sections below.
 
 #### Likelihood {.appendix}
-The likelihood for our network meta-analysis model was specified as follows for each outcome (depression and anxiety:
+The likelihood for our network meta-analysis model was specified as follows for each outcome (depression and anxiety):
 
-For all studies $i = 1, \dots, N$ and treatment arms $j = 1, \dots, J_{i}$, we observed effect sizes $y_{i,j}$ or the $i$-th study and $j$-th treatment arm with corresponding variances $\sigma_{i,j}^2$:
+For all studies $i = 1, \dots, N$ and treatment arms $j = 1, \dots, J_{i}$, we observed effect sizes $y_{i,j}$ for the $i$-th study and $j$-th treatment arm with corresponding variances $\sigma_{i,j}^2$:
 
 $$ y_{i,1}, y_{i,2}, \ldots, y_{i,J_{i}} \sim \text{Multivariate Student-t}\left(\mathbf{\mu}_i, \Sigma_i, \nu \right),$$
 
 where $\mathbf{\mu}$ is the vector of true effect sizes for each treatment arm, $\Sigma_i$ is the covariance matrix for study $i$ that accounts for the within-study correlations between arms, and $\nu = 30$ is the degrees of freedom parameter for the Student-t distribution which allows for heavier tails to account for potential outliers. The covariance matrix $\Sigma_i$ was specified as $\sigma_{i,j}^2$ on the diagonal and $\sigma_{i,0}^2$ for the off-diagonal elements where $\sigma_{i,0}$ is the standard deviation of the reference arm for the trial. Note that $J_i$ is one less than the total number of arms in the trial, as the reference arm is not included in the likelihood.
 
-The vector $\mathbf{\mu}_i$ of true effect sizes for study $i$ corresponds to the treatment effects for each arm relative to a reference treatment (e.g., placebo) and was modeled as a function of the treatment effects, $\theta$ and random effects, $\upsilon$ as described in the next section. for example, for a study where the first arm compared treatment A to B, it's mean component would be equal to 
+The vector $\mathbf{\mu}_i$ of true effect sizes for study $i$ corresponds to the treatment effects for each arm relative to a reference treatment (e.g., placebo) and was modeled as a function of the treatment effects, $\theta$, and random effects, $\upsilon$, as described in the next section. For example, for a study where the first arm compared treatment A to B, its mean component would be equal to
 $$ \theta_A - \theta_B + \upsilon_{i,1}. $$
 
 For the same arm in the same study, the mean for the effect modifier analysis including deficiency status and baseline depression/anxiety status would be calculated as
@@ -1676,7 +1676,7 @@ To monitor convergence, we examined trace plots for all parameters and calculate
 
 #### Software {.appendix}
 
-We utilize `R` version 4.5.1 for analyses. The `brms` package version 2.23.0 was used to fit the Bayesian network meta-analysis and meta-regression models, which interfaces with the Stan sampling language. We utilized the `cmdstanr` version 0.9.0.9000 backend to sample from the posterior distributions. The `tidyverse` suite of packages was used for data manipulation and visualization, and the `gt` package was used for creating tables.
+We used `R` version 4.5.1 for analyses. The `brms` package version 2.23.0 was used to fit the Bayesian network meta-analysis and meta-regression models, which interface with the Stan sampling language. We used the `cmdstanr` version 0.9.0.9000 backend to sample from the posterior distributions. The `tidyverse` suite of packages was used for data manipulation and visualization, and the `gt` package was used for creating tables.
 
 
 
@@ -1966,7 +1966,7 @@ When examining the effect of placebo over time, there did not appear to be any m
 
 ![](../overall/pdf/placebo_effects_over_time.pdf)
 
-The mean end score of placebo arms by year of publication for placebo arms. The points are the observed points for placebo arms in studies included in our main and sensitivity analyses with and endpoint available. The line is the predicted mean from a random effects meta-regression model adjusting for scale used. There does not appear to be a major trend in placebo response over time.
+The mean end score of placebo arms by year of publication for placebo arms. The points are the observed points for placebo arms in studies included in our main and sensitivity analyses with an endpoint available. The line is the predicted mean from a random effects meta-regression model adjusting for scale used. There does not appear to be a major trend in placebo response over time.
 
 :::
 
@@ -1987,7 +1987,7 @@ We assessed reporting bias by examining funnel plots both for the simple model w
 
 ![](../depression/pdf/funnel_plot.pdf)
 
-Contour enhanced funnel plot for effects on depression outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on simple model incorporating only treatment effects as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on depression outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a simple treatment-only model using micronutrient treatment effects and study-level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
@@ -1995,7 +1995,7 @@ Contour enhanced funnel plot for effects on depression outcomes. Study outcomes 
 
 ![](../anxiety/pdf/funnel_plot.pdf)
 
-Contour enhanced funnel plot for effects on anxiety outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on simple model incorporating only treatment effects as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on anxiety outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a simple treatment-only model using micronutrient treatment effects and study-level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
@@ -2003,7 +2003,7 @@ Contour enhanced funnel plot for effects on anxiety outcomes. Study outcomes in 
 
 ![](../depression/pdf/funnel_plot_by_def_centered_low_bias_only_with_contours.pdf)
 
-Contour enhanced funnel plot for effects on depression outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on depression outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
@@ -2011,17 +2011,17 @@ Contour enhanced funnel plot for effects on depression outcomes. Study outcomes 
 
 ![](../anxiety/pdf/funnel_plot_by_def_centered_low_bias_only_with_contours.pdf)
 
-Contour enhanced funnel plot for effects on anxiety outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on anxiety outcomes. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and anxiety and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
-Based on the funnel plots, there is some evidence of asymmetry in the simple model for depression and a anxiety outcomes, which may suggest the presence of small study effects or publication bias. The models incorporating baseline disease (depression/anxiety) and deficiency status appear more symmetric but still appear to have outliers. Thus, we also examined funnel plots by intervention to further explore potential sources of asymmetry. The funnel plots for the simple model by intervention are presented in @fig-funnel-dep-by-inter and @fig-funnel-anx-by-inter. The funnel plots for the model including effect modification by intervention are presented in @fig-funnel-dep-mod-by-inter and @fig-funnel-anx-mod-by-inter.
+Based on the funnel plots, there is some evidence of asymmetry in the simple treatment-only model for depression and anxiety outcomes, which may suggest the presence of small study effects or publication bias. The models incorporating baseline disease (depression/anxiety) and deficiency status appear more symmetric but still appear to have outliers. Thus, we also examined funnel plots by intervention to further explore potential sources of asymmetry. The funnel plots for the simple treatment-only model by intervention are presented in @fig-funnel-dep-by-inter and @fig-funnel-anx-by-inter. The funnel plots for the model including effect modification by intervention are presented in @fig-funnel-dep-mod-by-inter and @fig-funnel-anx-mod-by-inter.
 
 ::: {#fig-funnel-dep-by-inter}
 
 ![](../depression/pdf/funnel_plot_by_intervention_centered.pdf)
 
-Contour enhanced funnel plot for effects on depression outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a simple model incorporating only treatment effects and study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on depression outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a simple treatment-only model using micronutrient treatment effects and study-level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
@@ -2029,7 +2029,7 @@ Contour enhanced funnel plot for effects on depression outcomes separated by int
 
 ![](../anxiety/pdf/funnel_plot_by_intervention_centered.pdf)
 
-Contour enhanced funnel plot for effects on anxiety outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a simple model incorporating only treatment effects and study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on anxiety outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a simple treatment-only model using micronutrient treatment effects and study-level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
@@ -2037,7 +2037,7 @@ Contour enhanced funnel plot for effects on anxiety outcomes separated by interv
 
 ![](../depression/pdf/funnel_plot_by_def_centered_low_bias_only_with_contours_facet.pdf)
 
-Contour enhanced funnel plot for effects on depression outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on depression outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
@@ -2045,7 +2045,7 @@ Contour enhanced funnel plot for effects on depression outcomes separated by int
 
 ![](../anxiety/pdf/funnel_plot_by_def_centered_low_bias_only_with_contours_facet.pdf)
 
-Contour enhanced funnel plot for effects on anxiety outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on anxiety outcomes separated by intervention. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and anxiety and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
@@ -2057,7 +2057,7 @@ We also examined funnel plots for all data to assess reporting bias in the full 
 
 ![](../depression/pdf/funnel_plot_high.pdf)
 
-Contour enhanced funnel plot for effects on depression outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on simple model incorporating only treatment effects as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on depression outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a simple treatment-only model using micronutrient treatment effects and study-level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
@@ -2065,7 +2065,7 @@ Contour enhanced funnel plot for effects on depression outcomes for all data. St
 
 ![](../anxiety/pdf/funnel_plot_high.pdf)
 
-Contour enhanced funnel plot for effects on anxiety outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on simple model incorporating only treatment effects as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on anxiety outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a simple treatment-only model using micronutrient treatment effects and study-level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
@@ -2073,7 +2073,7 @@ Contour enhanced funnel plot for effects on anxiety outcomes for all data. Study
 
 ![](../depression/pdf/funnel_plot_by_def_centered_with_contours.pdf)
 
-Contour enhanced funnel plot for effects on depression outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on depression outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
@@ -2081,13 +2081,13 @@ Contour enhanced funnel plot for effects on depression outcomes for all data. St
 
 ![](../anxiety/pdf/funnel_plot_by_def_centered_with_contours.pdf)
 
-Contour enhanced funnel plot for effects on anxiety outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and depression and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show to the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
+Contour enhanced funnel plot for effects on anxiety outcomes for all data. Study outcomes in standardized mean differences (SMD) are centered by predicted mean ($\hat{\mu}$) based on a model incorporating treatment effects and anxiety and deficiency status effect modifiers as well as the study level random effects. The y-axis shows the standard error of the SMD. The vertical dashed line represents the overall effect estimate from the network meta-analysis and shaded areas show the probability that an observed study SMD would be that far from the predicted mean. In the absence of reporting bias, we would expect the points to be symmetrically distributed around the overall effect estimate, with more precise studies (those with smaller standard errors) clustered near the top of the plot and less precise studies (those with larger standard errors) spread out towards the bottom. Asymmetry in the funnel plot may suggest the presence of reporting bias or small study effects.
 
 :::
 
 #### Publication bias assessment by country {.appendix}
 
-In this section we present the evidence from our meta-regression analyses as to whether there are any country level effects (1) in general and (2) with publication bias. We utilize a Egger regression (regression of the standard error of estimates on the outcome) with a random effect by country to assess whether there is evidence of small study effects by country. We also present funnel plots highlighting studies from Iran, which had the largest number of studies and thus may be driving any observed small study effects. The results of the meta-regression analyses are presented in @fig-country and the funnel plots are presented in @fig-funnel-country-dep and @fig-funnel-country-anx. 
+In this section we present the evidence from our meta-regression analyses as to whether there are any country-level effects (1) in general and (2) with publication bias. We use an Egger regression (regression of the standard error of estimates on the outcome) with a random effect by country to assess whether there is evidence of small-study effects by country. We also present funnel plots highlighting studies from Iran, which had the largest number of studies and thus may be driving any observed small-study effects. The results of the meta-regression analyses are presented in @fig-country and the funnel plots are presented in @fig-funnel-country-dep and @fig-funnel-country-anx.
 
 
 :::  {#fig-country}
@@ -2252,7 +2252,7 @@ dep_results %>% rename(Intervention = .trt) %>%
 
 ```
 
-#### Effects of micronutrients on depression outcomes by baseline disesase and deficiency  {.appendix}
+#### Effects of micronutrients on depression outcomes by baseline disease and deficiency  {.appendix}
 
 ##### Low bias data
 In the main analysis, we presented forest plots only for vitamin D of the effect of micro-nutrients by baseline disease and deficiency status. Here we also include the tables of the effects in @tbl-dep-mod-low-bias.
@@ -2280,7 +2280,7 @@ readRDS(
 ```
 
 ##### All data by deficiency and depression status
-In our sensitivity analysis, we included all data with slopes for treatment effect allowed to vary by bias level. Results presented in @tbl-dep-mod-all-bias. Vitamin D estimates have been presented as forest plots in @fig-dep-mod-all-D.
+In our sensitivity analysis, we included all data with slopes for treatment effect allowed to vary by bias level. Results are presented in @tbl-dep-mod-all-bias. Vitamin D estimates are presented as forest plots in @fig-dep-mod-all-D.
 
 ::: {#fig-dep-mod-all-D}
 
@@ -2339,13 +2339,13 @@ Here we present the results of the network meta-analysis assessing the effects o
 
 ![](../depression/pdf/relative_effects_low_bias_ssri_only.pdf)
 
-Relative effects of micro-nutrients as augmentation to antidepressants for depression outcomes. The plot shows the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered by effect size, with the most effective treatments at the top. The vertical dashed line represents no effect (SMD = 0). Treatments with credible intervals that do not include zero are considered to have a statistically significant effect compared to placebo.
+Relative effects of micro-nutrients as augmentation to antidepressants for depression outcomes. The plot shows the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered by effect size, with the most effective treatments at the top. The vertical dashed line represents no effect (SMD = 0). Treatments with credible intervals that do not include zero are considered to have a statistically significant effect compared to antidepressants alone.
 
 :::
 
 ```{r}
 #| label: tbl-augmentation-dep
-#| tbl-cap: "Table of depression treatments compared to placebo for studies comparing augmentation to antidepressants The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+#| tbl-cap: "Table of depression treatments compared to antidepressants alone for studies comparing augmentation to antidepressants. The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
 
 fit_ssri_dep %>% 
   vit$summary_brms_nma(keep = ".trt") %>% 
@@ -2431,10 +2431,10 @@ anx_results %>% rename(Intervention = .trt) %>%
 
 ```
 
-#### Effects of micronutrients on anxiety outcomes by baseline disesase and deficiency  {.appendix}
+#### Effects of micronutrients on anxiety outcomes by baseline disease and deficiency  {.appendix}
 
 ##### Low bias data
-In the main analysis, we presented forest plots only for vitamin D of the effect of micro-nutrients by baseline disease and deficiency status. Here we also include the tables of the effects for all miconutrients in @tbl-anx-mod-low and forest plots for those outcomes in @fig-anx-mod-low.
+In the main analysis, we presented forest plots only for vitamin D of the effect of micro-nutrients by baseline disease and deficiency status. Here we also include the tables of the effects for all micronutrients in @tbl-anx-mod-low and forest plots for those outcomes in @fig-anx-mod-low.
 
 ::: {#fig-anx-mod-low}
 
@@ -2455,7 +2455,7 @@ readRDS(
 ```
 ##### All data
 
-In our sensitivity analysis, we included all data with slopes for treatment effect allowed to vary by bias level. Results presented in @tbl-anx-mod-all-bias. Vitamin D estimates have been presented as forest plots in @fig-dep-mod-all-D.
+In our sensitivity analysis, we included all data with slopes for treatment effect allowed to vary by bias level. Results are presented in @tbl-anx-mod-all-bias. Vitamin D estimates are presented as forest plots in @fig-anx-mod-all-D.
 
 ::: {#fig-anx-mod-all-D}
 
@@ -2467,7 +2467,7 @@ Forest plot for the effect of vitamin D on anxiety broken down by baseline disea
 
 ```{r}
 #| label: tbl-anx-mod-all-bias
-#| tbl-cap: "Table of anxiety treatments compared to placebo for all data by disease (depression yes or no) and deficiency status. The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+#| tbl-cap: "Table of anxiety treatments compared to placebo for all data by disease (anxiety yes or no) and deficiency status. The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
 
 outcome <- "anxiety"
 outcome_label <- "anxiety"
@@ -2513,13 +2513,13 @@ Here we present the results of the network meta-analysis assessing the effects o
 
 ![](../anxiety/pdf/relative_effects_low_bias_ssri_only.pdf)
 
-Relative effects of micro-nutrients as augmentation to antidepressants for depression outcomes. The plot shows the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered by effect size, with the most effective treatments at the top. The vertical dashed line represents no effect (SMD = 0). Treatments with credible intervals that do not include zero are considered to have a statistically significant effect compared to placebo.
+Relative effects of micro-nutrients as augmentation to antidepressants for anxiety outcomes. The plot shows the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered by effect size, with the most effective treatments at the top. The vertical dashed line represents no effect (SMD = 0). Treatments with credible intervals that do not include zero are considered to have a statistically significant effect compared to antidepressants alone.
 
 :::
 
 ```{r}
 #| label: tbl-augmentation-anx
-#| tbl-cap: "Table of anxiety treatments compared to placebo for studies comparing augmentation to antidepressants. The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
+#| tbl-cap: "Table of anxiety treatments compared to antidepressants alone for studies comparing augmentation to antidepressants. The table lists the estimated treatment effects (standardized mean differences, SMD) for each comparison in the network meta-analysis, along with 95% credible intervals. The comparisons are ordered alphabetically."
 
 fit_ssri_anx %>% 
   vit$summary_brms_nma(keep = ".trt") %>% 
@@ -2542,7 +2542,7 @@ fit_ssri_anx %>%
 ```
 
 ### Adverse Events
-Here were present adverse events results for low bias studies in the main analysis, all studies, and studies comparing augmentation to antidepressants in @fig-ae-low-bias, @fig-ae-all-bias, and @fig-ae-ssri-all-bias respectively. We also present tables of the odds ratios for adverse events for these comparisons in @tbl-ae-low-bias, @tbl-ae-all-bias, and @tbl-ae-ssri-all-bias respectively. Of note, only `r full_data %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow()` (`r round((full_data %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow())/nrow(full_data %>% distinct(study)) * 100, digits = 2)`%) of all  studies reported on adverse events and only `r data %>% filter(bias == "low") %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow()` (`r round((data %>% filter(bias == "low") %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow())/nrow(data %>% filter(bias == "low") %>% distinct(study)) * 100, digits = 2)`%) of low bias studies included in the main analysis, which may limit the conclusions that can be drawn from these analyses.
+Here we present adverse event results for low bias studies in the main analysis, all studies, and studies comparing augmentation to antidepressants in @fig-ae-low-bias, @fig-ae-all-bias, and @fig-ae-ssri-all-bias, respectively. We also present tables of the odds ratios for adverse events for these comparisons in @tbl-ae-low-bias, @tbl-ae-all-bias, and @tbl-ae-ssri-all-bias, respectively. Of note, only `r full_data %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow()` (`r round((full_data %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow())/nrow(full_data %>% distinct(study)) * 100, digits = 2)`%) of all studies reported on adverse events and only `r data %>% filter(bias == "low") %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow()` (`r round((data %>% filter(bias == "low") %>% distinct(study, .keep_all = TRUE) %>% filter(!is.na(adverse.count)) %>% nrow())/nrow(data %>% filter(bias == "low") %>% distinct(study)) * 100, digits = 2)`%) of low bias studies included in the main analysis, which may limit the conclusions that can be drawn from these analyses.
 
 ::: {#fig-ae-low-bias}
 ![](../overall/pdf/adverse_events_odds_ratios_low_bias_overall.pdf)
@@ -2559,7 +2559,7 @@ Forest plots for odds ratios of adverse events as compared to placebo for all st
 ::: {#fig-ae-ssri-all-bias}
 ![](../overall/pdf/adverse_events_odds_ratios_ssri_overall.pdf)
 
-Forest plots for odds ratios of adverse events for all studies considering augmentation of antidepressants with micronutrients. Values less than 1 indicate that the intervention had fewer adverse events than antidepressants alone, while values greater than 1 indicate that the intervention had more adverse events than antidepressants alone The vertical dashed line represents no effect (odds ratio = 1). Interventions with credible intervals that do not include 1 are considered to have a statistically significant effect compared to antidepressants alone.
+Forest plots for odds ratios of adverse events for all studies considering augmentation of antidepressants with micronutrients. Values less than 1 indicate that the intervention had fewer adverse events than antidepressants alone, while values greater than 1 indicate that the intervention had more adverse events than antidepressants alone. The vertical dashed line represents no effect (odds ratio = 1). Interventions with credible intervals that do not include 1 are considered to have a statistically significant effect compared to antidepressants alone.
 :::
 
 ```{r}
@@ -3018,7 +3018,7 @@ Leave-one-out estimates for depression outcomes for the main analysis. Each plot
 
 ::: {#fig-loo-anx}
 
-![](../depression/pdf/loo_plot_low_bias.pdf)
+![](../anxiety/pdf/loo_plot_low_bias.pdf)
 
 Leave-one-out estimates for anxiety outcomes for the main analysis. Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the effect of leaving out a study with the intervention in question; purple circles are the changes in effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
 
@@ -3030,7 +3030,7 @@ Leave-one-out estimates for anxiety outcomes for the main analysis. Each plot co
 
 ![](../depression/pdf/loo_plot_some_and_low_bias.pdf)
 
-Leave-one-out estimates for depression outcomes for the low and unclear bias data Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the effect of leaving out a study with the intervention in question; purple circles are the changes in effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
+Leave-one-out estimates for depression outcomes for the low and unclear bias data. Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the effect of leaving out a study with the intervention in question; purple circles are the changes in effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
 
 :::
 
@@ -3038,7 +3038,7 @@ Leave-one-out estimates for depression outcomes for the low and unclear bias dat
 
 ![](../anxiety/pdf/loo_plot_some_and_low_bias.pdf)
 
-Leave-one-out estimates for anxiety outcomes for the low and unclear bias data Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the effect of leaving out a study with the intervention in question; purple circles are the changes in effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
+Leave-one-out estimates for anxiety outcomes for the low and unclear bias data. Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the effect of leaving out a study with the intervention in question; purple circles are the changes in effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
 
 :::
 
@@ -3054,12 +3054,12 @@ Leave-one-out estimates for depression outcomes for all data. Each plot correspo
 
 ![](../anxiety/pdf/loo_plot_all_bias.pdf)
 
-Leave-one-out estimates for anxiety outcomes for data. Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the estimated mean effect when leaving out a study with the intervention in question; purple circles are the mean effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
+Leave-one-out estimates for anxiety outcomes for all data. Each plot corresponds to a comparison in the network meta-analysis. The x-axis shows the estimated treatment effect (standardized mean difference) when leaving out each study in turn, with 95% credible intervals. The orange X's correspond to the estimated mean effect when leaving out a study with the intervention in question; purple circles are the mean effects when leaving out studies that do not use the intervention in question. If the leave-one-out estimates are similar to the overall estimate and do not show large deviations, this suggests that no single study has a disproportionate influence on the overall results.
 
 :::
 
 ### Dose Response Estimates {.appendix}
-Part of our interest was to assess whether any dose response relationship existed between micro-nutrient supplementation and depression and anxiety outcomes. To do this, we followed the method of Watt et al. and estimated dose categories as a random effect [@watt_incorporating_2022]. This eliminates the need for complex modeling of the dose response curve and will also pool estimates toward the grand mean if data do not support them being different. The dose categories chose for each micro-nutrient were based on the distribution of doses in the included studies and clinical relevance. For example, for vitamin D, we categorized doses as low (<1000 IU/day), medium (1000-3000 IU/day), and high (>3000 IU/day). We then estimated the treatment effect for each dose category compared to placebo. This method also allowed us to include several additional studies that did not have a true comparison group but simply compared different doses of micro-nutrients, such as Penckofer et al. (2022) that used total daily doses of vitamin D about 700 IU versus 7000 IU. Full dose categories for micro-nutrients are presented in @tbl-dose-cat. 
+Part of our interest was to assess whether any dose-response relationship existed between micro-nutrient supplementation and depression and anxiety outcomes. To do this, we followed the method of Watt et al. and estimated dose categories as a random effect [@watt_incorporating_2022]. This eliminates the need for complex modeling of the dose-response curve and will also pool estimates toward the grand mean if data do not support them being different. The dose categories chosen for each micro-nutrient were based on the distribution of doses in the included studies and clinical relevance. For example, for vitamin D, we categorized doses as low (<1000 IU/day), medium (1000-3000 IU/day), and high (>3000 IU/day). We then estimated the treatment effect for each dose category compared to placebo. This method also allowed us to include several additional studies that did not have a true comparison group but simply compared different doses of micro-nutrients, such as Penckofer et al. (2022), which used total daily doses of approximately 700 IU versus 7000 IU. Full dose categories for micro-nutrients are presented in @tbl-dose-cat.
 
 
 ::: {#tbl-dose-cat}
@@ -3095,7 +3095,7 @@ The results for data included in our main analysis (i.e., 50 out of 52 low bias 
 
 ``` {r}
 #| label: tbl-dose-response-dep
-#| tbl-cap: "Dose response estimates for depression outcomes in low bias data. The table shows the estimated treatment effect in standardized meand differences (SMD) for each dose category of micronutrient supplementation compared to placebo. The table is ordered alphabetically by intervention and then by dose category. Estimates with very large intervals are based on the prior as the placebo effect is not identified."
+#| tbl-cap: "Dose response estimates for depression outcomes in low bias data. The table shows the estimated treatment effect in standardized mean differences (SMD) for each dose category of micronutrient supplementation compared to placebo. The table is ordered alphabetically by intervention and then by dose category. Estimates with very large intervals are based on the prior as the placebo effect is not identified."
 #| 
 dose_tab_dep <- here::here("outputs", "depression","tables","ft",
                               glue::glue("nma_depression_dose_response_table_low_bias.rds")) %>% 
@@ -3126,13 +3126,13 @@ Evidence for dose response in vitamin D appears consistent across bias levels.
 
 ``` {r}
 #| label: tbl-dose-response-anx
-#| tbl-cap: "Dose response estimates for anxiety outcomes in low bias data. The table shows the estimated treatment effect in standardized meand differences (SMD) for each dose category of micronutrient supplementation compared to placebo. The table is ordered alphabetically by intervention and then by dose category. Estimates with very large intervals are based on the prior as the placebo effect is not identified."
+#| tbl-cap: "Dose response estimates for anxiety outcomes in low bias data. The table shows the estimated treatment effect in standardized mean differences (SMD) for each dose category of micronutrient supplementation compared to placebo. The table is ordered alphabetically by intervention and then by dose category. Estimates with very large intervals are based on the prior as the placebo effect is not identified."
 #| 
 dose_tab_anx <- here::here("outputs", "anxiety","tables","ft",
                               glue::glue("nma_anxiety_dose_response_table_low_bias.rds")) %>% 
   readRDS()
 
-dose_tab_dep %>% knitr::knit_print()
+dose_tab_anx %>% knitr::knit_print()
 
 ```
 
@@ -3140,7 +3140,7 @@ dose_tab_dep %>% knitr::knit_print()
 
 ![](../anxiety/pdf/vitamin_d_dose_response_low_bias.pdf)
 
-Forest plots for the effect of vitamin D on depression broken down by dose category in low bias data. SMD = standardized mean difference. 
+Forest plots for the effect of vitamin D on anxiety broken down by dose category in low bias data. SMD = standardized mean difference.
 
 :::
 
@@ -3155,7 +3155,7 @@ Evidence for dose response in vitamin D appears consistent across bias levels fo
 
 ### Duration Estimates {.appendix}
 
-To assess whether the duration of treatment was associated with treatment effects, we estimated the treatment by duration categories as a random effect. The duration categories were initially selected at 0-4 weeks, 4-8 weeks, and >8 weeks; however, given the actual distribution of study durations, we combined the 0-4 weeks and 4-8 weeks categories and separated the >8 week into 8-16 weeks, 16-26 weeks and > 26 weeks. The results are presented in @tbl-duration-response-dep and @tbl-duration-response-anx. Only vitamin D had studies in each duration category so we present it's results graphically. In low bias data, there is significant uncertainty but there does seem to be evidence of attenuation in treatment effects over time. Vitamin D figures presented in @fig-duration-dep-D and @fig-duration-anx-D.
+To assess whether the duration of treatment was associated with treatment effects, we estimated the treatment by duration categories as a random effect. The duration categories were initially selected at 0-4 weeks, 4-8 weeks, and >8 weeks; however, given the actual distribution of study durations, we combined the 0-4 weeks and 4-8 weeks categories and separated the >8 weeks category into 8-16 weeks, 16-26 weeks, and >26 weeks. The results are presented in @tbl-duration-response-dep and @tbl-duration-response-anx. Only vitamin D had studies in each duration category, so we present its results graphically. In low bias data, there is significant uncertainty, but there does seem to be evidence of attenuation in treatment effects over time. Vitamin D figures are presented in @fig-duration-dep-D and @fig-duration-anx-D.
 
 ``` {r}
 #| label: tbl-duration-response-dep
@@ -3212,7 +3212,7 @@ Forest plots for the effect of vitamin D on depression broken down by duration c
 
 ::: {#fig-duration-anx-D-all}
 
-![](../anxiety/pdf/follow_up_duration_distribution.pdf)
+![](../anxiety/pdf/follow_up_duration_distribution_all_data.pdf)
 
 Forest plots for the effect of vitamin D on anxiety broken down by duration category in all data. SMD = standardized mean difference.
 
@@ -3220,13 +3220,13 @@ Forest plots for the effect of vitamin D on anxiety broken down by duration cate
 
 ### Percent Deficient and Percent with Baseline Disease Status
 
-In our main analysis, we classify studies as being in deficient (or  non-deficient) populations based strictly on the mean value of the baseline micro-nutrient level. However, since this is a population level distinction and there would be many people without deficiency (respectively, with deficiency) in the deficient (respectively, non-deficient) populations. Thus, we wanted to assess treatment effects if we tried to better account for the real population percentages.
+In our main analysis, we classified studies as being in deficient (or non-deficient) populations based strictly on the mean value of the baseline micro-nutrient level. However, because this is a population-level distinction, there will still be many people without deficiency in the deficient populations and many people with deficiency in the non-deficient populations. Thus, we wanted to assess treatment effects after better accounting for the underlying population percentages.
 
-To do so, we assume a log-Gaussian distribution to calculate the percentages of deficient and non-deficient participants in each study based on the reported mean and standard deviation of baseline micro-nutrient levels. We do the same for the percentage of participants with baseline depression or anxiety symptoms based on the reported mean and standard deviation of baseline symptom severity.
+To do so, we assumed a log-Gaussian distribution to calculate the percentages of deficient and non-deficient participants in each study based on the reported mean and standard deviation of baseline micro-nutrient levels. We did the same for the percentage of participants with baseline depression or anxiety symptoms based on the reported mean and standard deviation of baseline symptom severity.
 
 Some studies didn't report enough information to calculate these percentages, so their values were imputed using a simple truncated Gaussian model with only an intercept and a term for year of publication.
 
-We should note that the probabilities from the log-Gaussian distribution, if underestimated, would expect the results to be biased away from the null; if overestimated, the results would be biased toward the null. Thus, the results of this analysis should be interpreted with caution as they are based on assumptions about the distribution of micro-nutrient levels and symptom severity in the included studies.
+We should note that if the probabilities from the log-Gaussian distribution are underestimated, the results would be biased away from the null; if overestimated, the results would be biased toward the null. Thus, the results of this analysis should be interpreted with caution because they are based on assumptions about the distribution of micro-nutrient levels and symptom severity in the included studies.
 
 #### Results for Depression Outcomes
 
@@ -3242,7 +3242,7 @@ Forest plots for the effect of vitamin D on depression based on models broken do
 
 ```{r}
 #| label: tbl-deficiency-response-dep
-#| tbl-cap: "Deficiency response estimates for depression outcomes in low bias data. The table shows the estimated treatment effect in standardized mean differences (SMD) for each intervention based on the percentage of participants with baseline micro-nutrient deficiency and depression. The table is ordered alphabetically by intervention. Values are based on models with using estimated percentages of depression and deficiency status as covariates."
+#| tbl-cap: "Deficiency response estimates for depression outcomes in low bias data. The table shows the estimated treatment effect in standardized mean differences (SMD) for each intervention based on the percentage of participants with baseline micro-nutrient deficiency and depression. The table is ordered alphabetically by intervention. Values are based on models using estimated percentages of depression and deficiency status as covariates."
 
 deficiency_tab_dep <- here::here("outputs", "depression","tables","ft",
                               glue::glue("nma_depression_pct_table_low_bias.rds")) %>% 
@@ -3259,19 +3259,19 @@ We also targeted anxiety outcomes in our analysis of the effect of micro-nutrien
 
 ![](../anxiety/pdf/percentage_plot_approximation.pdf)
 
-Forest plots for the effect of vitamin D on anxiety based on models broken down by percentage of participants with baseline vitamin D deficiency and depression in low bias data. Estimates presented here are for hypothetical populations with values set to either 0 or 100% for the listed covariates. SMD = standardized mean difference.
+Forest plots for the effect of vitamin D on anxiety based on models broken down by percentage of participants with baseline vitamin D deficiency and anxiety in low bias data. Estimates presented here are for hypothetical populations with values set to either 0 or 100% for the listed covariates. SMD = standardized mean difference.
 
 :::
 
 ```{r}
 #| label: tbl-deficiency-response-anx
-#| tbl-cap: "Deficiency response estimates for anxiety outcomes in low bias data with a model utilizing percentages of anxious and deficient individuals. The table shows the estimated treatment effect in standardized mean differences (SMD) for each intervention based on populations with different baseline micro-nutrient deficiency and anxiety status The table is ordered alphabetically by intervention. Values are based on models with using estimated percentages of depression and deficiency status as covariates."
+#| tbl-cap: "Deficiency response estimates for anxiety outcomes in low bias data with a model utilizing percentages of anxious and deficient individuals. The table shows the estimated treatment effect in standardized mean differences (SMD) for each intervention based on populations with different baseline micro-nutrient deficiency and anxiety status. The table is ordered alphabetically by intervention. Values are based on models using estimated percentages of anxiety and deficiency status as covariates."
 
 deficiency_tab_anx <- here::here("outputs", "anxiety","tables","ft",
                               glue::glue("nma_anxiety_pct_table_low_bias.rds")) %>% 
   readRDS()
 
-deficiency_tab_dep %>% knitr::knit_print()
+deficiency_tab_anx %>% knitr::knit_print()
 ```
 
 ## Confidence in Network Meta-Analysis Ratings {#sec-cinema .appendix}
@@ -3302,7 +3302,7 @@ Bias assessments for all studies are presented in @fig-traffic-1 and @fig-traffi
 
 <span class="custom-paragraph-header">2. Reporting bias</span>
 
-Our search included over 3000 studies from Ovid MEDLINE, Embase.com, Web of Science Core Collection, the Cochrane Central Register of Controlled Trials, ClinicalTrials.gov, and APA PsycINFO databases. Given this, we think it is unlikely that there are many large studies that were missed in our search. However, we cannot rule out the possibility of some smaller studies being missed, particularly those published in non-English languages or those published in less accessible journals. Thus, any other evidence of missing studies would likely be do to publication bias. 
+Our search included over 3000 studies from Ovid MEDLINE, Embase.com, Web of Science Core Collection, the Cochrane Central Register of Controlled Trials, ClinicalTrials.gov, and APA PsycINFO databases. Given this, we think it is unlikely that there are many large studies that were missed in our search. However, we cannot rule out the possibility of some smaller studies being missed, particularly those published in non-English languages or those published in less accessible journals. Thus, any other evidence of missing studies would likely be due to publication bias. 
 
 To assess for publication bias, we examined funnel plots for our primary outcome of depression scales and anxiety scales. Then, if there was evidence of publication bias, we examined funnel plots for each intervention separately. If there were more than 10 studies in a comparison, we would examine the funnel plot for that comparison. If there was evidence of publication bias at the intervention level, then reporting bias was downgraded by one level. For comparisons with 10 or fewer studies, reporting bias was downgraded one level if the global assessment found evidence of reporting bias.
 
@@ -3318,23 +3318,25 @@ We examined the distribution of these variables across treatment comparisons. If
 
 <span class="custom-paragraph-header">4. Imprecision</span>
 
-We examined the credible intervals for each comparison in the network meta-analysis to assess for imprecision. If the credible interval for a comparison included the null value (SMD of 0), then we downgraded for imprecision by one level. If the credible interval was wide and included both clinically meaningful benefits and harms, then we downgraded for imprecision by two levels. We considered an standardized mean difference of 0.5 to be the threshold for clinical significance [@jakobsen_should_2020]. Thus, if the credible interval for a comparison included both an SMD of -0.5 and an standardized mean difference of 0.5, then we considered this to be a wide credible interval that included both clinically meaningful benefits and harms and downgraded for imprecision by two levels.
+We examined the credible intervals for each comparison in the network meta-analysis to assess imprecision. If the credible interval for a comparison included the null value (SMD of 0), then we downgraded for imprecision by one level. If the credible interval was wide and included both clinically meaningful benefits and harms, then we downgraded for imprecision by two levels. We considered a standardized mean difference of 0.5 to be the threshold for clinical significance [@jakobsen_should_2020]. Thus, if the credible interval for a comparison included both an SMD of -0.5 and a standardized mean difference of 0.5, then we considered this to be a wide credible interval that included both clinically meaningful benefits and harms and downgraded for imprecision by two levels.
 
 <span class="custom-paragraph-header">5. Heterogeneity</span>
 
-Heterogeneity was assessed similar to imprecision. We calculated prediction intervals for each comparison, calculated by adding a random effect from a new hypothetical study to the mean estimate from the network meta analysis and calculating the 95% credible intervals. If the prediction interval crossed the null value, then we downgraded for heterogeneity by one level. If the prediction interval was wide and included both clinically meaningful benefits and harms, then we downgraded for heterogeneity by two levels. We again considered an standardized mean difference of 0.5 to be the threshold for clinical significance [@jakobsen_should_2020]. 
+Heterogeneity was assessed similarly to imprecision. We calculated prediction intervals for each comparison by adding a random effect from a new hypothetical study to the mean estimate from the network meta-analysis and then calculating the 95% credible intervals. If the prediction interval crossed the null value, then we downgraded for heterogeneity by one level. If the prediction interval was wide and included both clinically meaningful benefits and harms, then we downgraded for heterogeneity by two levels. We again considered a standardized mean difference of 0.5 to be the threshold for clinical significance [@jakobsen_should_2020]. 
 
 <span class="custom-paragraph-header">6. Incoherence</span>
 
 To assess incoherence, we examined the consistency of direct and indirect evidence for each comparison in the network meta-analysis using the Separate Indirect from Direct Evidence (SIDE) approach [@dias_checking_2010; @shihEvidencesplittingApproachEvaluation2021]. If there was a significant inconsistency between direct and indirect evidence for a comparison, then we downgraded for incoherence by one level. 
 
-We also assessed the fit of unrelated mean effects (design by treatment interaction) as compared to consistency models to examine for incoherence in the network. If the fit of the unrelated mean effects model was substantially better than the consistency model, then we downgraded for incoherence by one level. If the fit of the unrelated mean effects model was substantially better than the consistency model and there were concerns about the transitivity of the network, then we downgraded for incoherence by two levels. We assessed fit by using the expected predictive log density (EPLD) and from a leave one out cross validation. If the EPLD was higher for the unrelated mean effects model than the consistency model, then we downgraded for incoherence by one level.
+We also assessed the fit of unrelated mean effects (design by treatment interaction) as compared to consistency models to examine incoherence in the network. If the fit of the unrelated mean effects model was substantially better than the consistency model, then we downgraded for incoherence by one level. If the fit of the unrelated mean effects model was substantially better than the consistency model and there were concerns about the transitivity of the network, then we downgraded for incoherence by two levels. We assessed fit using the expected log predictive density (ELPD) from leave-one-out cross-validation. If the ELPD was higher for the unrelated mean effects model than for the consistency model, then we downgraded for incoherence by one level.
 
 ### Assessment of overall confidence  {.appendix}
 We downgraded overall confidence in the evidence by one level for any category marked as "some concerns" and by two levels for any category marked as "high risk of bias" or "Major concerns". We treated indirectness and incoherence as correlated categories representing transitivity and imprecision and heterogeneity as correlated categories for variability. Inside these categories, we reduced the global ranking by one level if any category therein was "Some concerns" and two levels if any category had "Major concerns".
 
 ::: {.landscape}
 ### CINeMA ratings for interventions  {.appendix}
+
+In the CINeMA tables below, `CrI` denotes the 95% credible interval for the estimated treatment effect and `PI` denotes the 95% prediction interval, which reflects the range of effects that might be expected in a new study after accounting for between-study heterogeneity.
 
 ```{r}
 #| label: load cinema
@@ -3353,7 +3355,7 @@ cinema_low_anx_def <- readRDS(here::here("outputs","anxiety","tables",
 
 ```{r}
 #| label: tbl-cinema-dep
-#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for depression scales."
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for depression scales. CrI = 95% credible interval; PI = 95% prediction interval."
 cinema_low_dep %>% set_table_properties(layout = "fixed") %>%                # good to do before scaling
     fit_to_width(max_width = 10) %>%    # because margins will be smaller
     fontsize(size = 6, part = "all") %>%  knitr::knit_print()
@@ -3361,7 +3363,7 @@ cinema_low_dep %>% set_table_properties(layout = "fixed") %>%                # g
 
 ```{r}
 #| label: tbl-cinema-dep-def
-#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for depression scales. Estimates broken out by depression status and vitamin deficiency status."
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for depression scales. Estimates broken out by depression status and vitamin deficiency status. CrI = 95% credible interval; PI = 95% prediction interval."
 cinema_low_dep_def %>% set_table_properties(layout = "fixed") %>%    
   fit_to_width(max_width = 10) %>%    # because margins will be smaller
   fontsize(size = 6, part = "all") %>%
@@ -3370,7 +3372,7 @@ cinema_low_dep_def %>% set_table_properties(layout = "fixed") %>%
 
 ```{r}
 #| label: tbl-cinema-anx
-#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for anxiety scales."
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for anxiety scales. CrI = 95% credible interval; PI = 95% prediction interval."
 cinema_low_anx %>% set_table_properties(layout = "fixed") %>%                # good to do before scaling
     fit_to_width(max_width = 10) %>%    # because margins will be smaller
     fontsize(size = 6, part = "all") %>%  knitr::knit_print()
@@ -3378,7 +3380,7 @@ cinema_low_anx %>% set_table_properties(layout = "fixed") %>%                # g
 
 ```{r}
 #| label: tbl-cinema-anx-def
-#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for anxiety scales. Estimates broken out by depression status and vitamin deficiency status."
+#| tbl-cap: "CINeMA ratings for all treatments in low bias studies in the main analysis compared to placebo for anxiety scales. Estimates broken out by anxiety status and vitamin deficiency status. CrI = 95% credible interval; PI = 95% prediction interval."
 cinema_low_anx_def %>% set_table_properties(layout = "fixed") %>%                # good to do before scaling
     fit_to_width(max_width = 10) %>%    # because margins will be smaller
     fontsize(size = 6, part = "all") %>% 

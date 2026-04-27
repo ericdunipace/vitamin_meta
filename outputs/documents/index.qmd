@@ -79,6 +79,12 @@ A common between-study heterogeneity parameter (τ) was assumed across intervent
 When augmentation trials formed a disconnected subnetwork from the main placebo-controlled network, they were modeled separately and did not contribute to indirect comparisons in the primary network.
 Certainty of evidence was evaluated using the Confidence in Network Meta-Analysis (CINeMA) framework, which assesses six domains: within-study bias, reporting bias, indirectness, imprecision, heterogeneity, and incoherence [@nikolakopoulou_cinema_2020]. Confidence ratings were generated for all interventions relative to placebo and for all contrasts present in the network (see the Appendix).
 
+
+<!-- Figure 1:  PRISMA flow diagram showing study selection from 5036 records to 101 included studies after screening, eligibility review, and exclusions. -->
+<!-- Figure 2:  Network diagrams for depression and anxiety show vitamin D vs placebo as most studied, with a distinct antidepressant subnetwork. -->
+<!-- Figure 3:  Stacked bar chart showing low, unclear, and high risk of bias percentages across seven domains and overall, with most studies rated low risk -->
+<!-- Figure 4:  Two forest plots showing SMDs with credible intervals for vitamin and mineral interventions on depression and anxiety symptoms versus placebo -->
+
 # Results
 
 ```{r}

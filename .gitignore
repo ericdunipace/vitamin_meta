@@ -26,3 +26,11 @@ outputs/documents/Appendix_files
 outputs/documents/renv
 outputs/documents/.gitignore
 .positai
+outputs/documents/scripts/__pycache__/
+outputs/documents/.tmp_split_bib_test/
+outputs/documents/index_cache/
+outputs/documents/partials/
+outputs/documents/site_libs/
+
+/.quarto/
+**/*.quarto_ipynb

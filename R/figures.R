@@ -2971,6 +2971,8 @@ for(outcome in outcomes) {
   }
 }
 
+cli::cli_inform("  Finished depression/anxiety figures. Now running additional figures for adverse events and effects on vitamin levels.")
+
 #### adverse events ####
 fit_adv <- here::here("outputs", "saved_models", "adverse_events.rds") %>% readRDS()
 newdata <- vit$nma_newdata_for_summary(fit_adv)
