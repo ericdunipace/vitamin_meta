@@ -31,6 +31,6 @@ outputs/documents/.tmp_split_bib_test/
 outputs/documents/index_cache/
 outputs/documents/partials/
 outputs/documents/site_libs/
-
+.decktape
 /.quarto/
 **/*.quarto_ipynb
