@@ -1,18 +1,94 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const appendix = document.querySelector("#appendix");
-  if (!appendix) return;
+  if (appendix) {
+    const sections = appendix.querySelectorAll("h2");
 
-  const sections = appendix.querySelectorAll("h2");
+    sections.forEach((sec, i) => {
+      const letter = String.fromCharCode(65 + i); // A, B, C
+      sec.innerHTML = letter + ". " + sec.innerHTML;
 
-  sections.forEach((sec, i) => {
-    const letter = String.fromCharCode(65 + i); // A, B, C
-    sec.innerHTML = letter + ". " + sec.innerHTML;
-
-    let subsections = sec.parentElement.querySelectorAll("h3");
-    subsections.forEach((sub, j) => {
-      sub.innerHTML = letter + "." + (j + 1) + " " + sub.innerHTML;
+      let subsections = sec.parentElement.querySelectorAll("h3");
+      subsections.forEach((sub, j) => {
+        sub.innerHTML = letter + "." + (j + 1) + " " + sub.innerHTML;
+      });
     });
+  }
+
+  // Quarto book HTML links citations to the global refs page even when a page
+  // has its own local bibliography. If a local ref target exists, use it and
+  // unhide the local bibliography section.
+  const localRefs = document.querySelector('#refs.references');
+  if (!localRefs || !localRefs.querySelector('.csl-entry')) return;
+
+  const citedIds = new Set();
+  const citationOrder = [];
+  document.querySelectorAll('[data-cites]').forEach((el) => {
+    const cites = (el.getAttribute('data-cites') || '').trim().split(/\s+/).filter(Boolean);
+    cites.forEach((cite) => {
+      if (!citedIds.has(cite)) {
+        citationOrder.push(cite);
+      }
+      citedIds.add(cite);
+    });
+  });
+
+  localRefs.querySelectorAll('.csl-entry[id^="ref-"]').forEach((entry) => {
+    const citeId = entry.id.replace(/^ref-/, '');
+    if (!citedIds.has(citeId)) {
+      entry.remove();
+    }
+  });
+
+  if (!localRefs.querySelector('.csl-entry')) return;
+
+  const refEntries = new Map();
+  Array.from(localRefs.querySelectorAll('.csl-entry[id^="ref-"]')).forEach((entry) => {
+    refEntries.set(entry.id.replace(/^ref-/, ''), entry);
+  });
+
+  citationOrder.forEach((citeId) => {
+    const entry = refEntries.get(citeId);
+    if (entry) {
+      localRefs.appendChild(entry);
+    }
+  });
+
+  const localNumberMap = new Map();
+  Array.from(localRefs.querySelectorAll('.csl-entry[id^="ref-"]')).forEach((entry, index) => {
+    const citeId = entry.id.replace(/^ref-/, '');
+    const newNumber = String(index + 1);
+    localNumberMap.set(citeId, newNumber);
+
+    const leftMargin = entry.querySelector('.csl-left-margin');
+    if (leftMargin) {
+      leftMargin.textContent = newNumber + '. ';
+    }
+  });
+
+  localRefs.style.display = '';
+  localRefs.removeAttribute('style');
+
+  const bibliorefs = document.querySelectorAll('a[role="doc-biblioref"]');
+  bibliorefs.forEach((link) => {
+    const href = link.getAttribute('href');
+    if (!href) return;
+
+    const hashIndex = href.indexOf('#');
+    if (hashIndex === -1) return;
+
+    const localTarget = href.slice(hashIndex + 1);
+    if (!localTarget) return;
+
+    if (document.getElementById(localTarget)) {
+      link.setAttribute('href', '#' + localTarget);
+
+      const citeId = localTarget.replace(/^ref-/, '');
+      const newNumber = localNumberMap.get(citeId);
+      if (newNumber) {
+        link.textContent = newNumber;
+      }
+    }
   });
 });
 </script>

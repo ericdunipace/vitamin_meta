@@ -589,32 +589,32 @@ dose_anx_results <- vit$summary_brms_nma(fit_dose_anx, keep = c(".trt",".dose"))
 
 ```
 
-## PRISMA 2020 Checklist {#sec-prisma .appendix}
+## PRISMA 2020 Checklist [@page_prisma_2020] {#sec-prisma .appendix}
 
 | Section | Item | Description | Location Reported |
 |----------|------|------------|-------------------|
-| Title | 1 | Identify the report as a systematic review. | [Title page](#sec-title-page) |
-| Abstract | 2 | See PRISMA 2020 Abstract Checklist. | @sec-abstract-objective, @sec-abstract-methods, @sec-abstract-results, @sec-abstract-conclusions |
-| Introduction | 3 | Describe the rationale for the review in the context of existing knowledge. | [Introduction](@sec-intro) |
-| Introduction | 4 | Provide explicit statement of objectives/questions. | @sec-abstract-objective |
+| Title | 1 | Identify the report as a systematic review. | [Title page](index.html#sec-title-page) |
+| Abstract | 2 | See PRISMA 2020 Abstract Checklist. | [Objective](index.html#sec-abstract-objective), [Methods](index.html#sec-abstract-methods), [Results](index.html#sec-abstract-results), [Conclusions](index.html#sec-abstract-conclusions) |
+| Introduction | 3 | Describe the rationale for the review in the context of existing knowledge. | [Introduction](index.html#sec-intro) |
+| Introduction | 4 | Provide explicit statement of objectives/questions. | [Objective](index.html#sec-abstract-objective) |
 | Methods | 5 | Specify inclusion and exclusion criteria and grouping for syntheses. | @sec-inclusion-exclusion, @sec-stat-analysis |
-| Methods | 6 | Specify all information sources and dates searched. | @sec-abstract-methods, @sec-search-strategy |
+| Methods | 6 | Specify all information sources and dates searched. | @sec-search  |
 | Methods | 7 | Present full search strategies including filters and limits. | @sec-search-strategy |
 | Methods | 8 | Describe study selection process and reviewer roles. | @sec-study-selection |
-| Methods | 9 | Describe data collection process and reviewer roles. | @sec-study-char |
+| Methods | 9 | Describe data collection process and reviewer roles. | @sec-study-char | 
 | Methods | 10a | Define all outcomes sought and handling of multiple measures/time-points. | @sec-outcomes, @sec-rating-scales |
 | Methods | 10b | Define other variables collected and assumptions about missing data. | @sec-study-char |
 | Methods | 11 | Describe risk-of-bias assessment methods and tools used. | @sec-rob |
 | Methods | 12 | Specify effect measures used for each outcome. | @sec-outcomes, @sec-effect-measures |
-| Methods | 13a | Describe processes for determining study eligibility for each synthesis. | @sec-stat-analysis, @sec-study-selection |
-| Methods | 13b | Describe data preparation methods (e.g., conversions, missing data handling). | @sec-stat-analysis, @sec-coding-decisions |
+| Methods | 13a | Describe processes for determining study eligibility for each synthesis. | @sec-study-selection |
+| Methods | 13b | Describe data preparation methods (e.g., conversions, missing data handling). | @sec-data-extraction, @sec-stat-analysis, @sec-coding-decisions |
 | Methods | 13c | Describe tabulation or visualization methods. | @sec-study-char, @sec-trans |
 | Methods | 13d | Describe synthesis methods, models, heterogeneity assessment, software. | @sec-stat-analysis, @sec-stats-detailed |
-| Methods | 13e | Describe methods for exploring heterogeneity (subgroup/meta-regression). | @sec-stat-analysis, @sec-meta-reg |
+| Methods | 13e | Describe methods for exploring heterogeneity (subgroup/meta-regression). | @sec-stat-analysis, @sec-stats-detailed |
 | Methods | 13f | Describe sensitivity analyses conducted. | @sec-sens |
-| Methods | 14 | Describe assessment of reporting bias. | @sec-stat-analysis, @sec-reporting-bias |
+| Methods | 14 | Describe assessment of reporting bias. | @sec-stat-analysis, @sec-stats-detailed, @sec-reporting-bias |
 | Methods | 15 | Describe certainty/confidence assessment methods. | @sec-stat-analysis, @sec-cinema |
-| Results | 16a | Describe search and selection results (flow diagram recommended). | @sec-study-selection |
+| Results | 16a | Describe search and selection results (flow diagram recommended). | @sec-study-selection, @fig-prisma |
 | Results | 16b | Cite excluded studies and reasons for exclusion. | @sec-excluded-studies |
 | Results | 17 | Cite included studies and present characteristics. | @sec-results-characteristics, @sec-study-char, @sec-included-studies |
 | Results | 18 | Present risk-of-bias assessments. | @sec-results-rob, @sec-rob |
@@ -625,17 +625,16 @@ dose_anx_results <- vit$summary_brms_nma(fit_dose_anx, keep = c(".trt",".dose"))
 | Results | 20d | Present sensitivity analyses. | @sec-sens |
 | Results | 21 | Present reporting bias assessments. | @sec-reporting-bias |
 | Results | 22 | Present certainty of evidence assessments. | @sec-cinema |
-| Discussion | 23a | Interpret results in context of other evidence. | [Discussion](@sec-discussion) |
-| Discussion | 23b | Discuss limitations of included evidence. | [Discussion](@sec-discussion) |
-| Discussion | 23c | Discuss limitations of review process. | [Discussion](@sec-discussion) |
-| Discussion | 23d | Discuss implications for practice, policy, and research. | [Discussion](@sec-discussion) |
-| Other | 24a | Provide registration information. | [Discussion](@sec-discussion) |
-| Other | 24b | Indicate where protocol can be accessed. | [Discussion](@sec-discussion) |
-| Other | 24c | Describe amendments to protocol or registration. | [Discussion](@sec-discussion) |
+| Discussion | 23a | Interpret results in context of other evidence. | [Discussion](index.html#sec-discussion) |
+| Discussion | 23b | Discuss limitations of included evidence. | [Discussion](index.html#sec-discussion) |
+| Discussion | 23c | Discuss limitations of review process. | [Discussion](index.html#sec-discussion) |
+| Discussion | 23d | Discuss implications for practice, policy, and research. | [Discussion](index.html#sec-discussion) |
+| Other | 24a | Provide registration information. | @sec-protocol |
+| Other | 24b | Indicate where protocol can be accessed. | @sec-protocol  |
+| Other | 24c | Describe amendments to protocol or registration. | @sec-protocol, @sec-stats-detailed  |
 | Other | 25 | Describe financial or non-financial support. | Not reported |
 | Other | 26 | Declare competing interests. | Not reported |
 | Other | 27 | Report availability of data, code, and materials. | @sec-data-code |
-@page_prisma_2020
 <!-- From: Page MJ, McKenzie JE, Bossuyt PM, Boutron I, Hoffmann TC, Mulrow CD, et al. The PRISMA 2020 statement: an updated guideline for reporting systematic reviews. MetaArXiv. 2020, September 14. DOI: 10.31222/osf.io/v7gm2. For more information, visit: www.prisma-statement.org -->
 
 
@@ -1005,46 +1004,215 @@ supp_table_6 <- tibble(
 #| label: tbl-search-strategy-ovid
 #| tbl-cap: "Search strategy for Ovid MEDLINE. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
 flextable::flextable(supp_table_1) |>
-  autofit() 
+  flextable::set_table_properties(layout = "fixed") |>
+  flextable::fontsize(size = 9, part = "all") |>
+  flextable::width(j = 1, width = 2.0) |>
+  flextable::width(j = 2, width = 4.5) |>
+  flextable::border_inner_h(border = officer::fp_border(color = "gray70", width = 0.5))
 ```
 
 ```{r}
 #| label: tbl-search-strategy-embase
 #| tbl-cap: "Search strategy for Embase.com. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
 flextable::flextable(supp_table_2) |>
-  autofit() 
+  flextable::set_table_properties(layout = "fixed") |>
+  flextable::fontsize(size = 9, part = "all") |>
+  flextable::width(j = 1, width = 2.0) |>
+  flextable::width(j = 2, width = 4.5) |>
+  flextable::border_inner_h(border = officer::fp_border(color = "gray70", width = 0.5))
 ```
 
 ```{r}
 #| label: tbl-search-strategy-WOS
 #| tbl-cap: "Search strategy for the Web of Science. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
 flextable::flextable(supp_table_3) |>
-  autofit() 
+  flextable::set_table_properties(layout = "fixed") |>
+  flextable::fontsize(size = 9, part = "all") |>
+  flextable::width(j = 1, width = 2.0) |>
+  flextable::width(j = 2, width = 4.5) |>
+  flextable::border_inner_h(border = officer::fp_border(color = "gray70", width = 0.5))
 ```
 
 ```{r}
 #| label: tbl-search-strategy-PsycINFO
 #| tbl-cap: "Search strategy for PsycINFO. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
 flextable::flextable(supp_table_4) |>
-  autofit() 
+  flextable::set_table_properties(layout = "fixed") |>
+  flextable::fontsize(size = 9, part = "all") |>
+  flextable::width(j = 1, width = 2.0) |>
+  flextable::width(j = 2, width = 4.5) |>
+  flextable::border_inner_h(border = officer::fp_border(color = "gray70", width = 0.5))
 ```
 
 ```{r}
 #| label: tbl-search-strategy-clincaltrials
 #| tbl-cap: "Search strategy for ClinicalTrials.gov. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
 flextable::flextable(supp_table_5) |>
-  autofit() 
+  flextable::set_table_properties(layout = "fixed") |>
+  flextable::fontsize(size = 9, part = "all") |>
+  flextable::width(j = 1, width = 2.0) |>
+  flextable::width(j = 2, width = 4.5) |>
+  flextable::border_inner_h(border = officer::fp_border(color = "gray70", width = 0.5))
 ```
 
 ```{r}
 #| label: tbl-search-strategy-cochrane
 #| tbl-cap: "Search strategy for the Web of Cochrane CENTRAL. The search was adapted for each database and the full search strategies for each database are available in the supplementary materials."
 flextable::flextable(supp_table_6) |>
-  autofit()
+  flextable::set_table_properties(layout = "fixed") |>
+  flextable::fontsize(size = 9, part = "all") |>
+  flextable::width(j = 1, width = 2.0) |>
+  flextable::width(j = 2, width = 4.5) |>
+  flextable::border_inner_h(border = officer::fp_border(color = "gray70", width = 0.5))
 ```
 
 
 ### Inclusion and Exclusion Criteria  {#sec-inclusion-exclusion .appendix}
+
+This study had several inclusion and exclusion criteria in terms of population under study (@tbl-pop-inc), interventions (@tbl-interv-inc), outcomes (@tbl-out-inc), and study designs (@tbl-study-inc). 
+These are detailed in the tables below.
+
+```{r }
+#| label: tbl-pop-inc
+#| tbl-cap: "Inclusion and inclusion criteria for study populations. *Sub-syndromal defined as studies that included some measure of depression and anxiety and measured it over time but might have not met the threshold for a clinical diagnosis of depression and anxiety."
+#| echo: FALSE
+
+
+pop_inc <- data.frame(
+  Include = c(
+    "General population with a measure of anxiety / depression",
+    "Adults ONLY",
+    "Social anxiety disorder",
+    "Panic disorder",
+    "Generalized anxiety disorder",
+    "Major depressive disorder",
+    "Premenstrual dysphoric disorder",
+    "Persistent depressive disorder",
+    "Post-partum depression",
+    "Seasonal affective disorder",
+    "Dysthymic disorder",
+    "Vascular depression",
+    "A standardized psychiatric interview or ICD diagnosis of depressive episode or depression including major depressive disorder, persistent depressive disorder, premenstrual dysphoric disorder, unspecified depressive disorder",
+    "A clinical diagnosis of depressive disorder, depressive episode or depression",
+    "A diagnosis of depression based on a cut-off point on a validated rating scale",
+    "A standardized psychiatric interview or ICD diagnosis of generalized anxiety disorder, social anxiety disorder, panic disorder",
+"A clinical diagnosis of an anxiety disorder",
+"A diagnosis of anxiety based on a cut-off point on a validated rating scale",
+"Include those studies with sub-syndromal anxiety and depression disorders.*" 
+  )
+)
+pop_inc$Exclude = c(
+  "Children",
+  "Bipolar depression",
+  "ADHD",
+  "Psychosis",
+  "Schizophrenia",
+  "Cognitive disorders",
+  rep(NA, nrow(pop_inc) - 6)
+)
+
+pop_inc %>% flextable::flextable() %>%
+  flextable::theme_booktabs() %>% 
+  flextable::set_table_properties(layout = "fixed") |>
+  flextable::width(j = 1, width = 3.25) |>
+  flextable::width(j = 2, width = 3.25) |>
+  flextable::border_inner_h(border = officer::fp_border(color = "gray70", width = 0.5))
+```
+
+```{r}
+#| label: tbl-interv-inc
+#| cap: Inclusion/exclusion criteria for interventions.
+#| echo: FALSE
+
+interv_inc <- data.frame(
+  Include = c(
+  "B vitamins",
+  "Vitamin C",
+  "Vitamin D",
+  "Zinc",
+  "Magnesium",
+  "Selenium",
+  "Iron",
+  "Multi-nutrient interventions limited to a combination of any of the above vitamins or minerals.",
+  "No restriction on the dose, duration, or intensity of the vitamin or mineral supplementation."
+))
+
+interv_inc$Exclude = c(
+  "Effects of deficiencies in these vitamins or minerals without an intervention",
+  "Increased consumption of diets that are high in these vitamins or minerals",
+  "Other herbal remedies or nutrient supplements",
+  rep(NA, nrow(interv_inc) - 3)
+)
+
+interv_inc %>% flextable::flextable() %>%
+  flextable::theme_booktabs() %>% 
+  flextable::set_table_properties(layout = "fixed") |>
+  flextable::width(j = 1, width = 3.25) |>
+  flextable::width(j = 2, width = 3.25) |>
+  flextable::border_inner_h(border = officer::fp_border(color = "gray70", width = 0.5))
+
+```
+
+```{r}
+#| label: tbl-out-inc
+#| cap: Inclusion/exclusion criteria for outcomes.
+#| echo: FALSE
+
+out_inc <- data.frame(
+  Include = c(
+  "Primary: Reduction in depressive symptoms as measured by a standardized rating scale including but not limited to the PHQ-9, CES-D, HAM-D in the follow-up timeframe identified by the study",
+  "Primary: Reduction in anxiety symptoms as measured by a standardized rating scale including but not limited to the GAD-7, HAM-A in the follow-up timeframe identified by the study",
+  "Secondary: Measurement of B vitamin, vitamin C, vitamin D, Mg, selenium, iron, zinc before and after supplementation as measured by blood level",
+  "Secondary: Adverse effects of the intervention",
+  "Secondary: Duration of the intervention [short-term (less than 1 month) versus medium-term (1-3 months) versus long-term (over 3 months)]",
+  "Secondary: Intervention dosage strength."
+),
+Exclude = NA) 
+
+out_inc %>% flextable::flextable() %>%
+  flextable::theme_booktabs() %>% 
+  flextable::set_table_properties(layout = "fixed") |>
+  flextable::width(j = 1, width = 3.25) |>
+  flextable::width(j = 2, width = 3.25) |>
+  flextable::border_inner_h(border = officer::fp_border(color = "gray70", width = 0.5))
+
+```
+
+```{r}
+#| label: tbl-study-inc
+#| cap: Inclusion/exclusion criteria for study characteristics.
+#| echo: FALSE
+
+studyex <- c(
+  "Nonrandomized controlled trials",
+"Correlation and association studies",
+"Systematic review articles",
+"Narrative review articles",
+"Trials in animals",
+"Meta-analyses",
+"Non-peer reviewed articles",
+"Articles without publicly available full-text data",
+"Case reports",
+"Case series",
+"Studies that only examine nutrient deficiencies in anxiety and depression",
+"Studies that do not meet minimum reporting requirements for data extraction (sample size and composition, intervention dose and length, clearly defined outcome measure of anxiety or depression)"
+)
+study_inc <- data.frame(
+  Include = c(
+  "Randomized controlled trials (RCTs)",
+  "Studies that reported an outcome measure of subjective depression and anxiety",
+  rep(NA, length(studyex) - 2)
+))
+
+study_inc$Exclude = studyex
+
+study_inc %>% flextable::flextable() %>%
+  flextable::theme_booktabs() %>% 
+  flextable::set_table_properties(layout = "fixed") |>
+  flextable::width(j = 1, width = 3.25) |>
+  flextable::width(j = 2, width = 3.25) |>
+  flextable::border_inner_h(border = officer::fp_border(color = "gray70", width = 0.5))
+```
 
 
 ### List of Excluded Full-text Studies {#sec-excluded-studies .appendix}
@@ -1491,7 +1659,7 @@ where R is a $J_i \times J_i$ correlation matrix with 1's on the diagonal and $\
 
 We set a prior on effect sizes of $\theta \sim N(0, 2.5^2)$ with the same prior on effect modifiers $\delta$ and $\alpha$. We took $\tau \sim N_+(0, 0.5^2)$, a half-normal prior which is commonly used for variance parameters in random effects.
 
-In our meta regression, we put a regularized prior as described in the BRMS documentation on $\beta$ to help prevent overfitting given the large number of covariates and relatively small number of studies [@carvalho2009handling, @piironen2017hyperprior]:
+In our meta regression, we put a regularized prior as described in the BRMS documentation on $\beta$ to help prevent overfitting given the large number of covariates and relatively small number of studies [@carvalho2009handling; @piironen2017hyperprior]:
 
 $$ \beta_1, \ldots \beta_K \sim \text{regularized-horseshoe}(\text{df} = 3, \text{global scale} = 0.1, \text{scale slab} = 1). $$
 
@@ -1609,7 +1777,7 @@ contribution.mat.anx %>%
 ```
 :::
 
-### Assessment of Transitivity  {.appendix}
+### Assessment of Transitivity  {#sec-assess-trans .appendix}
 
 The assumption of transitivity was evaluated by examining whether potential effect modifiers were similarly distributed across treatment comparisons. Based on clinical and methodological considerations, we identified baseline micro-nutrient deficiency status, baseline depression/anxiety severity, age, and sex as effect modifiers.
 
@@ -3158,7 +3326,7 @@ Heterogeneity was assessed similar to imprecision. We calculated prediction inte
 
 <span class="custom-paragraph-header">6. Incoherence</span>
 
-To assess incoherence, we examined the consistency of direct and indirect evidence for each comparison in the network meta-analysis using the Separate Indirect from Direct Evidence (SIDE) approach [@dias_checking_2010, @shihEvidencesplittingApproachEvaluation2021]. If there was a significant inconsistency between direct and indirect evidence for a comparison, then we downgraded for incoherence by one level. 
+To assess incoherence, we examined the consistency of direct and indirect evidence for each comparison in the network meta-analysis using the Separate Indirect from Direct Evidence (SIDE) approach [@dias_checking_2010; @shihEvidencesplittingApproachEvaluation2021]. If there was a significant inconsistency between direct and indirect evidence for a comparison, then we downgraded for incoherence by one level. 
 
 We also assessed the fit of unrelated mean effects (design by treatment interaction) as compared to consistency models to examine for incoherence in the network. If the fit of the unrelated mean effects model was substantially better than the consistency model, then we downgraded for incoherence by one level. If the fit of the unrelated mean effects model was substantially better than the consistency model and there were concerns about the transitivity of the network, then we downgraded for incoherence by two levels. We assessed fit by using the expected predictive log density (EPLD) and from a leave one out cross validation. If the EPLD was higher for the unrelated mean effects model than the consistency model, then we downgraded for incoherence by one level.
 

@@ -462,7 +462,7 @@ if(!dir.exists(overall_tiff <- here::here(overall_outdir,"tiff"))) {
   #   DiagrammeRsvg::export_svg()  %>%
   #   charToRaw()
   
-  base_flow_plot <- DiagrammeR::grViz(glue::glue("digraph prisma2020 {
+  base_flow_dot <- glue::glue("digraph prisma2020 {
     
     graph [
         layout  = dot,
@@ -472,14 +472,14 @@ if(!dir.exists(overall_tiff <- here::here(overall_outdir,"tiff"))) {
     ]
     
     # ---- Global defaults ----
-    node [shape = box, fontname = 'Helvetica']
+    node [shape = box, fontname = \"Helvetica\"]
     
     # ---- Title bar ----
     title [
-        label    = 'Identification of studies via databases',
+        label    = \"Identification of studies through databases\",
         style    = filled,
-        fillcolor= '#FFC000',
-        fontsize = 20,
+        fillcolor= \"#FFC000\",
+        fontsize = 23,
         width    = 6,
         height   = 0.5
     ]
@@ -502,28 +502,31 @@ if(!dir.exists(overall_tiff <- here::here(overall_outdir,"tiff"))) {
     node [
         shape    = box,
         style    = filled,
-        fillcolor= 'white',
-        fontsize = 14,
-        width    = 3.3,
+        fillcolor= \"white\",
+        fontsize = 16.5,
         height   = 1.0
     ]
     
     # Row 1 (Identification)
+    node [width = 3.8]
     rec_id [
-        label = 'Records identified from:\\nDatabases (n = {{prisma_data$N_initial_studies}})'
+        label = \"Records identified from:\\nDatabases (n = {{prisma_data$N_initial_studies}})\"
     ]
     
+    node [width = 4.3]
     rec_removed [
-        label = 'Records removed before screening:\\nDuplicate records removed\\n(n = {{prisma_data$N_exclude}})'
+        label = \"Records removed before screening:\\nDuplicate records removed\\n(n = {{prisma_data$N_exclude}})\"
     ]
     
     # Row 2 (Screening)
+    node [width = 3.8]
     rec_screened [
-        label = 'Records screened\\n(n = {{prisma_data$N_screened}})'
+        label = \"Records screened\\n(n = {{prisma_data$N_screened}})\"
     ]
     
+    node [width = 4.3]
     rec_excluded [
-        label = 'Records excluded\\n(n = {{prisma_data$N_exclude_screen}})'
+        label = \"Records excluded\\n(n = {{prisma_data$N_exclude_screen}})\"
     ]
     
     # # Row 3 (Screening – retrieval)
@@ -536,26 +539,43 @@ if(!dir.exists(overall_tiff <- here::here(overall_outdir,"tiff"))) {
     # ]
     
     # Row 4 (Eligibility)
+    node [width = 3.8]
     rep_assessed [
-        label = 'Reports assessed for eligibility\\n(n = {{prisma_data$N_full_text}})'
+        label = \"Reports assessed for eligibility\\n(n = {{prisma_data$N_full_text}})\"
     ]
     
+    node [width = 4.3]
+    
     rep_excluded [
-        label = 'Reports excluded:\\n(n = {{prisma_data$N_exclude_full_text}})'
+        label = \"Reports excluded:\\n(n = {{prisma_data$N_exclude_full_text}})\"
     ]
     
     # Row 5 (Extraction)
+    node [width = 3.8]
     rep_extracted [
-        label = 'Studies included in extraction\\n(n ={{prisma_data$N_extracted}})'
+        label = \"Studies included in extraction\\n(n = {{prisma_data$N_extracted}})\"
     ]
     
+    node [width = 4.3]
+    
     rep_exclude_from_extract [
-        label = 'Reports exluded after extraction\\n(n ={{prisma_data$N_exclude_after_extract}})'
+        label = \"Reports excluded after data extraction\\n(n ={{prisma_data$N_exclude_after_extract}})\"
     ]
     
     # Row 6 (Included)
+    node [width = 3.8]
+    
     studies_included [
-        label = 'Studies included in analyses\\n(n = {{prisma_data$N_included}})\\nMain analysis\\n(n = {{prisma_data$N_main_analysis}} )\\nSensitivity analysis only\\n(n = {{prisma_data$N_sensitivity_only}})'
+        label = <
+          <TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"1\">
+            <TR><TD><B>Studies included in analyses</B></TD></TR>
+            <TR><TD>(n = {{prisma_data$N_included}})</TD></TR>
+            <TR><TD HEIGHT=\"6\"></TD></TR>
+            <TR><TD ALIGN=\"LEFT\">&#8226; Main analysis (n = {{prisma_data$N_main_analysis}})</TD></TR>
+            <TR><TD ALIGN=\"LEFT\">&#8226; Sensitivity analyses only (n = {{prisma_data$N_sensitivity_only}})</TD></TR>
+          </TABLE>
+        >,
+        height = 1.15
     ]
     
     # ---- Alignment (rows) ----
@@ -596,41 +616,66 @@ if(!dir.exists(overall_tiff <- here::here(overall_outdir,"tiff"))) {
     # screening_phase   -> rep_assessed
     # screening_phase-> rep_extracted
     # included_phase -> studies_included
-}", .open = "{{", .close = "}}")) %>% 
-    DiagrammeRsvg::export_svg()  %>%
-    charToRaw()
+}", .open = "{{", .close = "}}")
   
-  base_flow_plot %>% 
-    rsvg::rsvg_pdf(here::here(overall_pdf,"prisma_flow_diagram.pdf"),
-                   width  = 6.5 * 72,
-                   height = 5  * 72)
+  base_flow_plot <- DiagrammeR::grViz(base_flow_dot)
   
-  base_flow_plot %>% 
-    rsvg::rsvg_ps(here::here(overall_eps,"prisma_flow_diagram.eps"),
-                   width  = 6.5 * 72,
-                   height = 5 * 72)
+  prisma_dot_path <- here::here(overall_outdir, "prisma_flow_diagram.dot")
+  prisma_pdf_path <- here::here(overall_pdf, "prisma_flow_diagram.pdf")
+  prisma_eps_path <- here::here(overall_eps, "prisma_flow_diagram.eps")
+  prisma_jpeg_path <- here::here(overall_jpeg, "prisma_flow_diagram.jpeg")
+  prisma_tiff_path <- here::here(overall_tiff, "prisma_flow_diagram.tiff")
+  prisma_png_300_path <- tempfile("prisma_flow_diagram_300_", fileext = ".png")
+  prisma_png_600_path <- tempfile("prisma_flow_diagram_600_", fileext = ".png")
   
-  base_flow_plot %>% 
-    rsvg::rsvg_png(
-                   width  = 6.5 * 300,
-                   height = 5  * 300) %>% 
-  magick::image_read() %>% 
-  magick::image_write(
-    path   = here::here(overall_jpeg,
-                        "prisma_flow_diagram.jpeg"),
-    format = "jpeg",
-    compression = "none",  # uncompressed (best for journals)
-    density = 300
-  )
+  writeLines(base_flow_dot, prisma_dot_path)
   
-  magick::image_read(
-    rsvg::rsvg_png(base_flow_plot, 
-                   width  = 6.5 * 600,   # width (inches) * dpi
-                   height = 5 * 600)   # height (inches) * dpi
-  )  %>% 
+  dot_cmd <- Sys.which("dot")
+  if (dot_cmd == "") {
+    cli::cli_abort(c(
+      "Graphviz CLI `dot` is required to export the PRISMA diagram directly.",
+      "i" = "Install Graphviz so this script can render PDF/EPS/PNG without the SVG conversion step."
+    ))
+  }
+  
+  # Export directly through Graphviz so PDF text sizing matches the DOT source.
+  run_dot <- function(args) {
+    status <- system2(dot_cmd, args)
+    if (!identical(status, 0L)) {
+      cli::cli_abort("Graphviz `dot` export failed for the PRISMA diagram.")
+    }
+  }
+  
+  run_dot(c("-Tpdf", prisma_dot_path, "-o", prisma_pdf_path))
+  run_dot(c("-Teps", prisma_dot_path, "-o", prisma_eps_path))
+  run_dot(c(
+    "-Tpng",
+    sprintf("-Gsize=%s,%s!", 6.5, 5),
+    "-Gdpi=300",
+    prisma_dot_path,
+    "-o",
+    prisma_png_300_path
+  ))
+  run_dot(c(
+    "-Tpng",
+    sprintf("-Gsize=%s,%s!", 6.5, 5),
+    "-Gdpi=600",
+    prisma_dot_path,
+    "-o",
+    prisma_png_600_path
+  ))
+  
+  magick::image_read(prisma_png_300_path) %>% 
     magick::image_write(
-      path   = here::here(overall_tiff,
-                          "prisma_flow_diagram.tiff"),
+      path   = prisma_jpeg_path,
+      format = "jpeg",
+      compression = "none",  # uncompressed (best for journals)
+      density = 300
+    )
+  
+  magick::image_read(prisma_png_600_path) %>% 
+    magick::image_write(
+      path   = prisma_tiff_path,
       format = "tiff",
       compression = "none",  # uncompressed (best for journals)
       density = 600

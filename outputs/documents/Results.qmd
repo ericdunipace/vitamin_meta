@@ -484,7 +484,7 @@ Among low risk-of-bias studies, weighted mean baseline concentrations were: vita
 
 Vitamins B1, B2, B3, B5, B6, B7, and C were not measured in low risk-of-bias studies, either because baseline levels were not assessed or because measurements occurred only in studies excluded from the main analysis due to higher risk of bias.
 
-Sex distribution and baseline clinical status varied across comparisons, with some interventions evaluated primarily in female or clinically depressed populations. The distribution of key study-level characteristics across the network is summarized in the Appendix (Appendix ##).
+Sex distribution and baseline clinical status varied across comparisons, with some interventions evaluated primarily in female or clinically depressed populations. The distribution of key study-level characteristics across the network is summarized in the Appendix (@sec-trans).
 
 ## Intervention Characteristics {#sec-intervention-characteristics}
 

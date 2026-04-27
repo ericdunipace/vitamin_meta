@@ -16,12 +16,14 @@ import sys
 import zipfile
 import tempfile
 import shutil
+import copy
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import re
 from typing import Iterable
 
 NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+REL_NS = {"r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships"}
 ET.register_namespace("w", NS["w"])
 
 MARKER_TO_STYLE = {
@@ -301,6 +303,7 @@ def _strip_main_heading_numbering(styles_xml: bytes, numbering_xml: bytes | None
 def _patch_document_xml(
     xml_bytes: bytes,
     citation_scopes: dict[str, set[str]] | None = None,
+    hyperlink_targets: dict[str, str] | None = None,
     debug: bool = False,
 ) -> tuple[bytes, int]:
     root = ET.fromstring(xml_bytes)
@@ -390,6 +393,57 @@ def _patch_document_xml(
             t = ET.SubElement(r, f"{{{NS['w']}}}t")
             t.text = remaining
 
+    def paragraph_text(p: ET.Element) -> str:
+        return "".join(t.text for t in p.findall(".//w:t", NS) if t.text)
+
+    def hyperlink_bookmark(h: ET.Element) -> str | None:
+        anchor = h.get(f"{{{NS['w']}}}anchor")
+        if anchor:
+            return anchor
+        rid = h.get(f"{{{REL_NS['r']}}}id")
+        if not rid or not hyperlink_targets:
+            return None
+        target = hyperlink_targets.get(rid, "").strip()
+        if target.startswith("@") or target.startswith("#"):
+            return target[1:]
+        if "#" in target:
+            fragment = target.split("#", 1)[1].strip()
+            if fragment:
+                return fragment
+        return None
+
+    def pageref_runs(bookmark: str, display_text: str = "1") -> list[ET.Element]:
+        runs: list[ET.Element] = []
+
+        r_begin = ET.Element(f"{{{NS['w']}}}r")
+        ET.SubElement(
+            r_begin,
+            f"{{{NS['w']}}}fldChar",
+            {f"{{{NS['w']}}}fldCharType": "begin", f"{{{NS['w']}}}dirty": "true"},
+        )
+        runs.append(r_begin)
+
+        r_instr = ET.Element(f"{{{NS['w']}}}r")
+        instr = ET.SubElement(r_instr, f"{{{NS['w']}}}instrText")
+        instr.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
+        instr.text = f" PAGEREF {bookmark} \\\\h "
+        runs.append(r_instr)
+
+        r_sep = ET.Element(f"{{{NS['w']}}}r")
+        ET.SubElement(r_sep, f"{{{NS['w']}}}fldChar", {f"{{{NS['w']}}}fldCharType": "separate"})
+        runs.append(r_sep)
+
+        r_text = ET.Element(f"{{{NS['w']}}}r")
+        t = ET.SubElement(r_text, f"{{{NS['w']}}}t")
+        t.text = display_text
+        runs.append(r_text)
+
+        r_end = ET.Element(f"{{{NS['w']}}}r")
+        ET.SubElement(r_end, f"{{{NS['w']}}}fldChar", {f"{{{NS['w']}}}fldCharType": "end"})
+        runs.append(r_end)
+
+        return runs
+
     appendix_style_ids = set(MARKER_TO_STYLE.values())
 
     in_appendix = False
@@ -450,22 +504,19 @@ def _patch_document_xml(
     body = root.find("w:body", NS)
     pending_bookmarks = []
 
-    def capture_bookmarks(elem: ET.Element) -> None:
-        if elem.tag == f"{{{NS['w']}}}bookmarkStart":
-            name = elem.get(f"{{{NS['w']}}}name")
-            if name:
-                pending_bookmarks.append(name)
-            return
-        for b in elem.findall("w:bookmarkStart", NS):
-            name = b.get(f"{{{NS['w']}}}name")
-            if name:
-                pending_bookmarks.append(name)
-
     if body is None:
         return ET.tostring(root, encoding="utf-8", xml_declaration=True), patched
 
-    for node in list(body):
-        capture_bookmarks(node)
+    # Traverse the full body tree in document order so captions nested inside
+    # tables are processed too. Quarto often emits table captions as paragraphs
+    # inside table cells in DOCX output.
+    for node in body.iter():
+        if node.tag == f"{{{NS['w']}}}bookmarkStart":
+            name = node.get(f"{{{NS['w']}}}name")
+            if name:
+                pending_bookmarks.append(name)
+            continue
+
         if node.tag != f"{{{NS['w']}}}p":
             continue
 
@@ -613,8 +664,58 @@ def _patch_document_xml(
             else:
                 t.text = ""
 
+    # Fourth pass: convert PRISMA checklist "Location Reported" cells to PAGEREF
+    # fields so Word can show page numbers for section bookmarks.
+    prisma_rows_patched = 0
+    for tbl in root.findall(".//w:tbl", NS):
+        rows = tbl.findall("w:tr", NS)
+        if not rows:
+            continue
+        header_cells = rows[0].findall("w:tc", NS)
+        header = [paragraph_text(tc).strip() for tc in header_cells]
+        if header[:4] != ["Section", "Item", "Description", "Location Reported"]:
+            continue
+
+        for row in rows[1:]:
+            cells = row.findall("w:tc", NS)
+            if len(cells) < 4:
+                continue
+            location_cell = cells[3]
+            for p in location_cell.findall("w:p", NS):
+                children = list(p)
+                hyperlinks = [child for child in children if child.tag == f"{{{NS['w']}}}hyperlink"]
+                if not hyperlinks:
+                    continue
+
+                new_children: list[ET.Element] = []
+                for child in children:
+                    if child.tag == f"{{{NS['w']}}}pPr":
+                        new_children.append(copy.deepcopy(child))
+                        continue
+                    if child.tag == f"{{{NS['w']}}}hyperlink":
+                        bookmark = hyperlink_bookmark(child)
+                        if bookmark:
+                            display = "".join(t.text for t in child.findall(".//w:t", NS) if t.text) or "1"
+                            new_children.extend(pageref_runs(bookmark, display_text=display))
+                            prisma_rows_patched += 1
+                        else:
+                            new_children.append(copy.deepcopy(child))
+                        continue
+                    if child.tag == f"{{{NS['w']}}}r":
+                        new_children.append(copy.deepcopy(child))
+                        continue
+                    new_children.append(copy.deepcopy(child))
+
+                for child in list(p):
+                    p.remove(child)
+                for child in new_children:
+                    p.append(child)
+        break
+
     if debug:
         eprint(f"Caption paragraphs updated: {caption_patched}")
+        eprint(f"PRISMA PAGEREF fields inserted: {prisma_rows_patched}")
+    patched += prisma_rows_patched
 
     if citation_scopes:
         removed = _filter_docx_bibliographies(root, citation_scopes, debug=debug)
@@ -623,6 +724,33 @@ def _patch_document_xml(
             eprint(f"Bibliography entries removed: {removed}")
 
     return ET.tostring(root, encoding="utf-8", xml_declaration=True), patched
+
+
+def _hyperlink_targets(rels_xml: bytes | None) -> dict[str, str]:
+    if not rels_xml:
+        return {}
+    root = ET.fromstring(rels_xml)
+    targets: dict[str, str] = {}
+    for rel in root:
+        rel_id = rel.get("Id")
+        target = rel.get("Target")
+        if rel_id and target:
+            targets[rel_id] = target
+    return targets
+
+
+def _set_update_fields(settings_xml: bytes | None) -> tuple[bytes | None, int]:
+    if not settings_xml:
+        return None, 0
+    root = ET.fromstring(settings_xml)
+    existing = root.find("w:updateFields", NS)
+    if existing is not None:
+        existing.set(f"{{{NS['w']}}}val", "true")
+        return ET.tostring(root, encoding="utf-8", xml_declaration=True), 1
+    elem = ET.Element(f"{{{NS['w']}}}updateFields")
+    elem.set(f"{{{NS['w']}}}val", "true")
+    root.append(elem)
+    return ET.tostring(root, encoding="utf-8", xml_declaration=True), 1
 
 
 def patch_docx(input_path: Path, output_path: Path | None = None, debug: bool = False) -> int:
@@ -642,10 +770,12 @@ def patch_docx(input_path: Path, output_path: Path | None = None, debug: bool = 
     if input_path.parent.name == "_book":
         project_dir = input_path.parent.parent
     citation_scopes = _citation_scopes(project_dir)
+    hyperlink_targets = _hyperlink_targets(other_files.get("word/_rels/document.xml.rels"))
 
     new_xml, patched = _patch_document_xml(
         document_xml,
         citation_scopes=citation_scopes,
+        hyperlink_targets=hyperlink_targets,
         debug=debug,
     )
 
@@ -661,6 +791,11 @@ def patch_docx(input_path: Path, output_path: Path | None = None, debug: bool = 
         if new_numbering_xml is not None:
             other_files["word/numbering.xml"] = new_numbering_xml
         patched += style_patched
+
+    new_settings_xml, settings_patched = _set_update_fields(other_files.get("word/settings.xml"))
+    if new_settings_xml is not None:
+        other_files["word/settings.xml"] = new_settings_xml
+        patched += settings_patched
 
     # Write out new docx
     with tempfile.TemporaryDirectory() as td:

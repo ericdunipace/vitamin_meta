@@ -579,10 +579,10 @@ main   <- main_data %>%
       # ) %>% 
       gt::cols_label(
         intervention = "Intervention",
-        n.study = "Number of Studies",
-        depression = "Num. of Studies in Depressed Pop.",
-        anxiety = "Num. of Studies in Anxious Pop.",
-        deficiency = "Num. of Studies in Deficient Pop.",
+        n.study = "No. of Studies",
+        depression = "No. of Studies in Depressed Populations",
+        anxiety = "No. of Studies in Anxious Populations",
+        deficiency = "No. of Studies in Deficient Populations",
         duration = "Duration in weeks",
         dose = "Dose*"
       ) %>% 
@@ -817,9 +817,9 @@ main   <- main_data %>%
       flextable::set_header_labels(
         intervention = "Intervention",
         n.study = "Number\nof\nStudies",
-        depression = "Num. of Studies\nin Depressed Pop.",
-        anxiety = "Num. of Studies\nin Anxious Pop.",
-        deficiency = "Num. of Studies\nin Deficient Pop.",
+        depression = "No. of Studies\nin Depressed Populations",
+        anxiety = "No. of Studies\nin Anxious Populations",
+        deficiency = "No. of Studies\nin Deficient Populations",
         duration = "Duration (weeks)",
         dose = "Dose*",
         bias.low = "Low",
@@ -1146,7 +1146,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   
   combine_tab <- dplyr::left_join(
     pop_demo,
-    study_demo  %>% mutate(dose = stringr::str_replace_all(dose, "], ", ",\n"),
+    study_demo  %>% mutate(dose = stringr::str_replace_all(dose, "], ", "]\n"),
                            dose = stringr::str_replace_all(dose, "g, ", "g,\n")),
     by = "intervention") %>% 
     pop_table() %>% 
@@ -1154,7 +1154,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   
   combine_tab_ft <- dplyr::left_join(
     pop_demo,
-    study_demo  %>% mutate(dose = stringr::str_replace_all(dose, "], ", ",\n"),
+    study_demo  %>% mutate(dose = stringr::str_replace_all(dose, "], ", "]\n"),
                            dose = stringr::str_replace_all(dose, "g, ", "g,\n")),
     by = "intervention") %>% 
     pop_table_flex() %>% 
@@ -1170,7 +1170,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   
   combine_tab_low_ft <- dplyr::left_join(
     pop_demo_low,
-    study_demo_low %>% mutate(dose = stringr::str_replace_all(dose, "], ", ",\n"),
+    study_demo_low %>% mutate(dose = stringr::str_replace_all(dose, "], ", "]\n"),
                               dose = stringr::str_replace_all(dose, "g, ", "g,\n")),
     by = "intervention") %>% 
     pop_table_flex() %>% 
@@ -1461,7 +1461,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   
   combine_tab.comp <- dplyr::left_join(
     pop_demo.comp,
-    study_demo.comp %>% mutate(dose = stringr::str_replace_all(dose, "], ", ",\n"),
+    study_demo.comp %>% mutate(dose = stringr::str_replace_all(dose, "], ", "]\n"),
                                dose = stringr::str_replace_all(dose, "g, ", "g,\n")),
     by = c("intervention", "Comparator")
     ) %>% 
@@ -1470,7 +1470,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   
   combine_tab_low.comp <- dplyr::left_join(
     pop_demo_low.comp,
-    study_demo_low.comp %>% mutate(dose = stringr::str_replace_all(dose, "], ", ",\n"),
+    study_demo_low.comp %>% mutate(dose = stringr::str_replace_all(dose, "], ", "]\n"),
                                    dose = stringr::str_replace_all(dose, "g, ", "g,\n")),
     by = c("intervention", "Comparator") ) %>% 
     pop_table() %>% 
@@ -1478,7 +1478,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   
   combine_tab.comp_flex <- dplyr::left_join(
     pop_demo.comp,
-    study_demo.comp %>% mutate(dose = stringr::str_replace_all(dose, "], ", ",\n"),
+    study_demo.comp %>% mutate(dose = stringr::str_replace_all(dose, "], ", "]\n"),
                                dose = stringr::str_replace_all(dose, "g, ", "g,\n")),
     by = c("intervention", "Comparator") ) %>% 
     pop_table_flex() %>% 
@@ -1486,7 +1486,7 @@ baseline.vars <- data %>% select(c("study","intervention", !!!baseline.cols))
   
   combine_tab_low.comp_flex <- dplyr::left_join(
     pop_demo_low.comp,
-    study_demo_low.comp %>% mutate(dose = stringr::str_replace_all(dose, "], ", ",\n"),
+    study_demo_low.comp %>% mutate(dose = stringr::str_replace_all(dose, "], ", "]\n"),
                                    dose = stringr::str_replace_all(dose, "g, ", "g,\n")),
     by = c("intervention", "Comparator")) %>% 
     pop_table_flex() %>% 
